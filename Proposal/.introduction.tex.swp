@@ -1,0 +1,19 @@
+\section{Problema}
+
+O projeto \textit{Medical test Records} aborda dois problemas que os sistemas de informação, dos serviços hospitalares enfrentam.\\
+
+O primeiro origina da informação sensível que tem que ser armazenada para fornecer aos pacientes os cuidados necessários. Um paciente tem associado a si um conjunto de informação como a idade, nome, tipo de sangue, doenças, historial familiar... essa informação tem diferentes níveis de privacidade. Um nome não é informação sensível como o historial familiar e as possíveis doenças que esse paciente podera vir a desenvolver. \\
+
+Dado o caso anterior, os sistemas de informação responsáveis por gerir essa informação têm que fornecer diferentes níveis de acesso ao perfil de um paciente, consoante a autorização do indivíduo que esta a tentar aceder e contexto do mesmo. \\
+
+O segundo problema é na realização dos exames médicos, estes muitas vezes são realizados em laboratórios com uma infraestrutura completamente diferente a do hospital. O que exige uma ligação segura entre estes dois âmbientes, independentemente das suas diferenças. \\
+
+\subsection{Requisitos}
+
+Os problemas colocados anteriormente levantam as seguintes necessidades de segurança:
+
+\section{Solução Proposta}
+
+\section{Plano}
+
+\section{Referências}

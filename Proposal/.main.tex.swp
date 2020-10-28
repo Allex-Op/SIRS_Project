@@ -1,0 +1,58 @@
+\documentclass[a4paper,oneside,titlepage]{book}
+\usepackage[portuguese]{babel}
+\usepackage{graphicx}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{indentfirst}
+\usepackage{amsmath}
+\usepackage[top=1.5cm, bottom=1.5cm, left=1.5cm, right=1.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\renewcommand{\lstlistingname}{Listagem}
+\usepackage{enumerate}
+\usepackage{tabularx}
+\usepackage{subcaption}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\usepackage[square,comma,numbers]{natbib}
+\usepackage{seqsplit}
+\usepackage{graphicx}
+\usepackage{fancyhdr}   
+\renewcommand\thesection{\arabic{section}}
+
+\lstset{ 
+  extendedchars=true,
+  breaklines=true,                 % sets automatic line breaking
+  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+  tabsize=4,	                   % sets default tabsize to 2 spaces
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showstringspaces=false
+}
+
+\title{
+	\huge\textbf{Medical Test Records}\\ \vspace{.2cm}
+  \large {Segurança Informática em Redes e Sistemas}\\ \vspace{.2cm}
+	\includegraphics[width=.15\textwidth]{figs/IST_Logo.pdf}
+}
+\setlength{\textwidth}{16cm} \setlength{\textheight}{23cm} \setlength{\topmargin}{-1cm}
+\setlength{\oddsidemargin}{0.6mm} \setlength{\evensidemargin}{-0.4mm}
+
+\author{
+	\large{Taguspark G02} \\ \vspace{.2cm} \\
+	\begin{tabular}{rl}
+		Autores & Alexandru Pena, nº 98742 \\
+				& Ana Marta Sousa Contente, nº 98643 \\
+				& Rafaela Jorge Timóteo, nº 90773 \\
+				\\
+	\end{tabular}
+}
+\date{\MakeLowercase{\today}}
+\begin{document}
+	\maketitle
+	\noindent
+	
+	\include{introduction}
+
+  \include{appendix}
+
+	
+\end{document}
