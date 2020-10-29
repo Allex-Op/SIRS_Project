@@ -16,8 +16,12 @@
 \usepackage[square,comma,numbers]{natbib}
 \usepackage{seqsplit}
 \usepackage{graphicx}
-\usepackage{fancyhdr}   
+\usepackage{fancyhdr}
+\usepackage{lastpage}   
+\pagestyle{fancy} 
+
 \renewcommand\thesection{\arabic{section}}
+\cfoot{\thepage\ of \pageref{LastPage}}
 
 \lstset{ 
   extendedchars=true,
@@ -57,6 +61,5 @@
 	\include{introduction}
 
   \include{appendix}
-
 	
 \end{document}
