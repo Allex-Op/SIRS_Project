@@ -120,10 +120,12 @@ By this point the necessary mechanisms are all implemented, possible bugs should
 
 The project client and API infrastructure will be developed using the Java programming language. \\
 
-The API will use the \href{https://docs.spring.io/spring-framework/docs/3.2.x/spring-framework-reference/html/mvc.html}{Spring Web MVC} Framework to attend and process the client requests, enable the TLS communications and manage the KeyStores (own certificate) and TrustStores (partner labs certificates). \\
+The API will use the \href{https://docs.spring.io/spring-framework/docs/3.2.x/spring-framework-reference/html/mvc.html}{Spring Web MVC} Framework to attend and process the client requests, enable the TLS communications and manage the KeyStores (Hospital certificate) and TrustStores (partner labs certificates). \\
 
 The deployment scripts will use \href{https://www.vagrantup.com/}{Vagrant} to manage and deploy the VM's with the correct network configurations and all the necessary software to run the applications. \\
 
 The database management system will be provided by \href{https://www.mysql.com/}{MySQL}. \\
 
-Finally, the certificates will be self-signed and created using \href{https://www.openssl.org/}{OpenSSL}.
+The access manager architecture and policy defining language to be implemented is specified by OASIS eXtensible Access Control Markup Language \href{https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=xacml#other}{(XACML)}. For the policy definition it will be used the JSON XACML Profile. \\
+
+Finally, the certificates will be self-signed and created using \href{https://www.openssl.org/}{OpenSSL}. \\
