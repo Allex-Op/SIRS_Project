@@ -1,34 +1,35 @@
 \section{Problem}
 
-The Medical test Records project approaches two main problems that hospital information systems must face. \\
+The Medical test Records project approaches two main issues that hospital information systems face. \\
 
-The first originates from the sensible information that must be stored in order for the doctors, nurses, assistants... be able to give patients the necessary treatment. A patient profile has associated to it a group of information with different levels of sensibility for example: age, name, blood type, diseases, family records... 
-A name is not something sensible so probably most employees can access it, but what about the patient family records? A volunteer has no need to know such information. \\
+The first, is how the sensitive information must be stored  and who should have access to it in order for the medical staff (the doctors, nurses, assistants, etc...) to give patients the adequate treatment without evading the patient's privacy.
+A patient profile has associated with it a group of information with different levels of sensitivity, such as age, name, blood type, diseases, family records and others.
+A patient's name is not extremely sensitive so most employees can access it. However, for instance,the patient's family records do not need to be accessed nor should be accessible to most of the hospital staff, for example to volunteers. \\
 
-Given this scenario, the information systems in cause must be able to provide and enforce the correct policies so that different parts of a patient profile are only available to who actually need it and in the correct context. \\
+Given this scenario, the information systems  must be able to provide and enforce the correct policies so that different parts of a patient's profile are only available to whom actually requires them to fulfill one's obligations to the patient relating to the role ocuppied and in the correct context. \\
 
-The second problem is in the way that medical tests must be analyzed in different facilities, like partner labs, that are not part of the hospital infrastructure, but require that both are interconnected in a way that enables all sides to identify each other and communicate in a safe and secure way. (Note, in the planning of this project it's assumed that only partner labs with different facilties will realize writes of tests data)\\
+The second problem comes from medical tests being analyzed in different facilities, like partner labs, that are not part of the hospital infrastructure, but require that both are interconnected in a way that enables all sides to identify each other and communicate in a safe and secure way. \\
 
 \subsection{Requisites}
 
 Given the previous problems, the implementation of this project requires the following security guarantees:
 \begin{itemize}
 	\item A fine grained access control.
-	\item Integrity of all communications with the information systems.
+	\item Authenticity of all communications with the information systems.
 	\item Confidentiality of all communications with the information systems.
-	\item Non-repudiation of the tests results data.
-	\item Authenticity of the tests results data.
+	\item Non-repudiation of the test results data.
+	\item Authentication on access control.
 \end{itemize}
 
 \subsection{Trust assumptions}
 
-The main entities in this project are two, the hospital information system and the clients that try to access said system. \\
+There are two main entities in this project which are the hospital information system and the clients that try to access said system. \\
 
-The client entity can be internal or external to the hospital infrastructure, if the context is internal, the client is used by the hospital staff (doctors, nurses...). In case the client is used by the partner labs to send the tests data result, the client is external. \\
+The client entity can be internal or external to the hospital infrastructure. In internal context, the client side is used by the hospital staff (doctors, nurses...) in the external context the client is used by the hospital and partner labs to send the test data results. \\
 
 In both cases the client is untrusted, the information systems will require some type of authentication and authorization before the request is accepted. \\ 
 
-There is also a full trust assumption, that the code responsible for the access control is error free and an unauthorized person will never be able to access something is not supposed. \\
+There is also a full trust assumption, that the code responsible for the access control is error free and an unauthorized person will never be able to access something that is not supposed to. \\
 
 \section{Proposed solution}
 
@@ -104,7 +105,7 @@ By this point the necessary mechanisms are all implemented, possible bugs should
   | >{\centering\arraybackslash}X 
   | >{\centering\arraybackslash}X | }
  \hline
-  & Alexandru & Ana  & Rafaela \\
+  & Alexandru & Ana Marta & Rafaela \\
  \hline
  Week 1  & API and Access Control  & Deployment Scripts and Client  & Database and Client \\
   \hline
