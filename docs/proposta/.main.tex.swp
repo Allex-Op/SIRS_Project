@@ -16,8 +16,12 @@
 \usepackage[square,comma,numbers]{natbib}
 \usepackage{seqsplit}
 \usepackage{graphicx}
-\usepackage{fancyhdr}   
+\usepackage{fancyhdr}
+\usepackage{lastpage}   
+\pagestyle{fancy} 
+
 \renewcommand\thesection{\arabic{section}}
+\cfoot{\thepage\ of \pageref{LastPage}}
 
 \lstset{ 
   extendedchars=true,
@@ -39,20 +43,23 @@
 \author{
 	\large{Taguspark G02} \\ \vspace{.2cm} \\
 	\begin{tabular}{rl}
-		Autores & Alexandru Pena, nº 98742 \\
+		Autores & Rafaela Jorge Timóteo, nº 90773 \\
 				& Ana Marta Sousa Contente, nº 98643 \\
-				& Rafaela Jorge Timóteo, nº 90773 \\
-				\\
+				& Alexandru Pena, nº 98742 \\		
+				\\ \\
+				
+		& \includegraphics[width=.15\textwidth]{figs/alex_pic.pdf}
+		\includegraphics[width=.15\textwidth]{figs/default_pic.pdf}
+		\includegraphics[width=.15\textwidth]{figs/default_pic.pdf}
 	\end{tabular}
 }
+
 \date{\MakeLowercase{\today}}
 \begin{document}
 	\maketitle
 	\noindent
-	
 	\include{introduction}
 
   \include{appendix}
-
 	
 \end{document}
