@@ -24,12 +24,12 @@ Given the previous problems, the implementation of this project requires the fol
 \subsection{Trust assumptions}
 
 
-There are two main entities in this project which are the hospital information system and the clients that try to access said system. \\
+There are three main entities in this project which are the hospital information system, the clients that try to access said system, and the labs. \\
 
 
-The client entity can be internal or external to the hospital infrastructure. In internal context, the client side is used by the hospital staff (doctors, nurses...) in the external context the client is used by the hospital and partner labs to send the test data results. \\
+The hospital information system will store all of the patient data, the client entity is used by the hospital and lab staff (doctors, nurses...) and each lab, including the hospital labs, will have its own infrastructure where the test results will be stored. \\
 
-In both cases the client is untrusted, the information systems will require some type of authentication and authorization before the request is accepted. \\ 
+Both the client and the labs are considered untrusted, the information systems will require some type of authentication and authorization before the request is accepted. \\ 
 
 There is also a full trust assumption, that the code responsible for the access control is error free and an unauthorized person will never be able to access something that is not supposed to. \\
 
@@ -40,7 +40,9 @@ All communications from the client to the API (and vice-versa) will run with TLS
 
 	\includegraphics[width=.4\textwidth]{figs/network_layout.pdf}
 	
-TLS will require the definition of a couple certificates, the Hospital certificate to actually create the TLS tunnel and the laboratory certificates (each lab will have its own certificate), which will be used to digitally sign the sent data (non-repudiation and authenticity). \\ 
+TLS will require the definition of a couple certificates, we will consider that the certificates are signed and distributed safly.
+We will have a self-signed CA , which will sign the hospital-infrastructure's certificate and each labs' certificate (including labs inside the hospital).These certificates will be used to digitally sign the sent data (non-repudiation and authenticity).
+In order to be sure of the validity of the certificates exchanged at the begining of each TLS session , each machine will have the CA certificate.\\ 
 
 All requests received by the API need to posess a proof of identity to be further processed (accept or refuse action), in this case will be a token provided by the API after authentication using the correct set of credentials (username:password). The token is transported in the "Authorization" header of the HTTP request. If the token is not present the request will be refused with status code 401 UNAUTHENTICATED. \\
 
