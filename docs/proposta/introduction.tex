@@ -29,7 +29,7 @@ There are three main entities in this project which are the hospital information
 
 The hospital information system will store all of the patient data, the client entity is used by the hospital and lab staff (doctors, nurses...) and each lab, including the hospital labs, will have its own infrastructure where the test results will be stored. \\
 
-Both the client and the labs are considered untrusted, the information systems will require some type of authentication and authorization before the request is accepted. \\ 
+All requests are untrusted, and therefore will require some type of authentication and authorization before the request is accepted. \\ 
 
 There is also a full trust assumption, that the code responsible for the access control is error free and an unauthorized person will never be able to access something that is not supposed to. \\
 
@@ -40,8 +40,8 @@ All communications from the client to the API (and vice-versa) will run with TLS
 
 	\includegraphics[width=.4\textwidth]{figs/network_layout.pdf}
 	
-TLS will require the definition of a couple certificates, we will consider that the certificates are signed and distributed safly.
-We will have a self-signed CA , which will sign the hospital-infrastructure's certificate and each labs' certificate (including labs inside the hospital).These certificates will be used to digitally sign the sent data (non-repudiation and authenticity).
+TLS will require the definition of a couple certificates, we will consider that the certificates are signed and distributed safely.
+We will have a CA , which will sign the hospital-infrastructure's certificate and each labs' certificate (including labs inside the hospital).These certificates will be used to digitally sign the sent data (non-repudiation and authenticity).
 In order to be sure of the validity of the certificates exchanged at the begining of each TLS session , each machine will have the CA certificate.\\ 
 
 All requests received by the API need to posess a proof of identity to be further processed (accept or refuse action), in this case will be a token provided by the API after authentication using the correct set of credentials (username:password). The token is transported in the "Authorization" header of the HTTP request. If the token is not present the request will be refused with status code 401 UNAUTHENTICATED. \\
