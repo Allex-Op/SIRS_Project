@@ -1,8 +1,8 @@
-\section{Problem}
+y\section{Problem}
 
 The Medical test Records project approaches two main issues that hospital information systems face. \\
 
-The first, is how the sensitive information must be stored,  and who should have access to it in order for the hospital staff (the doctors, nurses, assistants, etc...) provide the patients with the adequate treatment without making the patient's private information available to anyone.
+The first, is how the sensitive information must be stored,  and who should have access to it in order for the hospital staff (the doctors, nurses, assistants, etc...) provide the patients with the adequate treatment without making the patient's private information available to everyone.
 A patient profile has associated with it a group of information with different levels of sensitivity, such as age, name, blood type, diseases, family records and others.
 A patient's name is not extremely sensitive so most employees can access it. However, for instance,the patient's family records do not need to be accessed nor should be accessible to most of the hospital staff, for example to volunteers. \\
 
@@ -23,7 +23,7 @@ Given the previous problems, the implementation of this project requires the fol
 \subsection{Trust assumptions}
 
 
-There are three main entities in this project which are the hospital information system, the labs and the clients that use said systems. \\
+There are three main entities in this project which are the hospital information system, the labs and the staff that use said systems. \\
 
 The hospital information system which will store all of the patient data and tests results received from the labs. The partners labs that will communicate with the hospital and vice-versa throught their respective API's. And finally the users of those systems, the staff. In case of the staff there is a full trust assumption that they won't have their credentials stolen/shared/etc., and as such we will not provide any mechanism to rapidly revoke those credentials. \\
 
@@ -34,14 +34,14 @@ There is also a full trust assumption, that all the code responsible for the acc
 
 \section{Proposed solution}
 
-The implementation will be separated in two main components, an hospital REST API and a laboratory REST API, which they will act as client or server, depending on the action being done. When further mentioned API in this text both the hospital API and lab's API's are being referred to, as they will be pretty similar in terms of security and access control. The only difference between those two entities (hospital and labs) API's, are the possible actions and data stored. \\
+The implementation will be separated in two main components, an hospital REST API and a laboratory REST API, which will act as client or server, depending on the action being done. When further mentioned API in this text both the hospital's API and lab's API's are being referred to, as they will be pretty similar in terms of security and access control. The only difference between those two entities (hospital and labs) API's, are the possible actions and data stored. \\
 
 All communications between those systems will run with TLS to provide confidentiality, integrity and freshness. TLS will be provided by the Spring framework, which will be used to develop the API. \\
 
 	\includegraphics[width=.4\textwidth]{figs/infrastructure.pdf}
 	
 TLS will require the definition of a certificate for each entity, we will consider that the certificates are installed manually by an administrator on each respective machine.
-We will have a made-up CA, which we will use to issue and sign the hospital certificate and each lab certificate (including labs inside the hospital). Those certificates besides the secure communication channel, will be used to digitally sign the sent tests data to guarantee its authenticity at any time.
+We will have a made-up CA, which we will use to issue and sign the hospital's certificate and each lab's certificate (including labs inside the hospital). Those certificates alongside with the secure communication channel, will be used to digitally sign the sent tests data to guarantee its authenticity at any time.
 In order to validate the certificate received by the server during the TLS Handshake, each machine will have the root CA certificate already installed, manually, by an administrator.\\ 
 
 All requests received by the API need to posess a proof of identity to be further processed (accept or refuse action), in this case will be a token provided by the respective entity API, after authentication using the correct set of credentials (username:password). The token is transported in the "Authorization" header of the HTTP request. If the token is not present the request will be refused with status code 401 UNAUTHENTICATED. \\
