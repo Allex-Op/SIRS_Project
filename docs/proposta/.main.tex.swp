@@ -22,7 +22,7 @@
 \pagestyle{fancy} 
 
 \renewcommand\thesection{\arabic{section}}
-\cfoot{\thepage\ of 6}
+\cfoot{\thepage\ of \pageref{LastPage}}
 
 \lstset{ 
   extendedchars=true,
@@ -62,9 +62,5 @@
 	\noindent
 	
 	\include{introduction}
-	\clearpage
-	\bibliography{refs}
-	\bibliographystyle{plain}
-
 	
 \end{document}

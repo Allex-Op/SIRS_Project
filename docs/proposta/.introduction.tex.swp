@@ -95,9 +95,11 @@ We will have a made-up CA (we will create it with OpenSSL\cite{openssl}) , which
 In order to validate the certificate received by the server during the TLS Handshake, each machine will have the root CA certificate already installed, manually, by an administrator.\\ 
 
 \subsection{Secure Protocol to Develop}
-[simplified version]
 The custom secure protocol will enable secure communications between the Hospital API and partner lab, providing as mentioned the same properties as TLS.
-The protocol will require opening a listener port in the target machines (e.g. 1443) and await for communications. The initial part of the protocol will require an handshake where the transmissor and receiver swap the public certificates between themselves. Each of the partcipants will then verify the certificate hostname, expiration date and validity by traversing the certificate chain until the CA. If everything is OK communications will begin encrypting each other data with the public key associated to the received certificate. The service on the receiving machine will then make a request to the API directly.
+The protocol will require opening a listener port in the target machines (e.g. 1443) and await for requests. The initial part of the protocol will require an handshake where the transmissor and receiver swap the public certificates between themselves. Each of the participants will then verify the certificate hostname, expiration date and validity of the certificate. If everything is OK communications will begin encrypting data with each other public key associated to the received certificate. The service on the receiving machine will then make a request to the API directly to transmit the data.
+
+E.g. flow:
+Hospital API wants to send data for test to the partner lab, it will make 
 
 
 \section{Plan}
@@ -111,18 +113,14 @@ The basic version of the project must have the following components in place:
 		\subitem - GET /patient/{id}/diseases, returns the diseases the patient has (e.g. tuberculosis...)
 		\subitem - GET /patient/{id}/treatment, the necessary treatment (e.g. what medicine the patient needs, 500mg of Vicodin).
 		\subitem - GET /patient/{id}/testsresults, the results of the tests.
-		\subitem - POST /patient/{id}/testresults, used by the partner labs to write the tests results.
+		\subitem - POST /testresults/{id}, used by the partner labs to write the tests results.
 	\item TLS for secure communication channels with the end-users.
 	\item Access Control.
 		\subitem The following roles will exist: Doctor, Nurse, Janitor and Lab Employee. The doctor role will give read access to any information about the patient, the nurse role will give read access to any information regarding the necessary treatment (e.g. food, medicine...), the janitor role will only give  read access to superficial information like the patient name, finally the lab employee won't have access to any patient profile information, they can only see in their entity respective API if there is any requests from the hospital to process tests data and writing the results of the tests data.
 	\item Custom communications protocol. (Hospital - Partner lab's).
 \end{itemize}
 
-All of the read and write operations will use objects following the JSON format.
-
-In an advanced version of the system the id of the patient shouldn't be used to write the tests data, but another id generated to make it difficult to associate some tests data with a given patient.
-
-It is expected that this version will take around 2 weeks to complete (worst case scenario). 
+It is expected that this version will take around 2 weeks to complete. 
 
 
 \subsection{Intermediate}
@@ -169,4 +167,31 @@ By this point the necessary mechanisms are all implemented, possible bugs should
 \end{tabularx}
 
 
+\begin{thebibliography}{9}
+\bibitem{springmvc} 
+Pivotal Software, Spring MVC
+\\\texttt{https://docs.spring.io/spring-framework/docs/3.2.x/spring-framework-reference/html/mvc.html}
+
+\bibitem{bcrypt} 
+Niels Provos and David Mazières, bcrypt
+\\\texttt{https://auth0.com/blog/hashing-in-action-understanding-bcrypt}
+
+\bibitem{xacml} 
+OASIS, XACML
+\\\texttt{https://www.oasis-open.org}
+
+\bibitem{vagrant} 
+HashiCorp, Vagrant
+\\\texttt{https://www.vagrantup.com/}
+
+\bibitem{openssl} 
+The OpenSSL Project, OpenSSL
+\\\texttt{https://www.openssl.org/}
+
+\bibitem{java} 
+Oracle, Java
+\\\texttt{https://java.com/}
+
+
+\end{thebibliography}
 
