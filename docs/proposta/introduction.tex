@@ -73,14 +73,14 @@ The PEP will send a XACML\cite{xacml} request to the PDP, the PDP will then base
 	\includegraphics[width=.6\textwidth]{figs/access_control.pdf}
 
 
-All those components will belong to the API but properly separated so that a flaw in one of them doesn't put in danger the whole system.
+The PDP, PAP... will reside in another machine to externalize the policy checking while the PEP will remain in the Hospital/Lab API.
 
 \subsection{Deployment}
 The following figure includes the distinct machines of this system, and as mentioned they will be interconnected through HTTPS secure channels.
 
 	\includegraphics[width=.4\textwidth]{figs/infrastructure.pdf}
 
-For simplicity, a lab will contain one machine with an API and in the context of this project there will be only one external lab. The partner lab staff will send HTTP requests to their API which in turn will communicate with the Hospital API using the custom protocol, to send and receive any data related to the tests data.
+The lab and hospital will contain two machines one with the API and the other with the PDP,PAP... components, and in the context of this project there will be only one external lab. The partner lab staff will send HTTP requests to their API which in turn will communicate with the Hospital API using the custom protocol to send and receive any data related to the tests data.
 
 The deployment scripts will use Vagrant\cite{vagrant} to manage and deploy the VM's with the correct network configurations and all the necessary software to run the applications. \\
 
@@ -90,16 +90,17 @@ All communications between the end-users (staff) and respective API's will run w
 
 The communications between the Hospital API and partner lab API will be under a custom made protocol which will provide the same properties as the TLS channel (confidentiality, integrity and freshness). \\
 	
-TLS will require the definition of a certificate for each entity, we will consider that the certificates are installed manually by an administrator on each respective machine.
+The secure channels will require the definition of a certificate for each entity, we will consider that the certificates are installed manually by an administrator on each respective machine.
 We will have a made-up CA (we will create it with OpenSSL\cite{openssl}) , which we will use to issue and sign the hospital's certificate and each lab's certificate (including labs inside the hospital). Those certificates alongside with the secure communication channel, will be used to digitally sign the sent tests data to guarantee its authenticity at any time.
 In order to validate the certificate received by the server during the TLS Handshake, each machine will have the root CA certificate already installed, manually, by an administrator.\\ 
-
+ 
 \subsection{Secure Protocol to Develop}
 The custom secure protocol will enable secure communications between the Hospital API and partner lab, providing as mentioned the same properties as TLS.
-The protocol will require opening a listener port in the target machines (e.g. 1443) and await for requests. The initial part of the protocol will require an handshake where the transmissor and receiver swap the public certificates between themselves. Each of the participants will then verify the certificate hostname, expiration date and validity of the certificate. If everything is OK communications will begin encrypting data with each other public key associated to the received certificate. The service on the receiving machine will then make a request to the API directly to transmit the data.
+The protocol will require opening a listener port in the receiving machines (e.g. 1443) and await for requests, meanwhile all new communications will start from a random unprivileged port (>1024) in the request machine. The initial part of the protocol will require an handshake where the transmissor will start by sending an "HELLO" message to the receiver. The receiver will answer with its own certificate and chosen cipher suite (e.g. TLS\_ECDHE\_RSA\_WITH\_AES\_128\_GCM\_SHA256). \\
 
-E.g. flow:
-Hospital API wants to send data for test to the partner lab, it will make 
+In our case there will be only one cipher suite, the protocols to be used will be RSA for key exchanging, AES-256 for block cipher and hmac-sha256 for message authentication. \\
+
+After receiving the certificate, the client will verify it by checking its hostname, expiration date and its validity with the CA. If its all ok, the client will generate a pseudo-random secret (random byte string), encrypt it with the receiver/target public key and send it back. From that secret, both client and server will generate session keys. To check if all went ok during the handshake they both will send a "Finished message" to each other, if both can decrypt it, communications can start. For extra security the "finished" message could be the hash of all exchanged messages to avoid tampering. All previous mentioned messages will also have a nonce and a timestamp for freshness. \\
 
 
 \section{Plan}
