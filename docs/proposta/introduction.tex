@@ -1,12 +1,12 @@
-y\section{Problem}
+\section{Problem}
 
 The Medical test Records project approaches two main issues that hospital information systems face. \\
 
-The first, is how the sensitive information must be stored,  and who should have access to it in order for the hospital staff (the doctors, nurses, assistants, etc...) provide the patients with the adequate treatment without making the patient's private information available to everyone.
+The first issue, is controlling access to a patient profile.
 A patient profile has associated with it a group of information with different levels of sensitivity, such as age, name, blood type, diseases, family records and others.
 A patient's name is not extremely sensitive so most employees can access it. However, for instance,the patient's family records do not need to be accessed nor should be accessible to most of the hospital staff, for example to volunteers. \\
 
-Given this scenario, the information systems  must be able to provide and enforce the correct policies so that different parts of a patient's profile are only available to whom actually requires them to fulfill one's obligations to the patient, relating to the role performed and in the correct context. \\
+Given this scenario, the access control mechanism must be able to correctly determine, and enforce the correct policies so that different parts of a patient's profile are only available to whom actually requires them to fulfill one's obligations to the patient, regarding the performed role and in the correct context. \\
 
 The second problem comes from medical tests being analyzed in different facilities, like partner labs, that are not part of the hospital infrastructure, but require that both are interconnected in a way that enables all sides to identify each other and communicate in a safe and secure way. \\
 
@@ -17,36 +17,46 @@ Given the previous problems, the implementation of this project requires the fol
 	\item A fine grained access control and secure authentication mechanism.
 	\item Authenticity of all communications with the information systems.
 	\item Confidentiality of all communications with the information systems.
-	\item Non-repudiation and integrity of the test results data.
+	\item Integrity of all communications with the information systems.
+	\item Non-repudiation of the communications with the partner labs.
 \end{itemize}
 
 \subsection{Trust assumptions}
 
 
-There are three main entities in this project which are the hospital information system, the labs and the staff that uses said systems. \\
+There are three main entities in this project:\\
+\begin{itemize}
+	\item The Hospital System
+		\subitem The system that will store all the patient data and tests results received from the labs.
+	\item The Partner Labs System
+		\subitem The partner lab can be internal, or external to the Hospital network. The internal lab is in the same network as the Hospital, but as the external lab, they will have different infrastructures from the hospital, which means they will have their own certificates and machines.
+	\item The users of those systems, the staff.
+	\item The certificate authority.
+\end{itemize}
 
-The hospital information system which will store all of the patient data and tests results received from the labs. The partners labs that will communicate with the hospital and vice-versa throught their respective API's. And finally the users of those systems, the staff. In case of the staff there is a full trust assumption that they won't have their credentials stolen/shared/etc., and as such we will not provide any mechanism to rapidly revoke those credentials. \\
+In case of the staff there is a full trust assumption that they won't have their credentials stolen/shared/etc., and as such we will not provide any mechanism to rapidly revoke those credentials. \\
 
-All communications will use HTTPS requests, and will be considered secure and resistant against attacks like replay, tampering and eavesdropping. \\
+Regarding the certificate authority, there is a full trust assumption that the private key used to issue/sign certificates won't be stolen and as such, we won't have a mechanism to revoke certificates. \\
 
-There is also a full trust assumption, that all the code responsible for the access control, libraries used and frameworks are error free and won't give any type of access to an attacker. \\
+Concerning the access control components which will be explained further (PDP,PEP...), there is a full trust assumption that those components will be correctly and logically well implemented, and won't allow any type of unauthorized access. \\
+
+All communications with the parnet labs (internal or external) will use HTTP requests with TLS, and will be considered secure and resistant against attacks like replay, tampering and eavesdropping. \\
+
+There is also a full trust assumption, that all the libraries and frameworks used are error free and won't give any type of access to an attacker. \\
 
 
 \section{Proposed solution}
 
+\subsection{Overview}
+
 The implementation will be separated in two main components, an hospital REST API and a laboratory REST API, which will act as client or server, depending on the action being done. When further mentioned API in this text both the hospital's API and lab's API's are being referred to, as they will be pretty similar in terms of security and access control. The only difference between those two entities (hospital and labs) API's, are the possible actions and data stored. \\
-
-All communications between those systems will run with TLS to provide confidentiality, integrity and freshness. TLS will be provided by the Spring framework, which will be used to develop the API. \\
-
-	\includegraphics[width=.4\textwidth]{figs/infrastructure.pdf}
-	
-TLS will require the definition of a certificate for each entity, we will consider that the certificates are installed manually by an administrator on each respective machine.
-We will have a made-up CA, which we will use to issue and sign the hospital's certificate and each lab's certificate (including labs inside the hospital). Those certificates alongside with the secure communication channel, will be used to digitally sign the sent tests data to guarantee its authenticity at any time.
-In order to validate the certificate received by the server during the TLS Handshake, each machine will have the root CA certificate already installed, manually, by an administrator.\\ 
 
 All requests received by the API need to posess a proof of identity to be further processed (accept or refuse action), in this case will be a token provided by the respective entity API, after authentication using the correct set of credentials (username:password). The token is transported in the "Authorization" header of the HTTP request. If the token is not present the request will be refused with status code 401 UNAUTHENTICATED. \\
 
-If the request contains all necessary information (token), it will be forwarded to the access control mechanism. \\
+The database will store the hash version of the password using the Bcrypt algorithm, which already salts the passwords. The API will validate the received credentials by hashing them and comparing to the value already stored in the database. Further steps can be taken to protect against brute-force attacks like increasing the processing time or limiting the number of login attempts, which will only be implemented in the advanced version of the project if there is time. \\
+
+
+If the request contains all necessary information (access token), it will be forwarded to the access control mechanism. \\
 
 The access control mechanism is composed by 4 major components:
 \begin{itemize}
@@ -59,6 +69,26 @@ The access control mechanism is composed by 4 major components:
 The PEP will send a XACML request to the PDP, the PDP will then based on the policies defined by the system return a XACML response which will dictate the action (ACCEPT or REFUSE) that PEP will enforce. If the result is ACCEPT, the request will continue and read or write the requested resource, otherwise the request will be dropped and replied with a 403 UNAUTHORIZED.
 
 	\includegraphics[width=.6\textwidth]{figs/access_control.pdf}
+
+
+All those components will belong to the API but properly separated so that a flaw in one of them doesn't put in danger the whole system.
+
+\subsection{Deployment}
+The following figure includes the distinct machines of this system, and as mentioned they will be interconnected throught HTTPS secure channels.
+
+	\includegraphics[width=.4\textwidth]{figs/infrastructure.pdf}
+
+For simplicity, there will be only one lab and each lab will contain one machine with an API. The partner lab staff will send HTTP requests to their API which in turn will communicate with the Hospital API to send and receive any data related to the tests data.
+
+\subsection{Secure Channels}
+
+All communications between those systems will run with TLS to provide confidentiality, integrity and freshness. TLS will be provided by the Spring framework (Java), which will be used to develop the API's. \\
+	
+TLS will require the definition of a certificate for each entity, we will consider that the certificates are installed manually by an administrator on each respective machine.
+We will have a made-up CA, which we will use to issue and sign the hospital's certificate and each lab's certificate (including labs inside the hospital). Those certificates alongside with the secure communication channel, will be used to digitally sign the sent tests data to guarantee its authenticity at any time.
+In order to validate the certificate received by the server during the TLS Handshake, each machine will have the root CA certificate already installed, manually, by an administrator.\\ 
+
+\subsection{Secure Protocol to Develop}
 	
 
 \section{Plan}
@@ -67,9 +97,20 @@ The PEP will send a XACML request to the PDP, the PDP will then based on the pol
 The basic version of the project must have the following components in place:
 \begin{itemize}
 	\item API.
+		\subitem The following endpoints will exist in the API:
+		\subitem - GET /patient/{id}/name, returns the name of the patient with id {id}.
+		\subitem - GET /patient/{id}/diseases, returns the diseases the patient has (e.g. tuberculosis...)
+		\subitem - GET /patient/{id}/treatment, the necessary treatment (e.g. what medicine the patient needs, 500mg of Vicodin).
+		\subitem - GET /patient/{id}/testsresults, the results of the tests.
+		\subitem - POST /patient/{id}/testresults, used by the partner labs to write the tests results.
 	\item TLS for secure communication channels.
 	\item Access Control.
+		\subitem The following roles will exist: Doctor, Nurse, Janitor and Lab Employee. The doctor role will give read access to any information about the patient, the nurse role will give read access to any information regarding the necessary treatment (e.g. food, medicine...), the janitor role will only give  read access to superficial information like the patient name, finally the lab employee won't have access to any patient profile information, they can only see in their entity respective API if there is any requests from the hospital to process tests data and writing the results of the tests data.
 \end{itemize}
+
+All of the read and write operations will use objects following the JSON format.
+
+In an advanced version of the system the id of the patient shouldn't be used to write the tests data, but another id generated to make it difficult to associate some tests data with a given patient.
 
 It is expected that this version will take around 2 weeks to complete (worst case scenario). 
 
@@ -78,7 +119,7 @@ It is expected that this version will take around 2 weeks to complete (worst cas
 The intermediate version will expand what was built in the first 2 weeks adding the following:
 \begin{itemize}
 	\item The necessary mechanism to check tests data authenticity at any time. (Digital Signature)
-	\item Sensitive information like passwords stored in a safe way (hashed).
+	\item Sensitive information like passwords stored in a safe way using Bcrypt (already salts).
 	\item Correct any bugs or misconfigurations left in the access control and TLS.
 \end{itemize}
 
@@ -130,3 +171,4 @@ The database management system will be provided by \href{https://www.mysql.com/}
 The access manager architecture and policy defining language to be implemented is specified by OASIS eXtensible Access Control Markup Language \href{https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=xacml#other}{(XACML)}. For the policy definition it will be used the JSON XACML Profile. \\
 
 Finally, the certificates will be self-signed and created using \href{https://www.openssl.org/}{OpenSSL}. \\
+
