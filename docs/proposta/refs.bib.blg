@@ -1,0 +1,16 @@
+[0] Config.pm:304> INFO - This is Biber 2.14 (beta) running in TOOL mode
+[0] Config.pm:307> INFO - Logfile is 'refs.bib.blg'
+[89] biber:322> INFO - === seg nov  9, 2020, 16:47:03
+[103] Utils.pm:75> INFO - Globbing data source 'refs.bib'
+[103] Utils.pm:91> INFO - Globbed data source 'refs.bib' to refs.bib
+[118] Biber.pm:4451> INFO - Looking for bibtex format file 'refs.bib'
+[119] bibtex.pm:1653> INFO - LaTeX decoding ...
+[124] bibtex.pm:1471> INFO - Found BibTeX data source 'refs.bib'
+[167] Biber.pm:1566> INFO - Datamodel validation starting
+[167] Biber.pm:1609> INFO - Datamodel validation complete
+[179] UCollate.pm:68> INFO - Overriding locale 'en_US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[179] UCollate.pm:68> INFO - Overriding locale 'en_US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[179] Biber.pm:4084> INFO - Sorting list 'tool/global//global/global' of type 'entry' with template 'tool' and locale 'en_US'
+[179] Biber.pm:4090> INFO - No sort tailoring available for locale 'en_US'
+[184] bibtex.pm:384> INFO - Writing 'refs_bibertool.bib' with encoding 'UTF-8'
+[184] bibtex.pm:414> INFO - Output to refs_bibertool.bib
