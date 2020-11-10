@@ -2,8 +2,8 @@
 
 The Medical test Records project approaches two main issues that hospital information systems face. \\
 
-The first issue, is controlling access to a patient's profile.
-A patient's profile has associated with it a group of information with different levels of sensitivity, such as age, name, blood type, diseases, family records and others.
+The first issue, is controlling access to a patient profile.
+A patient profile has associated with it a group of information with different levels of sensitivity, such as age, name, blood type, diseases, family records and others.
 A patient's name is not extremely sensitive so most employees can access it. However, for instance,the patient's family records do not need to be accessed nor should be accessible to most of the hospital staff, for example to volunteers. \\
 
 Given this scenario, the access control mechanism must be able to correctly determine, and enforce the correct policies so that different parts of a patient's profile are only available to whom actually requires them to fulfill one's obligations to the patient, regarding the performed role and in the correct context. \\
@@ -33,7 +33,6 @@ There are three main entities in this project:\\
 	\item The users of those systems, the staff.
 	\item The certificate authority.
 \end{itemize}
-
 
 In case of the staff there is a full trust assumption that they won't have their credentials stolen, shared or compromised in any way, and as such we will not provide any mechanism to rapidly revoke those credentials. \\
 
@@ -74,17 +73,16 @@ The PEP will send a XACML\cite{xacml} request to the PDP, the PDP will then base
 	\includegraphics[width=.6\textwidth]{figs/access_control.pdf}
 
 
-The PEP will be  contained on the API on the hospital's server and the rest of the components will be on a separate machine.
+The PDP, PAP... will reside in another machine to externalize the policy checking while the PEP will remain in the Hospital/Lab API.
 
 \subsection{Deployment}
 The following figure includes the distinct machines of this system, and as mentioned they will be interconnected through HTTPS secure channels.
 
 	\includegraphics[width=.4\textwidth]{figs/infrastructure.pdf}
 
-There will be only one external lab. The partner lab staff will send HTTP requests to their API which in turn will communicate with the Hospital API using the custom protocol to send and receive any data related to the tests data.
+The lab and hospital will contain two machines one with the API and the other with the PDP,PAP... components, and in the context of this project there will be only one external lab. The partner lab staff will send HTTP requests to their API which in turn will communicate with the Hospital API using the custom protocol to send and receive any data related to the tests data.
 
 The deployment scripts will use Vagrant\cite{vagrant} to manage and deploy the VM's with the correct network configurations and all the necessary software to run the applications. \\
-
 
 \subsection{Secure Channels}
 
@@ -98,11 +96,11 @@ In order to validate the certificate received by the server during the TLS Hands
  
 \subsection{Secure Protocol to Develop}
 The custom secure protocol will enable secure communications between the Hospital API and partner lab, providing as mentioned the same properties as TLS.
-The protocol will require a TCP socket, opening a listener port in the receiving machines (e.g. 1443) and await for requests, meanwhile all new communications will start from a random unprivileged port (>1024) in the request machine. The initial part of the protocol will require an handshake where the transmissor will start by sending an "HELLO" message to the receiver. The receiver will answer with its own certificate and chosen cipher suite (e.g. TLS\_ECDHE\_RSA\_WITH\_AES\_128\_GCM\_SHA256). \\
+The protocol will require opening a listener port in the receiving machines (e.g. 1443) and await for requests, meanwhile all new communications will start from a random unprivileged port (>1024) in the request machine. The initial part of the protocol will require an handshake where the transmissor will start by sending an "HELLO" message to the receiver. The receiver will answer with its own certificate and chosen cipher suite (e.g. TLS\_ECDHE\_RSA\_WITH\_AES\_128\_GCM\_SHA256). \\
 
 In our case there will be only one cipher suite, the protocols to be used will be RSA for key exchanging, AES-256 for block cipher and hmac-sha256 for message authentication. \\
 
-After receiving the certificate, the client will verify it by checking its hostname, expiration date and its validity with the CA. If it's all ok, the client will generate a pseudo-random secret (random byte string), encrypt it with the receiver/target public key and send it back. From that secret, both client and server will generate session keys. To check if all went ok during the handshake they both will send a "Finished message" to each other, if both can decrypt it, communications can start. For extra security the "finished" message could be the hash of all exchanged messages to avoid tampering. All previous mentioned messages will also have a nonce and a timestamp for freshness. \\
+After receiving the certificate, the client will verify it by checking its hostname, expiration date and its validity with the CA. If its all ok, the client will generate a pseudo-random secret (random byte string), encrypt it with the receiver/target public key and send it back. From that secret, both client and server will generate session keys. To check if all went ok during the handshake they both will send a "Finished message" to each other, if both can decrypt it, communications can start. For extra security the "finished" message could be the hash of all exchanged messages to avoid tampering. All previous mentioned messages will also have a nonce and a timestamp for freshness. \\
 
 
 \section{Plan}
