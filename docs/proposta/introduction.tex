@@ -34,7 +34,7 @@ There are three main entities in this project:\\
 	\item The certificate authority.
 \end{itemize}
 
-In case of the staff there is a full trust assumption that they won't have their credentials stolen/shared/etc., and as such we will not provide any mechanism to rapidly revoke those credentials. \\
+In case of the staff there is a full trust assumption that they won't have their credentials stolen, shared or compromised in any way , and as such we will not provide any mechanism to rapidly revoke those credentials. \\
 
 Regarding the certificate authority, there is a full trust assumption that the private key used to issue/sign certificates won't be stolen and as such, we won't have a mechanism to revoke certificates. \\
 
@@ -51,7 +51,7 @@ There is also a full trust assumption, that all the libraries and frameworks use
 
 The implementation will be separated in two main components, an hospital REST API and a laboratory REST API, which will act as client or server, depending on the action being done. When further mentioned API in this text both the hospital's API and lab's API's are being referred to, as they will be pretty similar in terms of security and access control. The only difference between those two entities (hospital and labs) API's, are the possible actions and data stored. \\
 
-All requests received by the API need to posess a proof of identity to be further processed (accept or refuse action), in this case will be a token provided by the respective entity API, after authentication using the correct set of credentials (username:password). The token is transported in the "Authorization" header of the HTTP request. If the token is not present the request will be refused with status code 401 UNAUTHENTICATED. \\
+All requests received by the API need to posess a proof of identity to be further processed (accept or refuse action), in this case it will be a token provided by the respective entity API, after authentication using the correct set of credentials (username:password). The token is transported in the "Authorization" header of the HTTP request. If the token is not present the request will be refused with status code 401 UNAUTHENTICATED. \\
 
 The database will store the hash version of the password using the Bcrypt algorithm, which already salts the passwords. The API will validate the received credentials by hashing them and comparing to the value already stored in the database. Further steps can be taken to protect against brute-force attacks like increasing the processing time or limiting the number of login attempts, which will only be implemented in the advanced version of the project if there is time. \\
 
@@ -71,14 +71,14 @@ The PEP will send a XACML request to the PDP, the PDP will then based on the pol
 	\includegraphics[width=.6\textwidth]{figs/access_control.pdf}
 
 
-All those components will belong to the API but properly separated so that a flaw in one of them doesn't put in danger the whole system.
+The PEP will be  contained on the API on the hospital's server and the rest of the components will be on a separate machine.
 
 \subsection{Deployment}
 The following figure includes the distinct machines of this system, and as mentioned they will be interconnected throught HTTPS secure channels.
 
 	\includegraphics[width=.4\textwidth]{figs/infrastructure.pdf}
 
-For simplicity, there will be only one lab and each lab will contain one machine with an API. The partner lab staff will send HTTP requests to their API which in turn will communicate with the Hospital API to send and receive any data related to the tests data.
+For simplicity, there will be only one lab, but in a larger scale each lab would contain one machine with an API. The partner lab staff will send HTTP requests to their API which in turn will communicate with the Hospital API to send and receive any data related to the tests data.
 
 \subsection{Secure Channels}
 
