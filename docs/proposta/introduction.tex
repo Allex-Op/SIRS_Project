@@ -34,6 +34,7 @@ There are three main entities in this project:\\
 	\item The certificate authority.
 \end{itemize}
 
+
 In case of the staff there is a full trust assumption that they won't have their credentials stolen, shared or compromised in any way, and as such we will not provide any mechanism to rapidly revoke those credentials. \\
 
 Regarding the certificate authority, there is a full trust assumption that the private key used to issue/sign certificates won't be stolen and as such, we won't have a mechanism to revoke certificates. \\
@@ -83,6 +84,7 @@ The following figure includes the distinct machines of this system, and as menti
 There will be only one external lab. The partner lab staff will send HTTP requests to their API which in turn will communicate with the Hospital API using the custom protocol to send and receive any data related to the tests data.
 
 The deployment scripts will use Vagrant\cite{vagrant} to manage and deploy the VM's with the correct network configurations and all the necessary software to run the applications. \\
+
 
 \subsection{Secure Channels}
 
