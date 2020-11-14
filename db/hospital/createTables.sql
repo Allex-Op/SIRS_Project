@@ -1,18 +1,19 @@
 CREATE TABLE IF NOT EXISTS users(
-    user_id GENERATED ALWAYS AS IDENTITY,
+    user_id SERIAL,
     username VARCHAR(16),
     password CHAR(60),                      -- Size of bcrypt hash
     PRIMARY KEY (user_id)
 );
 
 CREATE TABLE token(
-	id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	id SERIAL,
 	hash CHAR(64) UNIQUE,	               -- 64 hexa chars = 256 bits hash
-	expiresAt BIGINT
+	expiresAt BIGINT,
+    PRIMARY KEY(id)
 );
 
 CREATE TABLE IF NOT EXISTS roles(
-    role_id GENERATED ALWAYS AS IDENTITY,
+    role_id SERIAL,
     rolename VARCHAR(16),
     PRIMARY KEY(role_id)
 );
@@ -25,19 +26,19 @@ CREATE TABLE IF NOT EXISTS employees(
 );
 
 CREATE TABLE IF NOT EXISTS patients(
-    patient_id GENERATED ALWAYS AS IDENTITY,
+    patient_id SERIAL,
     name VARCHAR(32),
     age INT,
     PRIMARY KEY(patient_id)
 );
 
 CREATE TABLE IF NOT EXISTS labs(
-    lab_id GENERATED ALWAYS AS IDENTITY,
+    lab_id SERIAL,
     public_key TEXT                         -- Installed manually in the system by the sysadmin
 );
 
 CREATE TABLE IF NOT EXISTS tests(
-    test_id GENERATED ALWAYS AS IDENTITY,
+    test_id SERIAL,
     patient_id INT,
     test_name VARCHAR(32),
     result VARCHAR(256),                    -- The test results will be the response from the lab, it can contain stuff like the data it was completed, 

@@ -1,8 +1,6 @@
 ---
 # Setup Hospital App & Database
 - hosts: hosp
-  become: yes
-  become_method: sudo
   gather_facts: no
 
   tasks:
@@ -12,15 +10,29 @@
       repo: "https://github.com/Alex-Pena-Ok/SIRS_Project"
       clone: yes
       dest: '/home/vagrant/project'
+    become: yes
+    become_method: sudo
 
   - name: Drop tables
-    shell: psql -U vagrant -d sirsDb -a -f /home/vagrant/project/db/hospital/dropTables.sql
+    become: yes
+    become_user: postgres
+    shell: psql -U administrator -d projectDb -a -f /home/vagrant/project/db/hospital/dropTables.sql -h 127.0.0.1
+    environment:
+      PGPASSWORD: administrator
 
   - name: Create tables
-    shell: psql -U vagrant -d sirsDb -a -f /home/vagrant/project/db/hospital/createTables.sql
+    become: yes
+    become_user: postgres
+    shell: psql -U administrator -d projectDb -a -f /home/vagrant/project/db/hospital/createTables.sql -h 127.0.0.1
+    environment:
+      PGPASSWORD: administrator
 
   - name: Populate tables
-    shell: psql -U vagrant -d sirsDb -a -f /home/vagrant/project/db/hospital/populateTables.sql
+    become: yes
+    become_user: postgres
+    shell: psql -U administrator -d projectDb -a -f /home/vagrant/project/db/hospital/populateTables.sql -h 127.0.0.1
+    environment:
+      PGPASSWORD: administrator
 
   # Preencher tabela com script sql correto
 
@@ -32,8 +44,6 @@
 
 # Setup Lab's App & Database
 - hosts: lab
-  become: yes
-  become_method: sudo
   gather_facts: no
 
   tasks:
@@ -43,15 +53,23 @@
       repo: "https://github.com/Alex-Pena-Ok/SIRS_Project"
       clone: yes
       dest: '/home/vagrant/project'
+    become: yes
+    become_method: sudo
 
   - name: Drop tables
-    shell: psql -U vagrant -d sirsDb -a -f /home/vagrant/project/db/lab/dropTables.sql
+    become: yes
+    become_user: postgres
+    shell: psql -d sirsDb -a -f /home/vagrant/project/db/lab/dropTables.sql
 
   - name: Create tables
-    shell: psql -U vagrant -d sirsDb -a -f /home/vagrant/project/db/lab/createTables.sql
+    become: yes
+    become_user: postgres
+    shell: psql -d sirsDb -a -f /home/vagrant/project/db/lab/createTables.sql
 
-  - name: Populate tables
-    shell: psql -U vagrant -d sirsDb -a -f /home/vagrant/project/db/lab/populateTables.sql
+  - name: Populate tables    
+    become: yes
+    become_user: postgres
+    shell: psql -d sirsDb -a -f /home/vagrant/project/db/lab/populateTables.sql
 
   #- name: Compile project
   #  shell: mvn package

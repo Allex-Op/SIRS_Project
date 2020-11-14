@@ -1,0 +1,60 @@
+# Hospital and Lab MySQL
+- hosts: hosp,lab
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+    - name: Ensure bash, OpenSSl, and libssl are the latest versions
+      apt: 
+        name: ['bash', 'openssl', 'libssl-dev', 'libssl-doc']
+        update_cache: true 
+        state: latest
+      tags: packages
+
+    - name: Install PostgreSQL
+      apt: 
+        name: ['postgresql', 'postgresql-contrib', 'libpq-dev', 'python-psycopg2'] 
+        update_cache: true 
+        state: present
+      tags: packages
+
+    - name: Ensure the PostgreSQL service is running
+      service: name=postgresql state=started enabled=yes
+
+    - name: Create PostgreSQL cluster
+      shell: pg_createcluster 9.3 main
+      ignore_errors: yes
+
+    - name: Start PostgreSQL cluster
+      shell:  /etc/init.d/postgresql start
+      ignore_errors: yes
+
+    - name: Create postgres database
+      become: true
+      become_user: postgres
+      postgresql_db:
+        name: projectDb
+
+    - name: Create database user
+      become: true
+      become_user: postgres
+      postgresql_user: db=sirsDb
+               name=administrator
+               password=administrator
+               priv=ALL
+               state=present
+
+    - name: Give new user permissions
+      become: true
+      become_user: postgres
+      postgresql_user: name=administrator
+               role_attr_flags=SUPERUSER,CREATEDB
+               state=present
+
+    - name: Recompile locales configs
+      shell: locale-gen pt_PT.UTF-8
+
+    - name: dpkg-reconfigure
+      shell: dpkg-reconfigure locales
