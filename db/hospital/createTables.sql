@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS users(
     PRIMARY KEY (user_id)
 );
 
-CREATE TABLE token(
+CREATE TABLE IF NOT EXISTS token(
 	id SERIAL,
 	hash CHAR(64) UNIQUE,	               -- 64 hexa chars = 256 bits hash
 	expiresAt BIGINT,
@@ -34,7 +34,8 @@ CREATE TABLE IF NOT EXISTS patients(
 
 CREATE TABLE IF NOT EXISTS labs(
     lab_id SERIAL,
-    public_key TEXT                         -- Installed manually in the system by the sysadmin
+    public_key TEXT,                         -- Installed manually in the system by the sysadmin
+    PRIMARY KEY(lab_id)
 );
 
 CREATE TABLE IF NOT EXISTS tests(

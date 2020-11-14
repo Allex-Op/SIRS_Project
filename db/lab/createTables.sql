@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users(
     PRIMARY KEY (user_id)
 );
 
-CREATE TABLE token(
+CREATE TABLE IF NOT EXISTS token(
 	id SERIAL,
 	hash CHAR(64) UNIQUE,	               -- 64 hexa chars = 256 bits hash
 	expiresAt BIGINT,
