@@ -9,7 +9,18 @@
 
   - name: clone repo git
     git:
-      repo: "https://github.com/Alex-Pena-Ok/SIRS_Project/tree/main"
+      repo: "https://github.com/Alex-Pena-Ok/SIRS_Project"
+      clone: yes
+      dest: '/home/vagrant/project'
+
+  - name: Drop tables
+    shell: psql -U vagrant -d sirsDb -a -f /home/vagrant/project/db/hospital/dropTables.sql
+
+  - name: Create tables
+    shell: psql -U vagrant -d sirsDb -a -f /home/vagrant/project/db/hospital/createTables.sql
+
+  - name: Populate tables
+    shell: psql -U vagrant -d sirsDb -a -f /home/vagrant/project/db/hospital/populateTables.sql
 
   # Preencher tabela com script sql correto
 
@@ -29,7 +40,18 @@
 
   - name: clone repo git
     git:
-      repo: "https://github.com/Alex-Pena-Ok/SIRS_Project/tree/main"
+      repo: "https://github.com/Alex-Pena-Ok/SIRS_Project"
+      clone: yes
+      dest: '/home/vagrant/project'
+
+  - name: Drop tables
+    shell: psql -U vagrant -d sirsDb -a -f /home/vagrant/project/db/lab/dropTables.sql
+
+  - name: Create tables
+    shell: psql -U vagrant -d sirsDb -a -f /home/vagrant/project/db/lab/createTables.sql
+
+  - name: Populate tables
+    shell: psql -U vagrant -d sirsDb -a -f /home/vagrant/project/db/lab/populateTables.sql
 
   #- name: Compile project
   #  shell: mvn package
@@ -49,7 +71,9 @@
 
   - name: clone repo git
     git:
-      repo: "https://github.com/Alex-Pena-Ok/SIRS_Project/tree/main"
+      repo: "https://github.com/Alex-Pena-Ok/SIRS_Project/"
+      clone: yes
+      dest: '/home/vagrant/project'
 
 
 

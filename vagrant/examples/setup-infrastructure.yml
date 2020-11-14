@@ -81,14 +81,14 @@
       service: name=postgresql state=started enabled=yes
 
     - name: Create PostgreSQL cluster
-      shell: sudo pg_createcluster 9.3 main
+      shell: pg_createcluster 9.3 main
 
     - name: Start PostgreSQL cluster
-      shell: sudo /etc/init.d/postgresql start
+      shell:  /etc/init.d/postgresql start
 
     - name: Give Vagrant User PostgreSQL access
       shell: sudo -u postgres createuser vagrant -s
 
     - name: Ensure database is created
-      shell: createdb sirsDb
+      shell: sudo -u vagrant createdb sirsDb
 
