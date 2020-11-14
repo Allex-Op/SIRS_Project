@@ -1,0 +1,56 @@
+---
+# Setup Hospital App & Database
+- hosts: hosp
+  become: yes
+  become_method: sudo
+  gather_facts: no
+
+  tasks:
+
+  - name: clone repo git
+    git:
+      repo: "https://github.com/Alex-Pena-Ok/SIRS_Project/tree/main"
+
+  # Preencher tabela com script sql correto
+
+  #- name: Compile project
+  #  shell: mvn package
+
+  #- name: Starting Hospital API
+  #  shell: java -jar api.jar
+
+# Setup Lab's App & Database
+- hosts: lab
+  become: yes
+  become_method: sudo
+  gather_facts: no
+
+  tasks:
+
+  - name: clone repo git
+    git:
+      repo: "https://github.com/Alex-Pena-Ok/SIRS_Project/tree/main"
+
+  #- name: Compile project
+  #  shell: mvn package
+
+  #- name: Starting Lab API
+  #  shell: java -jar api.jar
+
+
+
+# Setup the authentication nodes with the access control mechanisms
+- hosts: auth
+  become: yes
+  become_method: sudo
+  gather_facts: no
+
+  tasks:
+
+  - name: clone repo git
+    git:
+      repo: "https://github.com/Alex-Pena-Ok/SIRS_Project/tree/main"
+
+
+
+
