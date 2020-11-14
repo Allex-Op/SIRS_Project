@@ -1,0 +1,100 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.ssh.insert_key = false
+  config.vbguest.auto_update = true
+  config.vm.box_check_update = false
+
+  # create Management (mgmt) node
+  config.vm.define "mgmt" do |mgmt_config|
+  mgmt_config.vm.box = "ubuntu/trusty64"
+  mgmt_config.vm.hostname = "mgmt"
+  mgmt_config.vm.network "private_network", ip: "192.168.56.9"
+  mgmt_config.vm.provider "virtualbox" do |vb|
+    vb.name = "mgmt"
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+    vb.memory = "512"
+  end # of vb
+  # Shared folders
+  if Vagrant::Util::Platform.windows? then
+    # Configuration SPECIFIC for Windows 10 hosts
+    mgmt_config.vm.synced_folder "examples", "/home/vagrant/examples",
+    id: "vagrant-root", ouner: "vagrant", group: "vagrant",
+    mount_options: ["dmode=775", "fmode=664"]
+  else
+    # Configuration for Unix/Linux hosts
+    mgmt_config.vm.synced_folder "examples", "/home/vagrant/examples",
+    mount_options: ["dmode=775", "fmode=664"]
+  end # of shared folders
+  # Provisioning
+  mgmt_config.vm.provision "shell", path: "bootstrap-mgmt.sh"
+  end # of mgmt_config
+
+  # create Hospital node
+  config.vm.define "hosp" do |hosp_config|
+    hosp_config.vm.box = "ubuntu/trusty64"
+    hosp_config.vm.hostname = "hospital"
+    hosp_config.vm.network "private_network", ip: "192.168.56.11"
+    hosp_config.vm.provider "virtualbox" do |vb|
+      vb.name = "hospital"
+      vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      vb.memory = "256"
+    end # of vb
+  end # of hosp
+
+  # create Hospital Externalized Policies node
+  config.vm.define "hospPdp" do |hosp_pdp_config|
+    hosp_pdp_config.vm.box = "ubuntu/trusty64"
+    hosp_pdp_config.vm.hostname = "hospitalPdp"
+    hosp_pdp_config.vm.network "private_network", ip: "192.168.56.12"
+    hosp_pdp_config.vm.provider "virtualbox" do |vb|
+      vb.name = "hospitalPdp"
+      vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      vb.memory = "256"
+    end # of vb
+  end # of hosp
+
+  # Create Labs Nodes 
+  (1..1).each do |i|
+    config.vm.define "lab" do |lab_config|
+      lab_config.vm.box = "ubuntu/trusty64"
+      lab_config.vm.hostname = "lab#{i}"
+      lab_config.vm.network "private_network", ip: "192.168.#{56+i}.11"
+      lab_config.vm.provider "virtualbox" do |vb|
+        vb.name = "lab#{i}"
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+        vb.memory = "256"
+      end # of vb
+    end # of lab
+  end # of loop
+
+  # Create Labs Externalized Policies Nodes 
+  (1..1).each do |i|
+    config.vm.define "labPdp" do |lab_pdp_config|
+      lab_pdp_config.vm.box = "ubuntu/trusty64"
+      lab_pdp_config.vm.hostname = "labPdp#{i}"
+      lab_pdp_config.vm.network "private_network", ip: "192.168.#{56+i}.12"
+      lab_pdp_config.vm.provider "virtualbox" do |vb|
+        vb.name = "labPdp#{i}"
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+        vb.memory = "256"
+      end # of vb
+    end # of lab
+  end # of loop
+
+  # create Switch/Router node, confirm if necessary...
+  #config.vm.define "switch" do |sw_config|
+    #sw_config.vm.box = "ubuntu/trusty64"
+    #sw_config.vm.hostname = "switch"
+    #sw_config.vm.network "private_network", ip: "192.168.56.254", virtualbox__intnet: "hospitalnet", auto_config: true
+    #sw_config.vm.network "private_network", ip: "192.168.57.254", virtualbox__intnet: "labnet", auto_config: true #Add more intnet if more labs
+    #sw_config.vm.provider "virtualbox" do |vb|
+      #vb.name = "switch"
+      #vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      #vb.memory = "256"
+    #end # of vb
+  #end # of hosp
+
+end # of config

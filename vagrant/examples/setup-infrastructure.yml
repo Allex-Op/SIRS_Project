@@ -1,0 +1,94 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  gather_facts: no
+
+  tasks:
+
+  - name: install ntp
+    apt:
+      name: ntp
+      state: present
+      update_cache: yes
+
+  - name: write our ntp.conf
+    copy:
+      src: /home/vagrant/examples/ntpfiles/ntp.conf
+      dest: /etc/ntp.conf
+      mode: '0644'
+      owner: root
+      group: root
+    notify: restart ntp
+
+  - name: start ntp
+    service:
+      name: ntp
+      state: started
+
+  - name: install git
+    apt:
+      name: git
+      state: present
+      update_cache: yes
+
+  - name: installing repo for Java 8 in Ubuntu
+    apt_repository: repo='ppa:openjdk-r/ppa'
+
+  - name: install JDK 8
+    apt:
+      name: openjdk-8-jdk
+      state: present
+      update_cache: yes
+
+  - name: install maven
+    apt:
+      name: maven
+      state: present
+      update_cache: yes
+
+  handlers:
+
+  - name: restart ntp
+    service:
+      name: ntp
+      state: restarted
+
+
+# Hospital and Lab MySQL
+- hosts: hosp,lab
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+    - name: Ensure bash, OpenSSl, and libssl are the latest versions
+      apt: 
+        name: ['bash', 'openssl', 'libssl-dev', 'libssl-doc']
+        update_cache: true 
+        state: latest
+      tags: packages
+
+    - name: Install PostgreSQL
+      apt: 
+        name: ['postgresql', 'postgresql-contrib', 'libpq-dev', 'python-psycopg2'] 
+        update_cache: true 
+        state: present
+      tags: packages
+
+    - name: Ensure the PostgreSQL service is running
+      service: name=postgresql state=started enabled=yes
+
+    - name: Create PostgreSQL cluster
+      shell: pg_createcluster 9.3 main
+
+    - name: Start PostgreSQL cluster
+      shell:  /etc/init.d/postgresql start
+
+    - name: Give Vagrant User PostgreSQL access
+      shell: sudo -u postgres createuser vagrant -s
+
+    - name: Ensure database is created
+      shell: sudo -u vagrant createdb sirsDb
+
