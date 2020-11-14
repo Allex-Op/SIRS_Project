@@ -16,21 +16,21 @@
   - name: Drop tables
     become: yes
     become_user: postgres
-    shell: psql -U administrator -d projectDb -a -f /home/vagrant/project/db/hospital/dropTables.sql -h 127.0.0.1
+    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/project/db/hospital/dropTables.sql -h 127.0.0.1
     environment:
       PGPASSWORD: administrator
 
   - name: Create tables
     become: yes
     become_user: postgres
-    shell: psql -U administrator -d projectDb -a -f /home/vagrant/project/db/hospital/createTables.sql -h 127.0.0.1
+    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/project/db/hospital/createTables.sql -h 127.0.0.1
     environment:
       PGPASSWORD: administrator
 
   - name: Populate tables
     become: yes
     become_user: postgres
-    shell: psql -U administrator -d projectDb -a -f /home/vagrant/project/db/hospital/populateTables.sql -h 127.0.0.1
+    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/project/db/hospital/populateTables.sql -h 127.0.0.1
     environment:
       PGPASSWORD: administrator
 
@@ -59,17 +59,23 @@
   - name: Drop tables
     become: yes
     become_user: postgres
-    shell: psql -d sirsDb -a -f /home/vagrant/project/db/lab/dropTables.sql
+    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/project/db/lab/dropTables.sql -h 127.0.0.1
+    environment:
+      PGPASSWORD: administrator
 
   - name: Create tables
     become: yes
     become_user: postgres
-    shell: psql -d sirsDb -a -f /home/vagrant/project/db/lab/createTables.sql
+    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/project/db/lab/createTables.sql -h 127.0.0.1
+    environment:
+      PGPASSWORD: administrator
 
-  - name: Populate tables    
+  - name: Populate tables
     become: yes
     become_user: postgres
-    shell: psql -d sirsDb -a -f /home/vagrant/project/db/lab/populateTables.sql
+    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/project/db/lab/populateTables.sql -h 127.0.0.1
+    environment:
+      PGPASSWORD: administrator
 
   #- name: Compile project
   #  shell: mvn package

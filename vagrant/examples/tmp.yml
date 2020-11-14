@@ -35,7 +35,7 @@
       become: true
       become_user: postgres
       postgresql_db:
-        name: projectDb
+        name: sirsDb
 
     - name: Create database user
       become: true
