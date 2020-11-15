@@ -1,5 +1,5 @@
 # Hospital and Lab MySQL
-- hosts: hosp,lab
+- hosts: hosp
   remote_user: vagrant
   become: yes
   become_method: sudo
@@ -21,15 +21,10 @@
       tags: packages
 
     - name: Ensure the PostgreSQL service is running
-      service: name=postgresql state=started enabled=yes
-
-    - name: Create PostgreSQL cluster
-      shell: pg_createcluster 9.3 main
-      ignore_errors: yes
-
-    - name: Start PostgreSQL cluster
-      shell:  /etc/init.d/postgresql start
-      ignore_errors: yes
+      systemd: 
+        name: postgresql 
+        state: started 
+        enabled: yes
 
     - name: Create postgres database
       become: true

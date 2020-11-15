@@ -22,22 +22,19 @@
     notify: restart ntp
 
   - name: start ntp
-    service:
+    systemd:
       name: ntp
       state: started
-
-  - name: install git
-    apt:
-      name: git
-      state: present
-      update_cache: yes
-
-  - name: installing repo for Java 8 in Ubuntu
-    apt_repository: repo='ppa:openjdk-r/ppa'
 
   - name: install JDK 8
     apt:
       name: openjdk-8-jdk
+      state: present
+      update_cache: yes
+
+  - name: install maven
+    apt:
+      name: maven
       state: present
       update_cache: yes
 
@@ -48,15 +45,6 @@
       dest: '/home/vagrant/project'
     become: yes
     become_method: sudo
-
-  - name: download maven
-    shell: wget https://downloads.apache.org/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz -P /tmp
-
-  - name: extract maven
-    shell: tar xf /tmp/apache-maven-3.6.3-bin.tar.gz -C /opt && ln -s /opt/apache-maven-3.6.3 /opt/maven
-
-  - name: configure maven
-    shell: cp /home/vagrant/project/vagrant/examples/maven.sh /etc/profile.d/maven.sh 
 
   - name: Install root CA
     shell: cp /home/vagrant/project/vagrant/examples/certificates/myCA.crt /usr/local/share/ca-certificates/myCA.crt && update-ca-certificates
@@ -86,21 +74,16 @@
 
     - name: Install PostgreSQL
       apt: 
-        name: ['postgresql', 'postgresql-contrib', 'libpq-dev', 'python-psycopg2'] 
+        name: ['postgresql', 'postgresql-contrib', 'libpq-dev', 'python3-psycopg2'] 
         update_cache: true 
         state: present
       tags: packages
 
     - name: Ensure the PostgreSQL service is running
-      service: name=postgresql state=started enabled=yes
-
-    - name: Create PostgreSQL cluster
-      shell: pg_createcluster 9.3 main
-      ignore_errors: yes
-
-    - name: Start PostgreSQL cluster
-      shell:  /etc/init.d/postgresql start
-      ignore_errors: yes
+      systemd: 
+        name: postgresql 
+        state: started 
+        enabled: yes
 
     - name: Create postgres database
       become: true
@@ -124,8 +107,14 @@
                role_attr_flags=SUPERUSER,CREATEDB
                state=present
 
-    - name: Recompile locales configs
-      shell: locale-gen pt_PT.UTF-8
 
-    - name: dpkg-reconfigure
-      shell: dpkg-reconfigure locales
+# Hospital and Lab MySQL
+- hosts: hosp
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+    - name: Deploy API Service
+      shell: cp /home/vagrant/project/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service

@@ -18,8 +18,8 @@
   gather_facts: no
 
   tasks:
-    - name: Deploy API Service
-      shell: cp /home/vagrant/project/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service
+#    - name: Deploy API Service
+#      shell: cd /home/vagrant/project/apis/hospital && mvn clean package
 
     - name: Start Hospital API Service
       systemd:

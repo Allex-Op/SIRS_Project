@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
 
   # create Management (mgmt) node
   config.vm.define "mgmt" do |mgmt_config|
-  mgmt_config.vm.box = "ubuntu/trusty64"
+  mgmt_config.vm.box = "ubuntu/xenial64"
   mgmt_config.vm.hostname = "mgmt"
   mgmt_config.vm.network "private_network", ip: "192.168.56.9"
   mgmt_config.vm.provider "virtualbox" do |vb|
@@ -34,7 +34,7 @@ Vagrant.configure("2") do |config|
 
   # create Hospital node
   config.vm.define "hosp" do |hosp_config|
-    hosp_config.vm.box = "ubuntu/trusty64"
+    hosp_config.vm.box = "ubuntu/xenial64"
     hosp_config.vm.hostname = "hospital"
     hosp_config.vm.network "private_network", ip: "192.168.56.11"
     hosp_config.vm.provider "virtualbox" do |vb|
@@ -42,24 +42,28 @@ Vagrant.configure("2") do |config|
       vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       vb.memory = "256"
     end # of vb
+    # Provisioning
+    config.vm.provision "shell", inline: <<-SHELL
+      echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZZr5NqMnX2oacqJCb/Wt/nMtpCvfytVo4GYZ3QA1ewD2Jjpg/t4Ti+n3d+jD3A2d5CLoY7ZowQTVFc013CpBLeb1QKaPEPxanU0tft9aoT+5jzbh73tJxU0zYOelcJdvqSkbBDLGHIyp0cOLDJQGWIiuU65IwWme3x8ZuF6XktY1JwO4Xdn2cucE5fzMh7bQe9mO/apR1dFtvvqZQCRbmTOv7aOwADiHhEamLgndHoAySakvq7qtRgmSP5mqDPqPXVbfirXzPfY8joMkb8qr0n39Yvra/ND5wWuKbA5LGH6Gtqm47wNjJHJuEEPZTjGrr83GCH82FS/9LsiLkJ6/1 alex@desktop" >> /home/vagrant/.ssh/authorized_keys
+    SHELL
   end # of hosp
 
   # create Hospital Externalized Policies node
-  config.vm.define "hospPdp" do |hosp_pdp_config|
-    hosp_pdp_config.vm.box = "ubuntu/trusty64"
-    hosp_pdp_config.vm.hostname = "hospitalPdp"
-    hosp_pdp_config.vm.network "private_network", ip: "192.168.56.12"
-    hosp_pdp_config.vm.provider "virtualbox" do |vb|
-      vb.name = "hospitalPdp"
-      vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      vb.memory = "256"
-    end # of vb
-  end # of hosp
+  #config.vm.define "hospPdp" do |hosp_pdp_config|
+  #  hosp_pdp_config.vm.box = "ubuntu/xenial64"
+  #  hosp_pdp_config.vm.hostname = "hospitalPdp"
+  #  hosp_pdp_config.vm.network "private_network", ip: "192.168.56.12"
+  #  hosp_pdp_config.vm.provider "virtualbox" do |vb|
+  #    vb.name = "hospitalPdp"
+  #    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+  #    vb.memory = "256"
+  #  end # of vb
+  #end # of hosp
 
   # Create Labs Nodes 
   (1..1).each do |i|
     config.vm.define "lab" do |lab_config|
-      lab_config.vm.box = "ubuntu/trusty64"
+      lab_config.vm.box = "ubuntu/xenial64"
       lab_config.vm.hostname = "lab#{i}"
       lab_config.vm.network "private_network", ip: "192.168.#{56+i}.11"
       lab_config.vm.provider "virtualbox" do |vb|
@@ -67,34 +71,25 @@ Vagrant.configure("2") do |config|
         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
         vb.memory = "256"
       end # of vb
+      # Provisioning
+      config.vm.provision "shell", inline: <<-SHELL
+        echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZZr5NqMnX2oacqJCb/Wt/nMtpCvfytVo4GYZ3QA1ewD2Jjpg/t4Ti+n3d+jD3A2d5CLoY7ZowQTVFc013CpBLeb1QKaPEPxanU0tft9aoT+5jzbh73tJxU0zYOelcJdvqSkbBDLGHIyp0cOLDJQGWIiuU65IwWme3x8ZuF6XktY1JwO4Xdn2cucE5fzMh7bQe9mO/apR1dFtvvqZQCRbmTOv7aOwADiHhEamLgndHoAySakvq7qtRgmSP5mqDPqPXVbfirXzPfY8joMkb8qr0n39Yvra/ND5wWuKbA5LGH6Gtqm47wNjJHJuEEPZTjGrr83GCH82FS/9LsiLkJ6/1 alex@desktop" >> /home/vagrant/.ssh/authorized_keys
+      SHELL
     end # of lab
-  end # of loop
+  end # of loop 
 
   # Create Labs Externalized Policies Nodes 
-  (1..1).each do |i|
-    config.vm.define "labPdp" do |lab_pdp_config|
-      lab_pdp_config.vm.box = "ubuntu/trusty64"
-      lab_pdp_config.vm.hostname = "labPdp#{i}"
-      lab_pdp_config.vm.network "private_network", ip: "192.168.#{56+i}.12"
-      lab_pdp_config.vm.provider "virtualbox" do |vb|
-        vb.name = "labPdp#{i}"
-        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-        vb.memory = "256"
-      end # of vb
-    end # of lab
-  end # of loop
-
-  # create Switch/Router node, confirm if necessary...
-  #config.vm.define "switch" do |sw_config|
-    #sw_config.vm.box = "ubuntu/trusty64"
-    #sw_config.vm.hostname = "switch"
-    #sw_config.vm.network "private_network", ip: "192.168.56.254", virtualbox__intnet: "hospitalnet", auto_config: true
-    #sw_config.vm.network "private_network", ip: "192.168.57.254", virtualbox__intnet: "labnet", auto_config: true #Add more intnet if more labs
-    #sw_config.vm.provider "virtualbox" do |vb|
-      #vb.name = "switch"
-      #vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-      #vb.memory = "256"
-    #end # of vb
-  #end # of hosp
+  #(1..1).each do |i|
+  #  config.vm.define "labPdp" do |lab_pdp_config|
+  #    lab_pdp_config.vm.box = "ubuntu/xenial64"
+  #    lab_pdp_config.vm.hostname = "labPdp#{i}"
+  #    lab_pdp_config.vm.network "private_network", ip: "192.168.#{56+i}.12"
+  #    lab_pdp_config.vm.provider "virtualbox" do |vb|
+  #      vb.name = "labPdp#{i}"
+  #      vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+  #      vb.memory = "256"
+  #    end # of vb
+  #  end # of lab
+  #end # of loop
 
 end # of config
