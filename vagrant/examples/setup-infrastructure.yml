@@ -41,12 +41,6 @@
       state: present
       update_cache: yes
 
-  - name: install maven
-    apt:
-      name: maven
-      state: present
-      update_cache: yes
-
   - name: clone repo git
     git:
       repo: "https://github.com/Alex-Pena-Ok/SIRS_Project"
@@ -54,6 +48,15 @@
       dest: '/home/vagrant/project'
     become: yes
     become_method: sudo
+
+  - name: download maven
+    shell: wget https://downloads.apache.org/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz -P /tmp
+
+  - name: extract maven
+    shell: tar xf /tmp/apache-maven-3.6.3-bin.tar.gz -C /opt && ln -s /opt/apache-maven-3.6.3 /opt/maven
+
+  - name: configure maven
+    shell: cp /home/vagrant/project/vagrant/examples/maven.sh /etc/profile.d/maven.sh && source /etc/profile.d/maven.sh
 
   - name: Install root CA
     shell: cp /home/vagrant/project/vagrant/examples/certificates/myCA.crt /usr/local/share/ca-certificates/myCA.crt && update-ca-certificates

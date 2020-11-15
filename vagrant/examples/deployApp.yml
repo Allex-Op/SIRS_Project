@@ -1,3 +1,17 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  gather_facts: no
+
+  tasks:
+    - name: clone repo git
+      git:
+        repo: "https://github.com/Alex-Pena-Ok/SIRS_Project"
+        clone: yes
+        dest: '/home/vagrant/project'
+
+# Hospital deployment
 - hosts: hosp
   become: yes
   become_method: sudo
@@ -5,13 +19,12 @@
 
   tasks:
     - name: Compile Hospital API
-      shell: mvn package
-      chdir: /home/vagrant/project/apis/hospital
+      shell: cd /home/vagrant/project/apis/hospital && mvn package
 
     - name: Start Hospital API
-      shell: java -jar hospital-0.0.1-SNAPSHOT.jar
-      chdir: /home/vagrant/project/apis/hospital/target
+      shell: cd /home/vagrant/project/apis/hospital/target && java -jar hospital-0.0.1-SNAPSHOT.jar
 
+# Lab deployment
 - hosts: lab
   become: yes
   become_method: sudo
@@ -21,6 +34,7 @@
     - name: Compile Lab API
       shell: echo "fake"
 
+# PDP, PAP... deployment
 - hosts: auth
   become: yes
   become_method: sudo
