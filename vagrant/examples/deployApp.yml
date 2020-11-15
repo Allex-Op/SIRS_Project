@@ -11,9 +11,6 @@
         clone: yes
         dest: '/home/vagrant/project'
 
-    - name: Import maven certificate
-      shell: keytool -import -file /home/vagrant/project/vagrant/repo.maven.apache.org -keystore /tmp/mavenKeystore
-
 # Hospital deployment
 - hosts: hosp
   become: yes
