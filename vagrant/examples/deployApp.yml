@@ -22,7 +22,7 @@
       shell: cp /home/vagrant/project/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service 
 
     - name: Start Hospital API
-      shell: ln -s /var/hospitalapi/hospitalapi.jar /etc/init.d/hospitalapi && service hospitalapi start
+      shell: systemctl start hospitalapi
 
 # Lab deployment
 - hosts: lab
