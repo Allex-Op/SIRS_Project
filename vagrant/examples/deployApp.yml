@@ -1,0 +1,31 @@
+- hosts: hosp
+  become: yes
+  become_method: sudo
+  gather_facts: no
+
+  tasks:
+    - name: Compile Hospital API
+      shell: mvn package
+      chdir: /home/vagrant/project/apis/hospital
+
+    - name: Start Hospital API
+      shell: java -jar hospital-0.0.1-SNAPSHOT.jar
+      chdir: /home/vagrant/project/apis/hospital/target
+
+- hosts: lab
+  become: yes
+  become_method: sudo
+  gather_facts: no
+
+  tasks:
+    - name: Compile Lab API
+      shell: echo "fake"
+
+- hosts: auth
+  become: yes
+  become_method: sudo
+  gather_facts: no
+
+  tasks:
+    - name: Compile Auth Components (PDP, PAP...)
+      shell: echo "fake"

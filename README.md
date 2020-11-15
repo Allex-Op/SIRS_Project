@@ -28,13 +28,15 @@ This will create the necessary SSH Trust to avoid the "The authenticity of host 
 
 Then issue the command "ansible-playbook setup-infrastructure.yml", this will install all the required software (JDK, Git, NTP, MySQL...).
 
-Finally, issue the command "ansible-playbook deploy-app.yml", this will clone the repository, compile the projects, populate the databases and start the applications.
+Finally, issue the command "ansible-playbook populateDb.yml" to reset the databases and populate with information, and "ansible-playbook deployApp.yml" to compile the projects and start the applications.
 
-MySQL User:
-admin:admin
+PostgreSQL User:
+administrator:administrator
 
 Vagrant virtualboxes:
 vagrant:vagrant
+
+
 
 
 ## Secrets & PKI

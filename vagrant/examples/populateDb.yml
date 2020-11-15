@@ -69,16 +69,3 @@
 
 
 
-# Setup the authentication nodes with the access control mechanisms
-- hosts: auth
-  become: yes
-  become_method: sudo
-  gather_facts: no
-
-  tasks:
-    - name: "die"
-      shell: echo "die"
-
-
-
-
