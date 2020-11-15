@@ -19,11 +19,12 @@
 
   tasks:
     - name: Deploy API Service
-      shell: ln /home/vagrant/project/apis/hospital/target/hospital-0.0.1-SNAPSHOT.jar /etc/init.d/hospitalapi
+      shell: cp /home/vagrant/project/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service
 
-    - service:
+    - name: Start Hospital API Service
+      systemd:
         name: hospitalapi
-        state: restarted
+        state: started
 
 # Lab deployment
 - hosts: lab

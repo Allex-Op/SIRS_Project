@@ -1,10 +1,8 @@
 [Unit]
-Description=A Spring Boot application
-After=syslog.target
+Description=A goddamn hospital API
  
 [Service]
-User=baeldung
-ExecStart=java -jar /home/vagrant/project/apis/hospital/target/hospital-0.0.1-SNAPSHOT.jar SuccessExitStatus=143 
+ExecStart=/home/vagrant/project/apis/hospital/target/hospital-0.0.1-SNAPSHOT.jar 
  
 [Install] 
 WantedBy=multi-user.target
