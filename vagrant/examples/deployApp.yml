@@ -19,7 +19,7 @@
 
   tasks:
     - name: Compile Hospital API
-      shell: cd /home/vagrant/project/apis/hospital && /opt/maven/bin/mvn package -Djavax.net.ssl.trustStore=/tmp/mavenKeystore
+      shell: cd /home/vagrant/project/apis/hospital && /opt/maven/bin/mvn package -Djavax.net.ssl.trustStore=/home/vagrant/project/vagrant/mavenKeystore
       environment:
         JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64/jre
 
