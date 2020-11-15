@@ -56,7 +56,7 @@
     shell: tar xf /tmp/apache-maven-3.6.3-bin.tar.gz -C /opt && ln -s /opt/apache-maven-3.6.3 /opt/maven
 
   - name: configure maven
-    shell: cp /home/vagrant/project/vagrant/examples/maven.sh /etc/profile.d/maven.sh && source /etc/profile.d/maven.sh
+    shell: sudo cp /home/vagrant/project/vagrant/examples/maven.sh /etc/profile.d/maven.sh && source /etc/profile.d/maven.sh
 
   - name: Install root CA
     shell: cp /home/vagrant/project/vagrant/examples/certificates/myCA.crt /usr/local/share/ca-certificates/myCA.crt && update-ca-certificates
