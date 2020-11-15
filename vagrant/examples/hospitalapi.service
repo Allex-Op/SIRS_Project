@@ -1,0 +1,10 @@
+[Unit]
+Description=A Spring Boot application
+After=syslog.target
+ 
+[Service]
+User=baeldung
+ExecStart=java -jar /home/vagrant/project/apis/hospital/target/hospital-0.0.1-SNAPSHOT.jar SuccessExitStatus=143 
+ 
+[Install] 
+WantedBy=multi-user.target

@@ -18,13 +18,11 @@
   gather_facts: no
 
   tasks:
-    - name: Compile Hospital API
-      shell: cd /home/vagrant/project/apis/hospital && /opt/maven/bin/mvn package -Djavax.net.ssl.trustStore=/home/vagrant/project/vagrant/mavenKeystore
-      environment:
-        JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64/jre
+    - name: Setup Hospital API Service
+      shell: cp /home/vagrant/project/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service 
 
     - name: Start Hospital API
-      shell: cd /home/vagrant/project/apis/hospital/target && java -jar hospital-0.0.1-SNAPSHOT.jar
+      shell: ln -s /var/hospitalapi/hospitalapi.jar /etc/init.d/hospitalapi && service hospitalapi start
 
 # Lab deployment
 - hosts: lab
