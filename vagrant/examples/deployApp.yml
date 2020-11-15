@@ -18,11 +18,8 @@
   gather_facts: no
 
   tasks:
-    - name: Setup Hospital API Service
-      shell: cp /home/vagrant/project/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service 
-
-    - name: Start Hospital API
-      shell: systemctl start hospitalapi
+    - name: Deploy API to Tomcat
+      shell: cp /home/vagrant/project/apis/demo/target/demo-0.0.1-SNAPSHOT.war /var/lib/tomcat7/webapps/demo-0.0.1-SNAPSHOT.war 
 
 # Lab deployment
 - hosts: lab
