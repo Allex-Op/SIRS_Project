@@ -47,6 +47,17 @@
       state: present
       update_cache: yes
 
+  - name: clone repo git
+    git:
+      repo: "https://github.com/Alex-Pena-Ok/SIRS_Project"
+      clone: yes
+      dest: '/home/vagrant/project'
+    become: yes
+    become_method: sudo
+
+  - name: Install root CA
+    shell: cp /home/vagrant/project/certificates/myCA.crt /usr/local/share/ca-certificates/myCA.crt && update-ca-certificates
+
   handlers:
 
   - name: restart ntp
