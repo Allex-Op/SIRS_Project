@@ -11,6 +11,9 @@
         clone: yes
         dest: '/home/vagrant/project'
 
+    - name: Import maven certificate
+      shell: keytool -import -file /home/vagrant/project/vagrant/repo.maven.apache.org -keystore /tmp/mavenKeystore
+
 # Hospital deployment
 - hosts: hosp
   become: yes
@@ -19,7 +22,9 @@
 
   tasks:
     - name: Compile Hospital API
-      shell: cd /home/vagrant/project/apis/hospital && mvn package
+      shell: cd /home/vagrant/project/apis/hospital && /opt/maven/bin/mvn package -Djavax.net.ssl.trustStore=/tmp/mavenKeystore
+      environment:
+        JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64/jre
 
     - name: Start Hospital API
       shell: cd /home/vagrant/project/apis/hospital/target && java -jar hospital-0.0.1-SNAPSHOT.jar
