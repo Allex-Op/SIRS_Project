@@ -18,8 +18,12 @@
   gather_facts: no
 
   tasks:
-    - name: Deploy API to Tomcat
-      shell: cp /home/vagrant/project/apis/demo/target/demo-0.0.1-SNAPSHOT.war /var/lib/tomcat7/webapps/demo-0.0.1-SNAPSHOT.war 
+    - name: Deploy API Service
+      shell: ln /home/vagrant/project/apis/hospital/target/hospital-0.0.1-SNAPSHOT.jar /etc/init.d/hospitalapi
+
+    - service:
+        name: hospitalapi
+        state: restarted
 
 # Lab deployment
 - hosts: lab
