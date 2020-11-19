@@ -15,10 +15,11 @@ INSERT INTO employees(employee_id, role_id) VALUES
     (2, 2),
     (3, 3); -- e.g. janitor was the 3rd user to be created (id:3) and janitor was 3rd role to be created pair(user_id, role_id)
 
-INSERT INTO patients(name, age) VALUES
-    ('joão', 15),
-    ('maria', 45);
+INSERT INTO patients(name, age, diseases, treatment) VALUES
+    ('joão', 15, 'HIV,PNEUMONIA', 'AN APPLE A DAY'),
+    ('maria', 45, 'COVID-19', '500g of Dishwasher');
 
+-- Talvez ter uma store em vez de guardar os certificados assim
 INSERT INTO labs(public_key) VALUES
     ('-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxZjOcdjMUcO0wMnBpAcG

@@ -1,0 +1,51 @@
+<PolicySet PolicySetId="HospitalRules">
+<Policy PolicyId="NormalPolicy">
+ 
+    <!-- Rule to see if we should allow the Subject to login -->
+    <Rule RuleId="DiseasesRule" Effect="Permit">
+
+      <!-- Only use this Rule if the action is to check a patient diseases record check first the action attributeValue -->
+      <Target>
+      
+        <Subjects>
+          <SubjectMatch MatchId="string-equal">
+           <AttributeValue DataType="#string">Doctor</AttributeValue>
+           <SubjectAttributeDesignator DataType="#string" AttributeId="subject-role"/>
+          </SubjectMatch>
+          
+          <SubjectMatch MatchId="string-equal">
+           <AttributeValue DataType="#string">Nurse</AttributeValue>
+           <SubjectAttributeDesignator DataType="#string" AttributeId="subject-role"/>
+          </SubjectMatch>
+        </Subjects>
+        
+        <Resources>
+          <ResourceMatch MatchId="string-equal">
+           <AttributeValue DataType="#string">/patients/{id}/diseases</AttributeValue>
+           <ResourceAttributeDesignator DataType="#string" AttributeId="resource-id"/>
+          </ResourceMatch>
+        </Resources>
+        
+        <Actions>
+          <ActionMatch MatchId="string-equal">
+            <AttributeValue DataType="#string">read</AttributeValue>
+            <ActionAttributeDesignator DataType="#string" AttributeId="action-id"/>
+          </ActionMatch>
+        </Actions>
+        
+     </Target>
+
+    </Rule>
+
+    <!-- We could include other Rules for different actions here -->
+
+    <!-- A final, "fall-through" Rule that always Denies -->
+    <Rule RuleId="FinalRule" Effect="Deny"/>
+
+</Policy>
+
+<Policy PolicyId="PandemicPolicy">
+	...
+</Policy>
+
+</PolicySet>

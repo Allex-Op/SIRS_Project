@@ -57,7 +57,7 @@ Content-Type: application/json
  
  {
      "name": "Alberto",
-     "diseases": ["Covid-19", "Pneumonia"...]
+     "diseases": "Covid-19, Pneumonia..."
  }
 ```
 
@@ -70,8 +70,7 @@ Content-Type: application/json
 - Id -  integer
 
 ### Authorization Scope:
-- Doctor during normal mode.
-- Anyone during pandemic mode.
+- Doctor.
 
 ### E.g. Request:
 ```
@@ -147,7 +146,7 @@ Content-Type: application/json
 
 - Digital signature only protects the 'results' field of the request. Signature must then be stored by the hospital for authenticity check when needed.
 
-- The id used in the URI is the one received 
+- The id used in the URI is the one that was used to send a request for analysis to the lab.
 
 ### E.g. Response:
 ```
@@ -215,7 +214,7 @@ Content-Type: application/json
     "data": "vWmkAcHlWb..."
 }
 ```
-- The test_id is a random INTEGER that will allow to associate the test results with a patient. It's not used the patient id to maintain privacy.
+- The test_id is a random INTEGER that will allow to associate the test results with a patient (only the hospital API can do the association). It's not used the patient id to maintain privacy.
 
 ### E.g. Response:
 ```
@@ -250,3 +249,131 @@ username=mrdoctor&password=doctor
     "token": "r6C6xEEZSKYrHX8i..."
 }
 ```
+
+# Authorization API (PDP, PAP...)
+
+## `POST /pdp`
+
+### Description:
+- Evaluates a XACML request (JSON profile) and decides if the request should be accepted or denied.
+- The group of policies that should be respected are not sent in the request, but already present in the machine.
+- Only the associated API can send authorization requests, for that a shared secret will be included in the request, similar to the authorization header access token. Example, the hospital API and the authorization API of the hospital will share the secret string "69i57j69i59j69i60l3j69i65l3.1158j0j7". This secret will be hardcoded and there are no mechanisms to generate another one in case this secret gets compromised.
+
+
+### Parameters:
+- None
+
+### Authorization Scope:
+- Associated API (Hospital API or Lab API)
+
+### E.g. Request:
+```
+POST /pdp
+Content-Type: application/json
+
+{
+       "Request": {
+              "AccessSubject": {
+                     "Attribute": [
+                           {
+                                "AttributeId": "subject-role",
+                                "Value": "Doctor"
+                           }
+              },
+              "Action": {
+                     "Attribute":
+                           {
+                                  "AttributeId": "action-id",
+                                  "Value": "GET"
+                           }
+              },
+              "Resource": {
+                     "Attribute": [
+                           {
+                                "AttributeId": "resource-id",
+                                "Value": "/patients/{id}/diseases"
+                           }
+              },
+              "Environment": {
+                  "Attribute": [
+                      {
+                          "AttributeId": "Context",
+                          "Value": "Pandemic Mode"
+                      }
+                  ]
+              }
+       }
+}
+```
+
+### E.g. Response:
+```
+200 OK
+
+{
+    "Response": [{"Decision": "Permit"}]
+}
+```
+
+or
+
+```
+200 OK
+
+{
+    "Response": [{"Decision": "Deny"}]
+}
+```
+
+- More info on the JSON Profile of XACML:
+http://docs.oasis-open.org/xacml/xacml-json-http/v1.0/cos01/xacml-json-http-v1.0-cos01.html#_Toc497727120
+
+
+Example of the policy set for reference:
+
+```
+{
+    "PolicySetId": "HospitalRules",
+    "Policies": [
+        {
+            "PolicyId": "NormalPolicy", 
+            "Rules": [
+                {
+                    "RuleId": "DiseasesRule",
+                    "Effect": "Permit",
+                    "Target": {
+                        "Subjects": [{
+                            "AttributeId": "Subject-Role",
+                            "Value": "Doctor"
+                        },
+                        {
+                            "AttributeId": "Subject-Role",
+                            "Value": "Nurse"
+                        }],
+                        "Resources": [{
+                            "AttributeId": "resource-id",
+                            "Value": "/patients/{id}/diseases"
+                        }],
+                        "Actions": [{
+                            "AttributeId": "action-id",
+                            "Value": "GET"
+                        }]
+                    }
+                },
+                {
+                    "RuleId": "Default",
+                    "Effect": "Deny"
+                }
+            ]
+        },
+        {
+            "PolicyId": "PandemicPolicy", 
+            "Rules": [
+                ...
+            ]
+        }
+    ]
+}
+```
+
+- PS: The rules for normal mode and pandemic mode are separated in two different policies. The policy that is evaluated depends on the mode the API is operating (normal or pandemic).

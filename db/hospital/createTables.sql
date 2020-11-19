@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS patients(
     patient_id SERIAL,
     name VARCHAR(32),
     age INT,
+    diseases TEXT,
+    treatment TEXT,
     PRIMARY KEY(patient_id)
 );
 
@@ -52,4 +54,3 @@ CREATE TABLE IF NOT EXISTS tests(
     FOREIGN KEY(lab_id) REFERENCES labs(lab_id),
     FOREIGN KEY(patient_id) REFERENCES patients(patient_id)
 );
-
