@@ -120,39 +120,6 @@ Content-Type: application/json
  }
 ```
 
-
-## `POST /sendtestresults/{id}`
-
-### Description:
-- Sends the test results back to the hospital from the lab. 
-
-### Parameters:
-- Id -  integer
-
-### Authorization Scope:
-- Lab employee.
-
-### E.g. Request:
-```
-POST /sendtestresults/1
-Authorization: r6C6xEEZSKYrHX8i...
-Content-Type: application/json
-
-{
-    results: "25/05/2020 Covid19:True,Pneumonia:True...",
-    digitalSignature: "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXpBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWjAxMjM0NTY3ODkK=="
-}
-```
-
-- Digital signature only protects the 'results' field of the request. Signature must then be stored by the hospital for authenticity check when needed.
-
-- The id used in the URI is the one that was used to send a request for analysis to the lab.
-
-### E.g. Response:
-```
-200 OK
-```
-
 ## `GET /checkauthenticity/{id}`
 
 ### Description:
@@ -190,18 +157,46 @@ or
 }
 ```
 
-# Partner Lab API
 
-## `POST /teststoanalyze`
+## `POST /sendtestresults`
 
 ### Description:
-- Sends a bunch of random data to the Partner lab for analysis.
+- Makes a request for tests data analysis
 
 ### Parameters:
-- None
+- None 
 
 ### Authorization Scope:
-- Doctor
+- Doctor.
+
+### E.g. Request:
+```
+POST /sendtestresults/
+Authorization: r6C6xEEZSKYrHX8i...
+
+{
+    "patient_id": 2,
+    "lab_id": 1
+}
+```
+
+- Sent in the body for confidentiality
+
+### E.g. Response:
+```
+200 OK
+```
+
+## `POST /sendtestresults/{id}`
+
+### Description:
+- Sends the test results back to the hospital from the lab. 
+
+### Parameters:
+- Id -  integer
+
+### Authorization Scope:
+- Lab employee.
 
 ### E.g. Request:
 ```
@@ -210,16 +205,57 @@ Authorization: r6C6xEEZSKYrHX8i...
 Content-Type: application/json
 
 {
-    "test_id": 1,
-    "data": "vWmkAcHlWb..."
+    results: "25/05/2020 Covid19:True,Pneumonia:True...",
+    digitalSignature: "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXpBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWjAxMjM0NTY3ODkK=="
 }
 ```
-- The test_id is a random INTEGER that will allow to associate the test results with a patient (only the hospital API can do the association). It's not used the patient id to maintain privacy.
+
+- Digital signature only protects the 'results' field of the request. Signature must then be stored by the hospital for authenticity check when needed.
+
+- The id used in the URI is the one that was used to send a request for analysis to the lab.
 
 ### E.g. Response:
 ```
 200 OK
 ```
+
+
+
+
+# Partner Lab API
+
+## `POST /teststoanalyze/{id}`
+
+### Description:
+- Sends a bunch of random data to the Partner lab for analysis.
+
+### Parameters:
+- None
+
+### Authorization Scope:
+- Hospital API (with shared secret)
+
+### E.g. Request:
+```
+POST /teststoanalyze/1
+Authorization: r6C6xEEZSKYrHX8i...
+Content-Type: application/json
+
+{
+    "data": "vWmkAcHlWb..."
+}
+```
+
+### E.g. Response:
+```
+200 OK
+```
+
+
+
+
+
+
 # Common API for Hospital & Lab
 
 ## `POST /login`

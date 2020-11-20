@@ -32,5 +32,6 @@ eQIDAQAB
 -----END PUBLIC KEY-----
 ');
 
--- INSERT INTO tests(patient_id, test_name, result, test_state, lab_id, digital_signature) VALUES (); -- All info besides result & digital_signature is inserted by the Hospital API.
+INSERT INTO tests(patient_id, result, lab_id, digital_signature) VALUES 
+    (1, 'COVID-19: POSITIVE', 1, 'invalidsignature'); -- All info besides result & digital_signature is inserted by the Hospital API.
 
