@@ -1,17 +1,3 @@
-CREATE TABLE IF NOT EXISTS users(
-    user_id SERIAL,
-    username VARCHAR(16),
-    password CHAR(60),                      -- Size of bcrypt hash
-    PRIMARY KEY (user_id)
-);
-
-CREATE TABLE IF NOT EXISTS token(
-	id SERIAL,
-	hash CHAR(64) UNIQUE,	               -- 64 hexa chars = 256 bits hash
-	expiresAt BIGINT,
-    PRIMARY KEY(id)
-);
-
 CREATE TABLE IF NOT EXISTS roles(
     role_id SERIAL,
     rolename VARCHAR(16),
@@ -19,10 +5,20 @@ CREATE TABLE IF NOT EXISTS roles(
 );
 
 CREATE TABLE IF NOT EXISTS employees(
-    employee_id INT,
+    employee_id SERIAL,
+    username VARCHAR(16),
+    password TEXT,                      -- Size of bcrypt hash
     role_id INT,
     PRIMARY KEY(employee_id),
     FOREIGN KEY(role_id) REFERENCES roles(role_id)
+);
+
+CREATE TABLE IF NOT EXISTS sessions(
+	id SERIAL,
+	token TEXT UNIQUE,	               -- 64 hexa chars = 256 bits hash
+    employee_id INT,
+    PRIMARY KEY(id),
+    FOREIGN KEY(employee_id) REFERENCES employees
 );
 
 CREATE TABLE IF NOT EXISTS patients(
@@ -53,11 +49,3 @@ CREATE TABLE IF NOT EXISTS tests(
     FOREIGN KEY(patient_id) REFERENCES patients(patient_id)
 );
 
--- Table used when the hospital API made a request for data analysis but the Lab didn't provide the results yet
-CREATE TABLE IF NOT EXISTS pendingtests(
-    test_id SERIAL,
-    patient_id INT,
-    lab_id INT,
-    PRIMARY KEY(test_id),
-    UNIQUE (patient_id, lab_id)    -- Limits the number of tests per pair patient/lab to 1 
-);

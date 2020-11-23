@@ -158,69 +158,32 @@ or
 ```
 
 
-## `POST /sendtestresults`
+## `GET /gettestresults/{id}`
 
 ### Description:
-- Makes a request for tests data analysis
+- Requests the results of the test results associated with id.
 
 ### Parameters:
-- None 
+- Id , Integer. 
 
 ### Authorization Scope:
 - Doctor.
 
 ### E.g. Request:
 ```
-POST /sendtestresults/
+GET /gettestresults/1
 Authorization: r6C6xEEZSKYrHX8i...
-
-{
-    "patient_id": 2,
-    "lab_id": 1
-}
 ```
-
-- Sent in the body for confidentiality
 
 ### E.g. Response:
 ```
 200 OK
-```
-
-## `POST /sendtestresults/{id}`
-
-### Description:
-- Sends the test results back to the hospital from the lab. 
-
-### Parameters:
-- Id -  integer
-
-### Authorization Scope:
-- Lab employee.
-
-### E.g. Request:
-```
-POST /sendtestresults/1
-Authorization: r6C6xEEZSKYrHX8i...
-Content-Type: application/json
 
 {
     results: "25/05/2020 Covid19:True,Pneumonia:True...",
     digitalSignature: "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXpBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWjAxMjM0NTY3ODkK=="
 }
 ```
-
-- Digital signature only protects the 'results' field of the request. Signature must then be stored by the hospital for authenticity check when needed.
-
-- The id used in the URI is the one that was used to send a request for analysis to the lab.
-
-### E.g. Response:
-```
-200 OK
-```
-
-
-
 
 # Partner Lab API
 

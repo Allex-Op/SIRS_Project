@@ -1,0 +1,3 @@
+psql -U administrator -d sirsDb -h 127.0.0.1 -f dropTables.sql
+psql -U administrator -d sirsDb -h 127.0.0.1 -f createTables.sql
+psql -U administrator -d sirsDb -h 127.0.0.1 -f populateTables.sql

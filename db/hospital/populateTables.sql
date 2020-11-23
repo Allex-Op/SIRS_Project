@@ -1,19 +1,14 @@
--- Used 'https://bcrypt-generator.com/' for the password encryption, as the API does not offer any registration method.
--- No register method implemented, therefore all users are directly inserted into the database.
-INSERT INTO users(username, password) VALUES
-    ('mrdoctor', '$2y$12$PPLKxZji2odOx/UHoUNnz.m4sRI0VsCfwqqwREz5rpRMFvdL104E.'),   -- password: doctor
-    ('msnurse', '$2y$12$0QtlCeUu4ZHuOMcpjd3tAOzPs.AzFSA4ka.h01xnfcBcqfzSC5HLm'),    -- password: nurse
-    ('mrjanitor', '$2y$12$.K3hjrANxX/Hp4ziaK9vJOu13H6hDH1pqpSSJwvlgUwClhL05dnd.');  -- password: janitor
-
 INSERT INTO roles(rolename) VALUES
     ('doctor'),
     ('nurse'),
     ('janitor');
 
-INSERT INTO employees(employee_id, role_id) VALUES
-    (1, 1),
-    (2, 2),
-    (3, 3); -- e.g. janitor was the 3rd user to be created (id:3) and janitor was 3rd role to be created pair(user_id, role_id)
+-- Used 'https://bcrypt-generator.com/' for the password encryption, as the API does not offer any registration method.
+-- No register method implemented, therefore all users are directly inserted into the database.
+INSERT INTO employees(username, password, role_id) VALUES
+    ('mrdoctor', '$2a$10$wWvxgnTa95bZdQqoek2eNOSVr5XM5ZgapzC.ds2UhASp3YGxcJo4C', 1), -- password: doctor
+    ('msnurse', '$2y$12$0QtlCeUu4ZHuOMcpjd3tAOzPs.AzFSA4ka.h01xnfcBcqfzSC5HLm', 2),  -- password: nurse
+    ('mrjanitor', '$2y$12$.K3hjrANxX/Hp4ziaK9vJOu13H6hDH1pqpSSJwvlgUwClhL05dnd.', 3); -- password: janitor
 
 INSERT INTO patients(name, age, diseases, treatment) VALUES
     ('joão', 15, 'HIV,PNEUMONIA', 'AN APPLE A DAY'),

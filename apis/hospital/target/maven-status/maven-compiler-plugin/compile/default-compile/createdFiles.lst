@@ -1,2 +1,16 @@
 sirs/api/hospital/HospitalApplication.class
-sirs/api/hospital/test.class
+sirs/api/hospital/accessControl/XACMLRequest.class
+sirs/api/hospital/accessControl/RequestDescriber.class
+sirs/api/hospital/entities/LoginBody.class
+sirs/api/hospital/accessControl/ControlAccessInterceptor.class
+sirs/api/hospital/entities/AuthenticityCheck.class
+sirs/api/hospital/entities/TestResults.class
+sirs/api/hospital/db/Repo.class
+sirs/api/hospital/entities/TokenEntity.class
+sirs/api/hospital/Handlers.class
+sirs/api/hospital/entities/Patient.class
+sirs/api/hospital/accessControl/ResourceId.class
+sirs/api/hospital/accessControl/XACMLResponse.class
+sirs/api/hospital/entities/Testanalysis.class
+sirs/api/hospital/db/Dbconn.class
+sirs/api/hospital/Crypto.class
