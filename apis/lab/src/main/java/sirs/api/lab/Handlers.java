@@ -9,6 +9,8 @@ import sirs.api.lab.entities.CustomProtocolResponse;
 import sirs.api.lab.entities.TestRequest;
 import sirs.api.lab.entities.TestResponse;
 
+import java.net.http.HttpClient;
+
 @RestController
 public class Handlers {
     Crypto cr = new Crypto();
@@ -22,7 +24,7 @@ public class Handlers {
         if(id != 1)
             return ResponseEntity.status(404).build();
         System.out.println(data);
-
+        
         String results = "25/05/2020 Covid19:True,Pneumonia:True...";
         String signature = cr.signData(results);
         TestResponse resp = new TestResponse(results, signature);

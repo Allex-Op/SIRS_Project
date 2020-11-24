@@ -1,16 +1,19 @@
 package sirs.api.hospital.accessControl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-import sirs.api.hospital.Crypto;
 import sirs.api.hospital.db.Repo;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 public class ControlAccessInterceptor implements HandlerInterceptor {
-    final private String pdpUrl = "http://192.168.56.12/pdp";
+    final private String pdpUrl = "http://127.0.0.1:8081/pdp";//"http://192.168.56.12/pdp";
     final private String authenticationHeader = "Authorization";
     Repo db = new Repo();
 
@@ -54,14 +57,36 @@ public class ControlAccessInterceptor implements HandlerInterceptor {
      *  if the request is allowed to continue it will return true.
      */
     private Boolean checkAuthorization(XACMLRequest xreq) {
-        return true;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+
+            // Write body
+            String reqBody = mapper.writeValueAsString(xreq);
+
+            // Send POST request
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(pdpUrl))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(reqBody))
+                    .build();
+
+            // Read response and convert
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            XACMLResponse resp = mapper.readValue(response.body(), XACMLResponse.class);
+
+            return resp.Response[0].getDecision().equals("Permit");
+        } catch(Exception e) {
+            System.out.println("I guess no HTTP requests for you :(");
+            return false;
+        }
     }
 
     /**
      *  Build's a request with the format specified by the XACML Framework.
      */
     private XACMLRequest buildxacmlreq(RequestDescriber req) {
-        return null;
+        return new XACMLRequest(req);
     }
 
     // Check if the token is valid and returns the associated role
