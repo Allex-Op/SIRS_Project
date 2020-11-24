@@ -57,8 +57,8 @@
       state: restarted
 
 
-# Hospital and Lab MySQL
-- hosts: hosp,lab
+# Hospital Database (Lab doesnt need a db)
+- hosts: hosp
   remote_user: vagrant
   become: yes
   become_method: sudo
@@ -108,7 +108,7 @@
                state=present
 
 
-# Hospital and Lab MySQL
+# Hospital API configuration Deployment (not the actual code only the config)
 - hosts: hosp
   remote_user: vagrant
   become: yes

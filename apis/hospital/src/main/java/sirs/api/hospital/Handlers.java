@@ -4,15 +4,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sirs.api.hospital.accessControl.ResourceId;
 import sirs.api.hospital.db.Repo;
-import sirs.api.hospital.entities.LoginBody;
-import sirs.api.hospital.entities.Patient;
-import sirs.api.hospital.entities.AuthenticityCheck;
-import sirs.api.hospital.entities.TokenEntity;
+import sirs.api.hospital.entities.*;
 
 @RestController
 public class Handlers {
     Repo repo = new Repo();
     Crypto cr = new Crypto();
+    CustomProtocol cp = new CustomProtocol();
 
     @GetMapping("/patient/{id}/name")
     @ResourceId(resourceId = "getPatientName")
@@ -93,14 +91,17 @@ public class Handlers {
     @GetMapping("/gettestresults/{id}")
     @ResourceId(resourceId = "getTestsResult")
     public ResponseEntity<String> sendTestToLab(@PathVariable int id) {
-        //boolean r = repo.updateTestResults(test_id, results);
-
         try {
-            //TODO: Include a shared secret to authenticate with the Lab API
+            //TODO: ADD CUSTOM SECURITY CHANNEL HERE
+            TestRequest req = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST");
+            cp.initHandshake();
+            String safeData = cp.encryptData(req);
+
             //URL url = new URL("https://192.168.57.11:8080/teststoanalyze/" + test_id);
             //HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             //InputStream responseStream = connection.getInputStream();
 
+            //TODO: After exchanging the data print it to the terminal
             return ResponseEntity.ok().build();
         } catch(Exception e) {
             System.out.println("Unable to make HTTP Request");
