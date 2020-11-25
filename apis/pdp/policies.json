@@ -10,11 +10,11 @@
                     "Target": {
                         "Subjects": [{
                             "AttributeId": "Subject-Role",
-                            "Value": "Doctor"
+                            "Value": "doctor"
                         },
                         {
                             "AttributeId": "Subject-Role",
-                            "Value": "Nurse"
+                            "Value": "nurse"
                         }],
                         "Resources": [{
                             "AttributeId": "resource-id",
@@ -32,15 +32,15 @@
                     "Target": {
                         "Subjects": [{
                             "AttributeId": "Subject-Role",
-                            "Value": "Doctor"
+                            "Value": "doctor"
                         },
                         {
                             "AttributeId": "Subject-Role",
-                            "Value": "Nurse"
+                            "Value": "nurse"
                         },
                         {
                             "AttributeId": "Subject-Role",
-                            "Value": "Janitor"
+                            "Value": "janitor"
                         }],
                         "Resources": [{
                             "AttributeId": "resource-id",
@@ -58,7 +58,7 @@
                     "Target": {
                         "Subjects": [{
                             "AttributeId": "Subject-Role",
-                            "Value": "Doctor"
+                            "Value": "doctor"
                         }],
                         "Resources": [{
                             "AttributeId": "resource-id",
@@ -76,11 +76,11 @@
                     "Target": {
                         "Subjects": [{
                             "AttributeId": "Subject-Role",
-                            "Value": "Doctor"
+                            "Value": "doctor"
                         },
                         {
                             "AttributeId": "Subject-Role",
-                            "Value": "Nurse"
+                            "Value": "nurse"
                         }],
                         "Resources": [{
                             "AttributeId": "resource-id",
@@ -98,7 +98,7 @@
                     "Target": {
                         "Subjects": [{
                             "AttributeId": "Subject-Role",
-                            "Value": "Doctor"
+                            "Value": "doctor"
                         }],
                         "Resources": [{
                             "AttributeId": "resource-id",
@@ -116,7 +116,7 @@
                     "Target": {
                         "Subjects": [{
                             "AttributeId": "Subject-Role",
-                            "Value": "Doctor"
+                            "Value": "doctor"
                         }],
                         "Resources": [{
                             "AttributeId": "resource-id",
@@ -134,7 +134,7 @@
                     "Target": {
                         "Subjects": [{
                             "AttributeId": "Subject-Role",
-                            "Value": "Anyone"
+                            "Value": "anyone"
                         }],
                         "Resources": [{
                             "AttributeId": "resource-id",
@@ -161,7 +161,7 @@
                     "Target": {
                         "Subjects": [{
                             "AttributeId": "Subject-Role",
-                            "Value": "Anyone"
+                            "Value": "anyone"
                         }],
                         "Resources": [{
                             "AttributeId": "resource-id",
@@ -179,7 +179,7 @@
                     "Target": {
                         "Subjects": [{
                             "AttributeId": "Subject-Role",
-                            "Value": "Anyone"
+                            "Value": "anyone"
                         }],
                         "Resources": [{
                             "AttributeId": "resource-id",

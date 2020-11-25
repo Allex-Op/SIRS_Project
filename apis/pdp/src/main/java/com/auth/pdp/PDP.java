@@ -46,7 +46,7 @@ public class PDP {
             //only proceed if the rule applies to the login resource, otherwise keep searching
             //for the adequate rule.
             if(target.getResources()[0].getValue().equals(resourceId)) {
-                return verifyRule(role, method, target);
+                return verifyRule(role.toLowerCase(), method, target);
             }
         }
         //Unreachable if policies and verification are well implemented
@@ -55,7 +55,8 @@ public class PDP {
 
     private boolean verifyRule(String role, String method, Target target) {
         for(Subjects subject: target.getSubjects()) {
-            if(subject.getValue().equals(role) || subject.getValue().equals("Anyone")) {
+            String subjectRole = subject.getValue().toLowerCase();
+            if(subjectRole.equals(role) || subjectRole.equals("anyone")) {
                 // Verify the method, if the method in the rule matches the requested method
                 // allow request to continue, otherwise reject request.
                 return target.getActions()[0].getValue().equals(method);

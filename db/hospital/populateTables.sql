@@ -7,8 +7,8 @@ INSERT INTO roles(rolename) VALUES
 -- No register method implemented, therefore all users are directly inserted into the database.
 INSERT INTO employees(username, password, role_id) VALUES
     ('mrdoctor', '$2a$10$wWvxgnTa95bZdQqoek2eNOSVr5XM5ZgapzC.ds2UhASp3YGxcJo4C', 1), -- password: doctor
-    ('msnurse', '$2y$12$0QtlCeUu4ZHuOMcpjd3tAOzPs.AzFSA4ka.h01xnfcBcqfzSC5HLm', 2),  -- password: nurse
-    ('mrjanitor', '$2y$12$.K3hjrANxX/Hp4ziaK9vJOu13H6hDH1pqpSSJwvlgUwClhL05dnd.', 3); -- password: janitor
+    ('msnurse', '$2a$10$nCpZUx0s9XleyPuUVkMKxeqboSgD8uf3s7JNbu/f2lENnC25j8vRG', 2),  -- password: nurse
+    ('mrjanitor', '$2a$10$bgrf87WsbjjVajKnOYBUMevEDCDoot8mR80wOdC7b4Q0MZaBh6tyi', 3); -- password: janitor
 
 INSERT INTO patients(name, age, diseases, treatment) VALUES
     ('joão', 15, 'HIV,PNEUMONIA', 'AN APPLE A DAY'),

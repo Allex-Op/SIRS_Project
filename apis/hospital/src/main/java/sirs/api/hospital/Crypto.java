@@ -75,6 +75,7 @@ public class Crypto {
     }
 
     public boolean matchPasswords(String password, String hashDb) {
+        //String pass = new BCryptPasswordEncoder().encode("janitor");
         return new BCryptPasswordEncoder().matches(password, hashDb);
     }
 }

@@ -23,8 +23,10 @@ public class ControlAccessInterceptor implements HandlerInterceptor {
         RequestDescriber req = buildRequestDescriber(request.getRequestURI(), request.getMethod(), handler);
 
         // Asked for nonexistent resource, small optimization to avoid a couple trips when the answer is known
-        if(req.getResourceId().equals(""))
+        if(req.getResourceId().equals("")) {
+            System.out.println("[AC Interceptor] Terminating request, requested resource does not exist.");
             return false;
+        }
 
         // If the resource trying to access is not the login endpoint it has to do extra work
         // like checking if the authentication token is valid and if so associate that information
@@ -35,18 +37,23 @@ public class ControlAccessInterceptor implements HandlerInterceptor {
 
             // Not authorized to access any resource if subject is not authenticated & wants to access a resource
             // different from the login endpoint.
-            if(accessToken == null)
+            if(accessToken == null) {
+                System.out.println("[AC Interceptor] Terminating request, no access token provided.");
                 return false;
+            }
 
             // Validates the authenticity of the token, if role is empty then there is no session
             // with this token.
             String role = validateToken(accessToken);
-            if(role.equals(""))
+            if(role.equals("")) {
+                System.out.println("[AC Interceptor] Terminating request, the provided token is not associated to any session.");
                 return false;
+            }
 
             req.setRole(role);
         }
 
+        System.out.println("[AC Interceptor] Asking PDP decision on: ["+req.getMethod()+"] ["+req.getRole()+"] ["+req.getResourceId()+"]");
         // Builds the XACMLRequest, forwards it to the PDP and if authorized lets request continue
         XACMLRequest xreq = buildxacmlreq(req);
         return checkAuthorization(xreq);
@@ -75,7 +82,13 @@ public class ControlAccessInterceptor implements HandlerInterceptor {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             XACMLResponse resp = mapper.readValue(response.body(), XACMLResponse.class);
 
-            return resp.Response[0].getDecision().equals("Permit");
+            if(resp.Response[0].getDecision().equals("Permit")) {
+                System.out.println("[AC Interceptor] PDP answered with PERMIT code, request is allowed to continue.");
+                return true;
+            } else {
+                System.out.println("[AC Interceptor] PDP answered with DENY code, request is not allowed to continue.");
+                return false;
+            }
         } catch(Exception e) {
             System.out.println("I guess no HTTP requests for you :(");
             return false;

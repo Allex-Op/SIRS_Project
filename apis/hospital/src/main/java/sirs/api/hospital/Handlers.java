@@ -69,9 +69,12 @@ public class Handlers {
         String token = repo.getSessionToken(credentials);
 
         if(!token.equals("")) {
+            System.out.println("[Handlers - Login] Authentication succeeded.");
             return ResponseEntity.ok(new TokenEntity(token));
-        } else
+        } else {
+            System.out.println("[Handlers - Login] Authentication failed.");
             return ResponseEntity.status(401).build();  // In case the authentication failed
+        }
     }
 
     /**
