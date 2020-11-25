@@ -3,12 +3,7 @@ package sirs.api.hospital.entities;
 public class TestResponse {
     String results;
     String digitalSignature;
-
-    public TestResponse(String results, String digitalSignature) {
-        this.results = results;
-        this.digitalSignature = digitalSignature;
-    }
-
+    
     public String getResults() {
         return results;
     }

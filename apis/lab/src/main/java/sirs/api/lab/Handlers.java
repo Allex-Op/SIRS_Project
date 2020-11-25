@@ -17,7 +17,7 @@ public class Handlers {
     CustomProtocol cp = new CustomProtocol();
 
     @PostMapping("/teststoanalyze/{id}")
-    public ResponseEntity<CustomProtocolResponse> testsToAnalyze(@PathVariable int id, @RequestBody TestRequest data) {
+    public ResponseEntity<TestResponse> testsToAnalyze(@PathVariable int id, @RequestBody TestRequest data) {
         // Because for simplicity reasons we only answer to requests with id 1
         // id is only for representation purposes in case this was a real system
         // we would have multiple id's...
@@ -29,12 +29,12 @@ public class Handlers {
         String signature = cr.signData(results);
         TestResponse resp = new TestResponse(results, signature);
 
-        if(signature.equals(""))
-            return ResponseEntity.status(500).build();
+//        if(signature.equals(""))
+//            return ResponseEntity.status(500).build();
 
         //TODO: ADD CUSTOM SECURITY CHANNEL HERE
         String safeData = cp.encryptData(resp);
 
-        return ResponseEntity.ok(new CustomProtocolResponse(safeData));
+        return ResponseEntity.ok(resp);
     }
 }

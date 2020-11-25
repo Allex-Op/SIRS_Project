@@ -1,10 +1,16 @@
 package sirs.api.hospital;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sirs.api.hospital.accessControl.ResourceId;
 import sirs.api.hospital.db.Repo;
 import sirs.api.hospital.entities.*;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 @RestController
 public class Handlers {
@@ -93,19 +99,31 @@ public class Handlers {
      */
     @GetMapping("/gettestresults/{id}")
     @ResourceId(resourceId = "getTestsResult")
-    public ResponseEntity<String> sendTestToLab(@PathVariable int id) {
+    public ResponseEntity<TestResponse> sendTestToLab(@PathVariable int id) {
         try {
             //TODO: ADD CUSTOM SECURITY CHANNEL HERE
             TestRequest req = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST");
-            cp.initHandshake();
-            String safeData = cp.encryptData(req);
+//            cp.initHandshake();
+//            String safeData = cp.encryptData(req);
 
-            //URL url = new URL("https://192.168.57.11:8080/teststoanalyze/" + test_id);
-            //HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            //InputStream responseStream = connection.getInputStream();
+            ObjectMapper mapper = new ObjectMapper();
+
+            // Write body
+            String reqBody = mapper.writeValueAsString(req);
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8082/teststoanalyze/" + id))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(reqBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            TestResponse resp = mapper.readValue(response.body(), TestResponse.class);
 
             //TODO: After exchanging the data print it to the terminal
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(resp);
+
         } catch(Exception e) {
             System.out.println("Unable to make HTTP Request");
             return ResponseEntity.status(500).build();
