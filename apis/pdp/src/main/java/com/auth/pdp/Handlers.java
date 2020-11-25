@@ -15,6 +15,9 @@ public class Handlers {
 
     @PostMapping("/pdp")
     public ResponseEntity<XACMLResponse> validateRequest(@RequestBody XACMLRequest xreq) {
+        if(xreq == null)    // Bad request
+            return ResponseEntity.status(400).build();
+
         if(pdp.checkPolicies(xreq))
             return ResponseEntity.ok(new XACMLResponse(PERMIT_DECISION));
         else

@@ -7,8 +7,8 @@ public class OperationMode {
 
     public static String getPandemicMode() {
         if(pandemicMode.get())
-            return "Pandemic Mode";
+            return "pandemic";
         else
-            return "Normal Mode";
+            return "normal";
     }
 }
