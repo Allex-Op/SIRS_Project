@@ -5,6 +5,7 @@
 - About
 - Deployment Setup
 - Secrets & PKI
+- TLS
 - API Authentication
 - Tests
 
@@ -48,9 +49,36 @@ The second file is the "myCA.pem", this is the root certificate, again with pass
 the issued certificates during the creation of secure channels.
 
 The 'hospital.key' is the private key associated with the hospital and 'hospital.crt' is the hospital certificate signed by the Certification Authority with the CA private key.
-Same for 'lab1.key' and 'lab1.crt'.
+Same for the PDP and LAB ('lab1.key' and 'lab1.crt'...).
 
-The hospital cryptographic material (key and certificate) are only present in the hospital and the same for the lab.
+The hospital cryptographic material (key and certificate) is only present in the hospital and the same for the lab & pdp.
+
+## TLS
+TLS will only be enabled in the Hospital API to communicate with the staff (doctors, nurses...) and the PDP to have secure commmunications with the hospital. Otherwise the PDP decision could be manipulated or data leaked.
+
+To enable TLS the following example configuration will be added to the "application.properties" file in each API:
+```
+server.ssl.key-store=classpath:hospitalKeystore.jks
+server.ssl.key-store-type=pkcs12
+server.ssl.key-store-password=hospital
+server.ssl.key-password=hospital
+server.ssl.key-alias=hospital
+server.port=8443
+```
+
+hospitalKeystore:hospital
+pdpKeystore:pdppdp (or pdp)
+
+The keystore will be the file that contains the private key and certificate packed, it is necessary to enable TLS.
+
+The lab will not require this configuration as it will communicate with the hospital throught the custom protocol.
+
+To use the API's locally it is necessary to install the root CA certificate, information on how to install the certificate
+for ubuntu: "https://superuser.com/questions/437330/how-do-you-add-a-certificate-authority-ca-to-ubuntu".
+
+Finally, you will also have to edit the file "/etc/hosts" with the following entries:
+127.0.0.1   hospital
+127.0.0.1   pdp
 
 ## API Authentication
 
