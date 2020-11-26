@@ -1,0 +1,8 @@
+[Unit]
+Description=A goddamn Lab API
+ 
+[Service]
+ExecStart=/home/vagrant/project/apis/hospital/target/lab-0.0.1-SNAPSHOT.jar 
+ 
+[Install] 
+WantedBy=multi-user.target

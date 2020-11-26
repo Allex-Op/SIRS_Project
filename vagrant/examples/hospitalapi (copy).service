@@ -1,0 +1,8 @@
+[Unit]
+Description=A goddamn hospital API
+ 
+[Service]
+ExecStart=/home/vagrant/project/apis/hospital/target/hospital-0.0.1-SNAPSHOT.jar 
+ 
+[Install] 
+WantedBy=multi-user.target

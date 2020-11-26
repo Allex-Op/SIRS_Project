@@ -18,7 +18,6 @@ cat >> /etc/hosts <<EOL
 # vagrant environment nodes
 192.168.56.9  mgmt
 192.168.56.11  hospital
-192.168.56.12  hospitalPdp
+192.168.56.12  pdp
 192.168.57.11  lab1
-192.168.57.12  labPdp1
 EOL

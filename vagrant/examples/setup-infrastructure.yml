@@ -108,7 +108,7 @@
                state=present
 
 
-# Hospital API configuration Deployment (not the actual code only the config)
+# Hospital API configuration  
 - hosts: hosp
   remote_user: vagrant
   become: yes
@@ -116,5 +116,35 @@
   gather_facts: true
 
   tasks:
-    - name: Deploy API Service
+    - name: Deploy Hospital API Service
       shell: cp /home/vagrant/project/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service
+
+    - name: Add Environment Variables
+      shell: echo "PGPASSWORD=administrator" >> /etc/profile; echo "PDP_URL='http://192.168.56.12:8081'" >> /etc/profile
+
+
+# PDP API configuration  
+- hosts: auth
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+    - name: Deploy PDP API Service
+      shell: cp /home/vagrant/project/vagrant/examples/pdpapi.service /etc/systemd/system/pdpapi.service
+
+    - name: Add Environment Variables
+      shell: echo "POLICIES_PATH='/home/vagrant/project/apis/pdp/policies.json'" >> /etc/profile
+
+
+# LAB API configuration  
+- hosts: lab
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+    - name: Deploy Lab API Service
+      shell: cp /home/vagrant/project/vagrant/examples/labapi.service /etc/systemd/system/labapi.service

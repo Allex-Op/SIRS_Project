@@ -13,7 +13,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class ControlAccessInterceptor implements HandlerInterceptor {
-    final private String pdpUrl = "http://127.0.0.1:8081/pdp";//"http://192.168.56.12/pdp";
+    final private String pdpUrl = System.getenv("PDP_URL");
     final private String authenticationHeader = "Authorization";
     Repo db = new Repo();
 

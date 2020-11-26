@@ -18,9 +18,6 @@
   gather_facts: no
 
   tasks:
-#    - name: Deploy API Service
-#      shell: cd /home/vagrant/project/apis/hospital && mvn clean package
-
     - name: Start Hospital API Service
       systemd:
         name: hospitalapi
@@ -33,8 +30,10 @@
   gather_facts: no
 
   tasks:
-    - name: Compile Lab API
-      shell: echo "fake"
+    - name: Start Lab API Service
+      systemd:
+        name: labapi
+        state: started
 
 # PDP, PAP... deployment
 - hosts: auth
@@ -43,5 +42,7 @@
   gather_facts: no
 
   tasks:
-    - name: Compile Auth Components (PDP, PAP...)
-      shell: echo "fake"
+    - name: Start PDP API Service
+      systemd:
+        name: pdpapi
+        state: started
