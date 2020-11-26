@@ -735,6 +735,6 @@ ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBDrIetX1
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOqLLO9HvU9xhivfOcaeWiYc8RWmn0g/38yVkNIedrxp root@ubuntu-xenial
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKBfmpEwN8lhDud8AQsLEiM8GrNBzqvpNPRZRhI6WOqoVvs8+w+NIu3cgVcAcAKXKOXBYMahLpQAZnuJiKIyjBobQFL5HZ6QrsVMS785EVMKH6fxyEE3Jz9ROCKYUNN3lqcAVk4n/ohtw/Cantp/YU7mgKFNakMotRunlo9pXNQ0dui8WwShZLy54j1sWB2cNQlJ8rv5UrmPbjH2Kvk4+YvpR/4vSlNnZ2d3VAtWjI64m3hLXhm3+SUd2YcFySefmzphzFf3z6DeDSZjtXmyN7tBpXhTDsTmj6W4rrOAj4XrwVvn34Glw16ahaAPUqXrNDSMQqOR9jwPSHNAOMl6c5 root@ubuntu-xenial
 -----END SSH HOST KEY KEYS-----
-[   29.238593] cloud-init[1514]: Cloud-init v. 20.3-2-g371b392c-0ubuntu1~16.04.1 running 'modules:final' at Thu, 26 Nov 2020 20:21:49 +0000. Up 28.63 seconds.
-[   29.239961] cloud-init[1514]: ci-info: no authorized SSH keys fingerprints found for user ubuntu.
-[   29.240754] cloud-init[1514]: Cloud-init v. 20.3-2-g371b392c-0ubuntu1~16.04.1 finished at Thu, 26 Nov 2020 20:21:50 +0000. Datasource DataSourceNoCloud [seed=/dev/sdb][dsmode=net].  Up 29.23 seconds
+[   29.238593] cloud-init[1514]: Cloud-init v. 20.3-2-g371b392c-0ubuntu1~16.04.1 running 'modul[ 4619.200710] Out of memory: Kill process 6070 (java) score 496 or sacrifice child
+[ 4619.268637] Killed process 6070 (java) total-vm:2528108kB, anon-rss:123100kB, file-rss:0kB
+] cloud-init[1514]: Cloud-init v. 20.3-2-g371b392c-0ubuntu1~16.04.1 finished at Thu, 26 Nov 2020 20:21:50 +0000. Datasource DataSourceNoCloud [seed=/dev/sdb][dsmode=net].  Up 29.23 seconds

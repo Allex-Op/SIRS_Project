@@ -1,0 +1,43 @@
+# PDP API configuration  
+- hosts: auth
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+
+    - name: clone repo git
+      git:
+        repo: "https://github.com/Alex-Pena-Ok/SIRS_Project"
+        clone: yes
+        dest: '/home/vagrant/project'
+      become: yes
+      become_method: sudo
+
+    - name: Deploy PDP API Service
+      shell: cp /home/vagrant/project/vagrant/examples/pdpapi.service /etc/systemd/system/pdpapi.service
+
+    - name: Add Environment Variables
+      shell: echo "POLICIES_PATH='/home/vagrant/project/apis/pdp/policies.json'" >> /etc/profile
+
+
+# LAB API configuration  
+- hosts: lab
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+
+    - name: clone repo git
+      git:
+        repo: "https://github.com/Alex-Pena-Ok/SIRS_Project"
+        clone: yes
+        dest: '/home/vagrant/project'
+      become: yes
+      become_method: sudo
+      
+    - name: Deploy Lab API Service
+      shell: cp /home/vagrant/project/vagrant/examples/labapi.service /etc/systemd/system/labapi.service

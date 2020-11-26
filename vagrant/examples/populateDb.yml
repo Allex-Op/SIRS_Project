@@ -26,46 +26,4 @@
     environment:
       PGPASSWORD: administrator
 
-  # Preencher tabela com script sql correto
-
-  #- name: Compile project
-  #  shell: mvn package
-
-  #- name: Starting Hospital API
-  #  shell: java -jar api.jar
-
-# Setup Lab's App & Database
-- hosts: lab
-  gather_facts: no
-
-  tasks:
-  
-  - name: Drop tables
-    become: yes
-    become_user: postgres
-    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/project/db/lab/dropTables.sql -h 127.0.0.1
-    environment:
-      PGPASSWORD: administrator
-
-  - name: Create tables
-    become: yes
-    become_user: postgres
-    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/project/db/lab/createTables.sql -h 127.0.0.1
-    environment:
-      PGPASSWORD: administrator
-
-  - name: Populate tables
-    become: yes
-    become_user: postgres
-    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/project/db/lab/populateTables.sql -h 127.0.0.1
-    environment:
-      PGPASSWORD: administrator
-
-  #- name: Compile project
-  #  shell: mvn package
-
-  #- name: Starting Lab API
-  #  shell: java -jar api.jar
-
-
 

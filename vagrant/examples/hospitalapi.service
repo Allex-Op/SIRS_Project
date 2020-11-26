@@ -2,7 +2,7 @@
 Description=A goddamn hospital API
  
 [Service]
-ExecStart=/home/vagrant/project/apis/hospital/target/hospital-0.0.1-SNAPSHOT.jar 
+ExecStart=/bin/sh -c "/home/vagrant/project/apis/hospital/target/hospital-0.0.1-SNAPSHOT.jar >> /var/logs/hospital.log"
  
 [Install] 
 WantedBy=multi-user.target
