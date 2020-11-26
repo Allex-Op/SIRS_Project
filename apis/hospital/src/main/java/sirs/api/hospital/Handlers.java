@@ -7,10 +7,13 @@ import sirs.api.hospital.accessControl.ResourceId;
 import sirs.api.hospital.db.Repo;
 import sirs.api.hospital.entities.*;
 
+import java.io.File;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 
 @RestController
 public class Handlers {
@@ -102,12 +105,16 @@ public class Handlers {
     public ResponseEntity<TestResponse> sendTestToLab(@PathVariable int id) {
         try {
             //TODO: ADD CUSTOM SECURITY CHANNEL HERE
-            TestRequest req = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST");
-//            cp.initHandshake();
+
+            // Getting the certificate to send along with the data in TestRequest
+            File crtFile = new File("/home/rafaela/Desktop/SIRS/Project/SIRS_Project/apis/hospital/src/main/resources/hospital.pem");
+            String certificate = new String(Files.readAllBytes(crtFile.toPath()), Charset.defaultCharset());
+
+
+            TestRequest req = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST", certificate);
 //            String safeData = cp.encryptData(req);
 
             ObjectMapper mapper = new ObjectMapper();
-
             // Write body
             String reqBody = mapper.writeValueAsString(req);
 
