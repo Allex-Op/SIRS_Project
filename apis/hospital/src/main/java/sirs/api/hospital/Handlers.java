@@ -112,9 +112,7 @@ public class Handlers {
             File crtFile = new File("/home/rafaela/Desktop/SIRS/Project/SIRS_Project/apis/hospital/src/main/resources/hospital.pem");
             String certificate = new String(Files.readAllBytes(crtFile.toPath()), Charset.defaultCharset());
 
-
             TestRequest req = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST", certificate);
-//            String safeData = cp.encryptData(req);
 
             ObjectMapper mapper = new ObjectMapper();
             mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
