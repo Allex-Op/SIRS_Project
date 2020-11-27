@@ -1,5 +1,6 @@
 package sirs.api.lab;
 
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,7 +42,6 @@ public class Handlers {
         if(id != 1)
             return ResponseEntity.status(404).build();
 
-        String data = testreq.getData();
         String certificate = testreq.getCertificate();
 
         //TODO: verify certificate
@@ -55,12 +55,14 @@ public class Handlers {
 
         // Encrypt random string with pub key
         byte[] encrypted_data = cp.encryptData(randomString, pubKey);
-        String encripted_string = new String(encrypted_data);
+        byte[] encrypted_base64 = Base64.encodeBase64(encrypted_data);
+
+        String encrypted_string64 = new String(encrypted_base64);
 
         //TODO: send encrypted random string
         String results = "25/05/2020 Covid19:True,Pneumonia:True...";
         String signature = cr.signData(results);
-        TestResponse resp = new TestResponse(results, signature, encripted_string);
+        TestResponse resp = new TestResponse(results, signature, encrypted_string64);
 
 //        if(signature.equals(""))
 //            return ResponseEntity.status(500).build();

@@ -102,6 +102,7 @@ public class Handlers {
      *  8º Save to db
      *
      */
+    @JsonIgnoreProperties
     @GetMapping("/gettestresults/{id}")
     @ResourceId(resourceId = "getTestsResult")
     public ResponseEntity<TestResponse> sendTestToLab(@PathVariable int id) {
@@ -115,7 +116,6 @@ public class Handlers {
             TestRequest req = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST", certificate);
 
             ObjectMapper mapper = new ObjectMapper();
-            mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
             // Write body
             String reqBody = mapper.writeValueAsString(req);

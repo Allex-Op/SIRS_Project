@@ -21,6 +21,8 @@ public class TestResponse {
         return digitalSignature;
     }
 
+    public void setEncryptedString(String encryptedString) { this.encryptedString = encryptedString; }
+
     public void setDigitalSignature(String digitalSignature) {
         this.digitalSignature = digitalSignature;
     }
