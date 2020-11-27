@@ -2,6 +2,7 @@
 Description=A goddamn hospital API
  
 [Service]
+Environment="PDP_URL=https://pdp:8444/pdp"
 ExecStart=/bin/sh -c "/home/vagrant/examples/snapshots/hospital-0.0.1-SNAPSHOT.jar >> /var/log/hospital.log"
  
 [Install] 

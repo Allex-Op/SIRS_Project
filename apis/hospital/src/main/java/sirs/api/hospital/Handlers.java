@@ -12,6 +12,12 @@ public class Handlers {
     Crypto cr = new Crypto();
     CustomProtocol cp = new CustomProtocol();
 
+    @GetMapping("/secret")
+    @ResourceId(resourceId = "secret")
+    public ResponseEntity<String> secret() {
+        return ResponseEntity.ok("top secret endpoint for debugging");
+    }
+
     @GetMapping("/patient/{id}/name")
     @ResourceId(resourceId = "getPatientName")
     public ResponseEntity<Patient> getPatientName(@PathVariable int id) {

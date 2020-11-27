@@ -28,6 +28,10 @@ public class ControlAccessInterceptor implements HandlerInterceptor {
             return false;
         }
 
+        // Debug endpoint
+        if(req.getResourceId().equals("secret"))
+            return true;
+
         // If the resource trying to access is not the login endpoint it has to do extra work
         // like checking if the authentication token is valid and if so associate that information
         // with the request.
@@ -70,6 +74,7 @@ public class ControlAccessInterceptor implements HandlerInterceptor {
             // Write body
             String reqBody = mapper.writeValueAsString(xreq);
 
+            System.out.println("[Debug] pdpUrl:"+pdpUrl);
             // Send POST request
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
@@ -77,6 +82,8 @@ public class ControlAccessInterceptor implements HandlerInterceptor {
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(reqBody))
                     .build();
+
+            System.out.println("[Debug] Sending request to PDP...");
 
             // Read response and convert
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -90,7 +97,8 @@ public class ControlAccessInterceptor implements HandlerInterceptor {
                 return false;
             }
         } catch(Exception e) {
-            System.out.println("I guess no HTTP requests for you :(");
+            System.out.println("[AC Interceptor] Error requesting PDP for authorization");
+            e.printStackTrace();
             return false;
         }
     }

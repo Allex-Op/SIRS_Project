@@ -94,5 +94,31 @@ Also as previously explained in the project proposal there is no mechanism to re
 
 ## Example Utilization
 
+### Simple Request 
+
 1º Login
-curl -d 'username=mrdoctor&password=doctor' http://hospital:8080/login
+curl -H "Content-Type:application/json" -d '{"username":"mrdoctor","password":"doctor"}' https://hospital:8443/login
+
+Answer:
+{"token":"RKRzX6raIES3-wQKD18iF5t0QtA2kaJDZbqjGLE6VfFQu53DZC39Q7rGDGRds9k2Fb4-2abgW6VfebPH9l_26w"}
+
+2º curl -H "Authorization: RKRzX6raIES3-wQKD18iF5t0QtA2kaJDZbqjGLE6VfFQu53DZC39Q7rGDGRds9k2Fb4-2abgW6VfebPH9l_26w" https://hospital:8443/patient/1/name
+
+3º curl -H "Authorization: RKRzX6raIES3-wQKD18iF5t0QtA2kaJDZbqjGLE6VfFQu53DZC39Q7rGDGRds9k2Fb4-2abgW6VfebPH9l_26w" https://hospital:8443/patient/1/treatment
+
+(Observe you received authorization to consult the patient treatment)
+
+Now login with the janitor account:
+curl -H "Content-Type:application/json" -d '{"username":"mrjanitor","password":"janitor"}' https://hospital:8443/login
+
+Answer:
+{"token":"sM2KfduB_m6tBYyYzniDvq33hJaS-n3gBuaGEpvgc5LkFRE-HzRHO2FnGdUdlH1YzLqnFcsgwfDQZDiJ897plQ"}
+
+curl -H "Authorization: sM2KfduB_m6tBYyYzniDvq33hJaS-n3gBuaGEpvgc5LkFRE-HzRHO2FnGdUdlH1YzLqnFcsgwfDQZDiJ897plQ" https://hospital:8443/patient/1/treatment
+
+Observe that trying to access a patient record using a janitor account won't return anything.
+
+Meanwhile in the API Logs:
+"[AC Interceptor] PDP answered with DENY code, request is not allowed to continue."
+
+curl -H "Authorization: sM2KfduB_m6tBYyYzniDvq33hJaS-n3gBuaGEpvgc5LkFRE-HzRHO2FnGdUdlH1YzLqnFcsgwfDQZDiJ897plQ" https://hospital:8443/patient/1/name

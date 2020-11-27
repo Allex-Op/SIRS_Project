@@ -105,9 +105,13 @@
     - name: Deploy Hospital API Service
       shell: cp /home/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service
 
-    - name: Add Environment Variables
-      shell: echo "PGPASSWORD=administrator" >> /etc/profile; echo "PDP_URL='http://192.168.56.12:8081/pdp'" >> /etc/profile
-
+    - name: Add PDP to /etc/hosts file
+      become: yes
+      become_user: root
+      lineinfile:
+        path: /etc/hosts
+        line: "192.168.56.12   pdp"
+        state: present
 
 # PDP API configuration  
 - hosts: auth
@@ -119,9 +123,6 @@
   tasks:
     - name: Deploy PDP API Service
       shell: cp /home/vagrant/examples/pdpapi.service /etc/systemd/system/pdpapi.service
-
-    - name: Add Environment Variables
-      shell: echo "POLICIES_PATH='/home/vagrant/examples/policies.json'" >> /etc/profile
 
 
 # LAB API configuration  
