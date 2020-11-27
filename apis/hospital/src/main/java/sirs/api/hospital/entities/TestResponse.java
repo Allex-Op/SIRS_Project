@@ -3,10 +3,13 @@ package sirs.api.hospital.entities;
 public class TestResponse {
     String results;
     String digitalSignature;
+    String encriptedString;
     
     public String getResults() {
         return results;
     }
+
+    public String getEncriptedString() { return encriptedString; }
 
     public String getDigitalSignature() {
         return digitalSignature;

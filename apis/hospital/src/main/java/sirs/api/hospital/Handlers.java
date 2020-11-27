@@ -1,11 +1,13 @@
 package sirs.api.hospital;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sirs.api.hospital.accessControl.ResourceId;
 import sirs.api.hospital.db.Repo;
 import sirs.api.hospital.entities.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.File;
 import java.net.URI;
@@ -115,6 +117,8 @@ public class Handlers {
 //            String safeData = cp.encryptData(req);
 
             ObjectMapper mapper = new ObjectMapper();
+            mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
             // Write body
             String reqBody = mapper.writeValueAsString(req);
 

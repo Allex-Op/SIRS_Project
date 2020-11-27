@@ -44,10 +44,7 @@ public class Handlers {
         String data = testreq.getData();
         String certificate = testreq.getCertificate();
 
-        System.out.println(data);
-        System.out.println(certificate);
-
-        //TODO: verify certificate -> generate random string (yes) -> encrypt it with the public key of the Lab (yes) -> send
+        //TODO: verify certificate
 
         // Generating random string
         byte[] randomString = new byte[64];
@@ -58,11 +55,12 @@ public class Handlers {
 
         // Encrypt random string with pub key
         byte[] encrypted_data = cp.encryptData(randomString, pubKey);
+        String encripted_string = new String(encrypted_data);
 
         //TODO: send encrypted random string
         String results = "25/05/2020 Covid19:True,Pneumonia:True...";
         String signature = cr.signData(results);
-        TestResponse resp = new TestResponse(results, signature);
+        TestResponse resp = new TestResponse(results, signature, encripted_string);
 
 //        if(signature.equals(""))
 //            return ResponseEntity.status(500).build();

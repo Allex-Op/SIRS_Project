@@ -3,11 +3,15 @@ package sirs.api.lab.entities;
 public class TestResponse {
     String results;
     String digitalSignature;
+    String encryptedString;
 
-    public TestResponse(String results, String digitalSignature) {
+    public TestResponse(String results, String digitalSignature, String encryptedString) {
         this.results = results;
         this.digitalSignature = digitalSignature;
+        this.encryptedString = encryptedString;
     }
+
+    public String getEncryptedString() { return encryptedString; }
 
     public String getResults() {
         return results;
