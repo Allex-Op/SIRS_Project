@@ -28,26 +28,12 @@
 
   - name: install JDK 
     apt:
-      name: default-jdk
+      name: openjdk-11-jdk
       state: present
       update_cache: yes
-
-  - name: install maven
-    apt:
-      name: maven
-      state: present
-      update_cache: yes
-
-  - name: clone repo git
-    git:
-      repo: "https://github.com/Alex-Pena-Ok/SIRS_Project"
-      clone: yes
-      dest: '/home/vagrant/project'
-    become: yes
-    become_method: sudo
 
   - name: Install root CA
-    shell: cp /home/vagrant/project/vagrant/examples/certificates/myCA.crt /usr/local/share/ca-certificates/myCA.crt && update-ca-certificates
+    shell: cp /home/vagrant/examples/certificates/myCA.crt /usr/local/share/ca-certificates/myCA.crt && update-ca-certificates
 
   handlers:
 
@@ -117,10 +103,10 @@
 
   tasks:
     - name: Deploy Hospital API Service
-      shell: cp /home/vagrant/project/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service
+      shell: cp /home/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service
 
     - name: Add Environment Variables
-      shell: echo "PGPASSWORD=administrator" >> /etc/profile; echo "PDP_URL='http://192.168.56.12:8081'" >> /etc/profile
+      shell: echo "PGPASSWORD=administrator" >> /etc/profile; echo "PDP_URL='http://192.168.56.12:8081/pdp'" >> /etc/profile
 
 
 # PDP API configuration  
@@ -132,10 +118,10 @@
 
   tasks:
     - name: Deploy PDP API Service
-      shell: cp /home/vagrant/project/vagrant/examples/pdpapi.service /etc/systemd/system/pdpapi.service
+      shell: cp /home/vagrant/examples/pdpapi.service /etc/systemd/system/pdpapi.service
 
     - name: Add Environment Variables
-      shell: echo "POLICIES_PATH='/home/vagrant/project/apis/pdp/policies.json'" >> /etc/profile
+      shell: echo "POLICIES_PATH='/home/vagrant/examples/policies.json'" >> /etc/profile
 
 
 # LAB API configuration  
@@ -147,4 +133,4 @@
 
   tasks:
     - name: Deploy Lab API Service
-      shell: cp /home/vagrant/project/vagrant/examples/labapi.service /etc/systemd/system/labapi.service
+      shell: cp /home/vagrant/examples/labapi.service /etc/systemd/system/labapi.service

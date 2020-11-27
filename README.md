@@ -7,7 +7,7 @@
 - Secrets & PKI
 - TLS
 - API Authentication
-- Tests
+- Example Utilization
 
 ## About 
 
@@ -92,6 +92,7 @@ The client must send this token in the AUTHORIZATION header of all requests or t
 
 Also as previously explained in the project proposal there is no mechanism to revoke tokens in case the users lose them or they get compromised.
 
-## Tests
+## Example Utilization
 
-To test the whole project you can run the script ... TBD
+1º Login
+curl -d 'username=mrdoctor&password=doctor' http://hospital:8080/login

@@ -8,21 +8,21 @@
   - name: Drop tables
     become: yes
     become_user: postgres
-    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/project/db/hospital/dropTables.sql -h 127.0.0.1
+    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/examples/database/dropTables.sql -h 127.0.0.1
     environment:
       PGPASSWORD: administrator
 
   - name: Create tables
     become: yes
     become_user: postgres
-    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/project/db/hospital/createTables.sql -h 127.0.0.1
+    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/examples/database/createTables.sql -h 127.0.0.1
     environment:
       PGPASSWORD: administrator
 
   - name: Populate tables
     become: yes
     become_user: postgres
-    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/project/db/hospital/populateTables.sql -h 127.0.0.1
+    shell: psql -U administrator -d sirsDb -a -f /home/vagrant/examples/database/populateTables.sql -h 127.0.0.1
     environment:
       PGPASSWORD: administrator
 

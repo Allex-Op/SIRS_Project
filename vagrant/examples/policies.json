@@ -1,0 +1,201 @@
+{
+    "PolicySetId": "HospitalRules",
+    "Policies": [
+        {
+            "PolicyId": "NormalPolicy", 
+            "Rules": [
+                {
+                    "RuleId": "DiseasesRule",
+                    "Effect": "Permit",
+                    "Target": {
+                        "Subjects": [{
+                            "AttributeId": "Subject-Role",
+                            "Value": "doctor"
+                        },
+                        {
+                            "AttributeId": "Subject-Role",
+                            "Value": "nurse"
+                        }],
+                        "Resources": [{
+                            "AttributeId": "resource-id",
+                            "Value": "getPatientDiseases"
+                        }],
+                        "Actions": [{
+                            "AttributeId": "action-id",
+                            "Value": "GET"
+                        }]
+                    }
+                },
+                {
+                    "RuleId": "PatientNameRule",
+                    "Effect": "Permit",
+                    "Target": {
+                        "Subjects": [{
+                            "AttributeId": "Subject-Role",
+                            "Value": "doctor"
+                        },
+                        {
+                            "AttributeId": "Subject-Role",
+                            "Value": "nurse"
+                        },
+                        {
+                            "AttributeId": "Subject-Role",
+                            "Value": "janitor"
+                        }],
+                        "Resources": [{
+                            "AttributeId": "resource-id",
+                            "Value": "getPatientName"
+                        }],
+                        "Actions": [{
+                            "AttributeId": "action-id",
+                            "Value": "GET"
+                        }]
+                    }
+                },
+                {
+                    "RuleId": "TestResultsRule",
+                    "Effect": "Permit",
+                    "Target": {
+                        "Subjects": [{
+                            "AttributeId": "Subject-Role",
+                            "Value": "doctor"
+                        }],
+                        "Resources": [{
+                            "AttributeId": "resource-id",
+                            "Value": "getPatientTestResults"
+                        }],
+                        "Actions": [{
+                            "AttributeId": "action-id",
+                            "Value": "GET"
+                        }]
+                    }
+                },
+                {
+                    "RuleId": "PatientTreatmentRule",
+                    "Effect": "Permit",
+                    "Target": {
+                        "Subjects": [{
+                            "AttributeId": "Subject-Role",
+                            "Value": "doctor"
+                        },
+                        {
+                            "AttributeId": "Subject-Role",
+                            "Value": "nurse"
+                        }],
+                        "Resources": [{
+                            "AttributeId": "resource-id",
+                            "Value": "getPatientTreatment"
+                        }],
+                        "Actions": [{
+                            "AttributeId": "action-id",
+                            "Value": "GET"
+                        }]
+                    }
+                },
+                {
+                    "RuleId": "CheckAuthenticityRule",
+                    "Effect": "Permit",
+                    "Target": {
+                        "Subjects": [{
+                            "AttributeId": "Subject-Role",
+                            "Value": "doctor"
+                        }],
+                        "Resources": [{
+                            "AttributeId": "resource-id",
+                            "Value": "checkAuthenticity"
+                        }],
+                        "Actions": [{
+                            "AttributeId": "action-id",
+                            "Value": "GET"
+                        }]
+                    }
+                },
+                {
+                    "RuleId": "TestResultsRule",
+                    "Effect": "Permit",
+                    "Target": {
+                        "Subjects": [{
+                            "AttributeId": "Subject-Role",
+                            "Value": "doctor"
+                        }],
+                        "Resources": [{
+                            "AttributeId": "resource-id",
+                            "Value": "getTestsResult"
+                        }],
+                        "Actions": [{
+                            "AttributeId": "action-id",
+                            "Value": "GET"
+                        }]
+                    }
+                },
+                {
+                    "RuleId": "LoginRule",
+                    "Effect": "Permit",
+                    "Target": {
+                        "Subjects": [{
+                            "AttributeId": "Subject-Role",
+                            "Value": "anyone"
+                        }],
+                        "Resources": [{
+                            "AttributeId": "resource-id",
+                            "Value": "login"
+                        }],
+                        "Actions": [{
+                            "AttributeId": "action-id",
+                            "Value": "POST"
+                        }]
+                    }
+                },
+                {
+                    "RuleId": "Default",
+                    "Effect": "Deny"
+                }
+            ]
+        },
+        {
+            "PolicyId": "PandemicPolicy", 
+            "Rules": [
+                {
+                    "RuleId": "DiseasesRule",
+                    "Effect": "Permit",
+                    "Target": {
+                        "Subjects": [{
+                            "AttributeId": "Subject-Role",
+                            "Value": "anyone"
+                        }],
+                        "Resources": [{
+                            "AttributeId": "resource-id",
+                            "Value": "getPatientDiseases"
+                        }],
+                        "Actions": [{
+                            "AttributeId": "action-id",
+                            "Value": "GET"
+                        }]
+                    }
+                },
+                {
+                    "RuleId": "LoginRule",
+                    "Effect": "Permit",
+                    "Target": {
+                        "Subjects": [{
+                            "AttributeId": "Subject-Role",
+                            "Value": "anyone"
+                        }],
+                        "Resources": [{
+                            "AttributeId": "resource-id",
+                            "Value": "login"
+                        }],
+                        "Actions": [{
+                            "AttributeId": "action-id",
+                            "Value": "POST"
+                        }]
+                    }
+                },
+                {
+                    "RuleId": "Default",
+                    "Effect": "Deny"
+                }
+            ]
+        }
+    ]
+}

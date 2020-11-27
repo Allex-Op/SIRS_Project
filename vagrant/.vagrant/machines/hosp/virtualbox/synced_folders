@@ -1,1 +1,1 @@
-{"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/alex/Documents/Mestrado/SIRS/SIRS_Project/vagrant","disabled":false,"__vagrantfile":true}}}
+{"virtualbox":{"/home/vagrant/examples":{"mount_options":["dmode=775","fmode=775","uid=1000","gid=1000"],"guestpath":"/home/vagrant/examples","hostpath":"/home/alex/Documents/Mestrado/SIRS/SIRS_Project/vagrant/examples","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"/home/alex/Documents/Mestrado/SIRS/SIRS_Project/vagrant","disabled":false,"__vagrantfile":true}}}

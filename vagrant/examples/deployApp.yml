@@ -1,16 +1,3 @@
----
-- hosts: all
-  become: yes
-  become_method: sudo
-  gather_facts: no
-
-  tasks:
-    - name: clone repo git
-      git:
-        repo: "https://github.com/Alex-Pena-Ok/SIRS_Project"
-        clone: yes
-        dest: '/home/vagrant/project'
-
 # Hospital deployment
 - hosts: hosp
   become: yes
