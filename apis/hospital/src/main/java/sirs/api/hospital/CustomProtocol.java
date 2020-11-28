@@ -3,6 +3,15 @@ package sirs.api.hospital;
 import sirs.api.hospital.entities.CustomProtocolResponse;
 import sirs.api.hospital.entities.TestRequest;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 //TODO: This is just a possible sketch
 public class CustomProtocol {
     String sessionKey;
@@ -32,5 +41,30 @@ public class CustomProtocol {
         //TODO
         return true;
     }
-}
+
+    public boolean verifyCertificate(Certificate certToCheck, String trustedAnchor) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        List mylist = new ArrayList();
+        mylist.add(certToCheck);
+
+        CertPath cp = cf.generateCertPath(mylist);
+        FileInputStream in = new FileInputStream(trustedAnchor);
+        Certificate trust = cf.generateCertificate(in);
+        TrustAnchor anchor = new TrustAnchor((X509Certificate) trust, null);
+        PKIXParameters params = new PKIXParameters(Collections.singleton(anchor));
+        params.setRevocationEnabled(false);
+        CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
+        PKIXCertPathValidatorResult result = null;
+        try {
+            result = (PKIXCertPathValidatorResult) cpv.validate(cp, params);
+            return true;
+        } catch (CertPathValidatorException e) {
+            System.out.println("Invalid Certificate");
+            return false;
+        }
+    }
+
+
+    }
 
