@@ -9,16 +9,14 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.nio.file.CopyOption;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
+import java.security.cert.*;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static java.nio.file.Files.readAllBytes;
 
@@ -57,5 +55,30 @@ public class CustomProtocol {
     public boolean verifyIntegrity(String data) {
         //TODO
         return true;
+    }
+
+    public boolean verifyCertificate(Certificate certToCheck, String trustedAnchor) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            List mylist = new ArrayList();
+            mylist.add(certToCheck);
+
+            CertPath cp = cf.generateCertPath(mylist);
+            FileInputStream in = new FileInputStream(trustedAnchor);
+            Certificate trust = cf.generateCertificate(in);
+            TrustAnchor anchor = new TrustAnchor((X509Certificate) trust, null);
+            PKIXParameters params = new PKIXParameters(Collections.singleton(anchor));
+            params.setRevocationEnabled(false);
+            CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
+            PKIXCertPathValidatorResult result = null;
+            try {
+                result = (PKIXCertPathValidatorResult) cpv.validate(cp, params);
+                return true;
+            } catch (CertPathValidatorException e) {
+                System.out.println("Invalid Certificate");
+                return false;
+            }
+
+
     }
 }
