@@ -14,15 +14,16 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.nio.charset.Charset;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Random;
@@ -43,6 +44,18 @@ public class Handlers {
             return ResponseEntity.status(404).build();
 
         String certificate = testreq.getCertificate();
+        System.out.println("Certificate received "+ certificate);
+
+        //creates certificate from the TesteRequest
+        byte [] decoded = Base64.decodeBase64(certificate.replaceAll("-----BEGIN CERTIFICATE-----\n", "").replaceAll("-----END CERTIFICATE-----", ""));
+        Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(decoded));
+        try {
+           boolean valid= cp.verifyCertificate(cert,"src/main/resources/myCA.crt");
+           System.out.println("Certificate is "+ valid);
+        } catch (InvalidAlgorithmParameterException e) {
+            System.out.println("Ups NOT WORKING");
+        }
+
 
         //TODO: verify certificate
 
