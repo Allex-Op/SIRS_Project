@@ -108,10 +108,11 @@ public class Handlers {
     public ResponseEntity<TestResponse> sendTestToLab(@PathVariable int id) {
         try {
             //TODO: ADD CUSTOM SECURITY CHANNEL HERE
-
+            System.out.println("entered");
             // Getting the certificate to send along with the data in TestRequest
-            File crtFile = new File("/home/rafaela/Desktop/SIRS/Project/SIRS_Project/apis/hospital/src/main/resources/hospital.pem");
+            File crtFile = new File("src/main/resources/hospital.pem");
             String certificate = new String(Files.readAllBytes(crtFile.toPath()), Charset.defaultCharset());
+            System.out.println("after fule");
 
             TestRequest req = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST", certificate);
 
