@@ -9,6 +9,8 @@ import sirs.api.hospital.db.Repo;
 import sirs.api.hospital.entities.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -16,6 +18,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Base64;
 
 @RestController
 public class Handlers {
@@ -112,12 +117,10 @@ public class Handlers {
             File crtFile = new File("src/main/resources/hospital.pem");
             String certificate = new String(Files.readAllBytes(crtFile.toPath()), Charset.defaultCharset());
 
-
             TestRequest req = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST", certificate);
 
-            ObjectMapper mapper = new ObjectMapper();
-
             // Write body
+            ObjectMapper mapper = new ObjectMapper();
             String reqBody = mapper.writeValueAsString(req);
 
             HttpClient client = HttpClient.newHttpClient();
@@ -129,6 +132,26 @@ public class Handlers {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             TestResponse resp = mapper.readValue(response.body(), TestResponse.class);
+
+            // Getting the encrypted random string from TestResponse
+            String encryptedString64 = resp.getEncryptedString();
+            byte[] encryptedStringBytes = Base64.getDecoder().decode(encryptedString64);
+
+            // Extract private key from hospitalKeyStore
+            File keyStoreFile = new File("src/main/resources/hospitalKeystore.jks");
+            PrivateKey privKey = cp.extractPrivKey(keyStoreFile);
+
+            // Decrypt random string received
+            byte[] decryptedStringBytes = cp.decryptData(encryptedStringBytes, privKey);
+
+            // Generate secret key
+            SecretKey secretKey = new SecretKeySpec(decryptedStringBytes, 0, decryptedStringBytes.length, "AES");
+
+            // Decrypt the test results with the secret key
+            String results64 = resp.getResults();
+            byte[] resultsBytes = Base64.getDecoder().decode(results64);
+            String encryptedResults = new String(resultsBytes);
+            String decryptedResults = cp.decryptWithSecretKey(encryptedResults, secretKey);
 
             //TODO: After exchanging the data print it to the terminal
             return ResponseEntity.ok(resp);

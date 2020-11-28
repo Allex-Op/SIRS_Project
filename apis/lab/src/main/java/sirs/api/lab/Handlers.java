@@ -10,10 +10,8 @@ import sirs.api.lab.entities.CustomProtocolResponse;
 import sirs.api.lab.entities.TestRequest;
 import sirs.api.lab.entities.TestResponse;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -49,6 +47,7 @@ public class Handlers {
         //creates certificate from the TesteRequest
         byte [] decoded = Base64.decodeBase64(certificate.replaceAll("-----BEGIN CERTIFICATE-----\n", "").replaceAll("-----END CERTIFICATE-----", ""));
         Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(decoded));
+
         try {
            boolean valid= cp.verifyCertificate(cert,"src/main/resources/myCA.crt");
            System.out.println("Certificate is "+ valid);
@@ -56,11 +55,8 @@ public class Handlers {
             System.out.println("Ups NOT WORKING");
         }
 
-
-        //TODO: verify certificate
-
         // Generating random string
-        byte[] randomString = new byte[64];
+        byte[] randomString = new byte[32];
         new Random().nextBytes(randomString);
 
         // Extract pub key from certificate
@@ -69,13 +65,21 @@ public class Handlers {
         // Encrypt random string with pub key
         byte[] encrypted_data = cp.encryptData(randomString, pubKey);
         byte[] encrypted_base64 = Base64.encodeBase64(encrypted_data);
-
         String encrypted_string64 = new String(encrypted_base64);
 
-        //TODO: send encrypted random string
+        // Generating secretKey from randomString
+        SecretKey secretKey = new SecretKeySpec(randomString, 0, randomString.length, "AES");
+
+        // Encrypting test results with secret key
         String results = "25/05/2020 Covid19:True,Pneumonia:True...";
+        String encryptedResults = cp.encryptWithSecretKey(results, secretKey);
+        byte[] encryptedResultsBytes = encryptedResults.getBytes();
+        byte[] encryptedResults64Bytes = Base64.encodeBase64(encryptedResultsBytes);
+        String encryptedResults64 = new String(encryptedResults64Bytes);
+
+        // Send encrypted random string + encrypted test results + signature
         String signature = cr.signData(results);
-        TestResponse resp = new TestResponse(results, signature, encrypted_string64);
+        TestResponse resp = new TestResponse(encryptedResults64, signature, encrypted_string64);
 
 //        if(signature.equals(""))
 //            return ResponseEntity.status(500).build();

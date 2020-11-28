@@ -1,14 +1,20 @@
 package sirs.api.hospital;
 
+import org.springframework.http.ResponseEntity;
 import sirs.api.hospital.entities.CustomProtocolResponse;
 import sirs.api.hospital.entities.TestRequest;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
+import javax.crypto.*;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.security.*;
 import java.security.cert.*;
+import java.security.cert.Certificate;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,21 +31,49 @@ public class CustomProtocol {
         return true;
     }
 
-    public String encryptData(TestRequest plaintextData) {
-        //TODO: Use the generated session key to encrypt the data adding Confidentiality,Integrity & Freshness
-        String cipheredText = plaintextData.getData();
+    public byte[] encryptData(byte[] randomString, PublicKey pubKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, BadPaddingException, IllegalBlockSizeException {
+        // Encrypt the data adding Confidentiality, Integrity & Freshness
+        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, pubKey);
+        byte[] cipheredText = cipher.doFinal(randomString);
+
         return cipheredText;
     }
 
-    public String decryptData(CustomProtocolResponse cipheredData) {
-        //TODO: Decrypt the data, verify integrity and freshness
-        String decryptedData = "some data";
+    public byte[] decryptData(byte[] cipheredData, PrivateKey privKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        // Decrypt the data, verify integrity and freshness
+        Cipher decrypt=Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
+        decrypt.init(Cipher.DECRYPT_MODE, privKey);
+        byte[] decryptedData = decrypt.doFinal(cipheredData);
+
         return decryptedData;
     }
 
-    public boolean verifyIntegrity(String data) {
-        //TODO
-        return true;
+    public PublicKey extractPubKey(String certificate) throws CertificateException {
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        InputStream cert = new ByteArrayInputStream(certificate.getBytes());
+        Certificate final_certificate = cf.generateCertificate(cert);
+        PublicKey pubKey = final_certificate.getPublicKey();
+
+        return pubKey;
+    }
+
+    public PrivateKey extractPrivKey(File keyStoreFile) throws IOException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException, CertificateException {
+        KeyStore keystore = KeyStore.getInstance("JKS");
+        String password = "hospital";
+        FileInputStream is = new FileInputStream(keyStoreFile);
+        String alias = "hospital";
+
+        keystore.load(is, password.toCharArray());
+        PrivateKey privKey = (PrivateKey) keystore.getKey(alias, password.toCharArray());
+
+        return privKey;
+    }
+
+    public String decryptWithSecretKey(String stringToDecrypt, SecretKey secretKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            return new String(cipher.doFinal(Base64.getDecoder().decode(stringToDecrypt)));
     }
 
     public boolean verifyCertificate(Certificate certToCheck, String trustedAnchor) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
@@ -65,6 +99,9 @@ public class CustomProtocol {
         }
     }
 
-
+    public boolean verifyIntegrity(String data) {
+        //TODO
+        return true;
     }
+}
 
