@@ -64,8 +64,7 @@ public class Handlers {
 
         // Encrypt random string with pub key
         byte[] encrypted_data = cp.encryptData(randomString, pubKey);
-        byte[] encrypted_base64 = Base64.encodeBase64(encrypted_data);
-        String encrypted_string64 = new String(encrypted_base64);
+        String encrypted_string64 = cp.encodingInBase64(encrypted_data);
 
         // Generating secretKey from randomString
         SecretKey secretKey = new SecretKeySpec(randomString, 0, randomString.length, "AES");
@@ -73,9 +72,9 @@ public class Handlers {
         // Encrypting test results with secret key
         String results = "25/05/2020 Covid19:True,Pneumonia:True...";
         String encryptedResults = cp.encryptWithSecretKey(results, secretKey);
+
         byte[] encryptedResultsBytes = encryptedResults.getBytes();
-        byte[] encryptedResults64Bytes = Base64.encodeBase64(encryptedResultsBytes);
-        String encryptedResults64 = new String(encryptedResults64Bytes);
+        String encryptedResults64 = cp.encodingInBase64(encryptedResultsBytes);
 
         // Send encrypted random string + encrypted test results + signature
         String signature = cr.signData(results);

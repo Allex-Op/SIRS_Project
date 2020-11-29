@@ -75,8 +75,13 @@ public class CustomProtocol {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
         return null;
+    }
+
+    public String encodingInBase64(byte[] data) {
+        byte[] data_base64 = org.apache.tomcat.util.codec.binary.Base64.encodeBase64(data);
+        String data_string64 = new String(data_base64);
+        return data_string64;
     }
 
     public boolean verifyCertificate(Certificate certToCheck, String trustedAnchor) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {

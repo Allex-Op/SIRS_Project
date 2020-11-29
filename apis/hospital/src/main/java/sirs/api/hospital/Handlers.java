@@ -149,8 +149,7 @@ public class Handlers {
 
             // Decrypt the test results with the secret key
             String results64 = resp.getResults();
-            byte[] resultsBytes = Base64.getDecoder().decode(results64);
-            String encryptedResults = new String(resultsBytes);
+            String encryptedResults = cp.decodingFromBase64(results64);
             String decryptedResults = cp.decryptWithSecretKey(encryptedResults, secretKey);
 
             //TODO: After exchanging the data print it to the terminal
