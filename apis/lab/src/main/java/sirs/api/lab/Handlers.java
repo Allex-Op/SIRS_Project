@@ -80,7 +80,7 @@ public class Handlers {
         String signature = cr.signData(results);
         TestResponse resp = new TestResponse(encryptedResults64, signature, encrypted_string64);
 
-        // TODO: Use mac on testResponse to verify integrity
+        // TODO: Use hmac-sha256 algorithm on testResponse to verify integrity
         byte[] message = cp.macMessage(resp, secretKey);
 
 //        if(signature.equals(""))

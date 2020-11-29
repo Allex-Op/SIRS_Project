@@ -132,7 +132,8 @@ public class Handlers {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // TODO: now we will receive a byte message bc of mac
+            // TODO: Receiving a byte message because of hmac-sha256 algorithm
+            //  We need to extract the testResponse from it
             byte[] message = mapper.readValue(response.body(), byte[].class);
             TestResponse resp = cp.extractResponse(message);
 
