@@ -3,6 +3,7 @@ package sirs.api.hospital;
 import org.springframework.http.ResponseEntity;
 import sirs.api.hospital.entities.CustomProtocolResponse;
 import sirs.api.hospital.entities.TestRequest;
+import sirs.api.hospital.entities.TestResponse;
 
 import javax.crypto.*;
 import java.io.*;
@@ -80,6 +81,11 @@ public class CustomProtocol {
         byte[] decodedData = Base64.getDecoder().decode(data);
         String finalData = new String(decodedData);
         return finalData;
+    }
+
+    public TestResponse extractResponse(byte[] message) {
+
+        return null;
     }
 
     public boolean verifyCertificate(Certificate certToCheck, String trustedAnchor) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {

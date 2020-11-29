@@ -131,7 +131,10 @@ public class Handlers {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            TestResponse resp = mapper.readValue(response.body(), TestResponse.class);
+
+            // TODO: now we will receive a byte message bc of mac
+            byte[] message = mapper.readValue(response.body(), byte[].class);
+            TestResponse resp = cp.extractResponse(message);
 
             // Getting the encrypted random string from TestResponse
             String encryptedString64 = resp.getEncryptedString();

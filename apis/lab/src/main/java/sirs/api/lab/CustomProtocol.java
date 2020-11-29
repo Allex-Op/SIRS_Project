@@ -1,6 +1,7 @@
 package sirs.api.lab;
 
 import sirs.api.lab.entities.CustomProtocolResponse;
+import sirs.api.lab.entities.TestRequest;
 import sirs.api.lab.entities.TestResponse;
 
 import javax.crypto.*;
@@ -12,10 +13,7 @@ import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static java.nio.file.Files.readAllBytes;
 
@@ -106,6 +104,23 @@ public class CustomProtocol {
             System.out.println("Invalid Certificate");
             return false;
         }
+    }
+
+    public byte[] macMessage(TestResponse testResponse, SecretKey secretKey) throws InvalidKeyException, NoSuchAlgorithmException {
+        // Creating Mac object and initializing
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(secretKey);
+
+        byte[] responseBytes = testResponse.toString().getBytes();
+        byte[] response = Arrays.copyOfRange(responseBytes, 0, responseBytes.length);
+
+        byte[] tag = mac.doFinal(response);
+        byte[] message = new byte[response.length + tag.length];
+
+        System.arraycopy(response, 0, message, 0, response.length);
+        System.arraycopy(tag, 0, message, tag.length, tag.length);
+
+        return message;
     }
 
     public boolean verifyIntegrity(String data) {
