@@ -132,12 +132,11 @@ public class Handlers {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // TODO: Receiving a String message because of hmac-sha256 algorithm
-            //  We need to extract the testResponse from it
+            // TODO: Now it will receive a CustomProtocolResponse.class here
             String message = mapper.readValue(response.body(), String.class);
             TestResponse resp = cp.extractResponse(message);
 
-            // Getting the encrypted random string from TestResponse
+            // TODO: Getting the encrypted random string from CustomProtocolResponse
             String encryptedString64 = resp.getEncryptedString();
             byte[] encryptedStringBytes = Base64.getDecoder().decode(encryptedString64);
 
@@ -151,9 +150,11 @@ public class Handlers {
             // Generate secret key
             SecretKey secretKey = new SecretKeySpec(decryptedStringBytes, 0, decryptedStringBytes.length, "AES");
 
-            // TODO: Only now we can verify the received response by checking the tag with the secret key
+            // TODO: Only now we can verify the received response by checking the TAG with the secret key
 
-            // Decrypt the test results with the secret key
+            // TODO: Decrypt the test results with the secret key
+            //  test results are in the DATA field in customProtocolResponse, which is a string
+            //  DATA field needs to be transformed again into a testResponse object
             String results64 = resp.getResults();
             String encryptedResults = cp.decodingFromBase64(results64);
             String decryptedResults = cp.decryptWithSecretKey(encryptedResults, secretKey);

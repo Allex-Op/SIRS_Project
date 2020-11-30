@@ -3,6 +3,8 @@ package sirs.api.hospital.entities;
 public class TestResponse {
     String results;
     String digitalSignature;
+
+    // TODO: DELETE THE NEXT FIELD, IT DOES NOT EXIST NOW. THIS FIELD IS IN CUSTOM PROTOCOL RESPONSE
     String encryptedString;
     
     public String getResults() {
