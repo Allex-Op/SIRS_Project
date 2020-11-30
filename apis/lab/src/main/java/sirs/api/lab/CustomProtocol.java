@@ -106,7 +106,7 @@ public class CustomProtocol {
         }
     }
 
-    public byte[] macMessage(TestResponse testResponse, SecretKey secretKey) throws InvalidKeyException, NoSuchAlgorithmException {
+    public String macMessage(TestResponse testResponse, SecretKey secretKey) throws InvalidKeyException, NoSuchAlgorithmException {
         // Creating Mac object and initializing
         Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(secretKey);
@@ -118,9 +118,11 @@ public class CustomProtocol {
         byte[] message = new byte[response.length + tag.length];
 
         System.arraycopy(response, 0, message, 0, response.length);
-        System.arraycopy(tag, 0, message, tag.length, tag.length);
+        System.arraycopy(tag, 0, message, response.length, tag.length);
 
-        return message;
+        String message64 = encodingInBase64(message);
+
+        return message64;
     }
 
     public boolean verifyIntegrity(String data) {

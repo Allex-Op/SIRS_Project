@@ -34,7 +34,7 @@ public class Handlers {
     CustomProtocol cp = new CustomProtocol();
 
     @PostMapping("/teststoanalyze/{id}")
-    public ResponseEntity<byte[]> testsToAnalyze(@PathVariable int id, @RequestBody TestRequest testreq) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, CertificateException {
+    public ResponseEntity<String> testsToAnalyze(@PathVariable int id, @RequestBody TestRequest testreq) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, CertificateException {
         // Because for simplicity reasons we only answer to requests with id 1
         // id is only for representation purposes in case this was a real system
         // we would have multiple id's...
@@ -81,7 +81,7 @@ public class Handlers {
         TestResponse resp = new TestResponse(encryptedResults64, signature, encrypted_string64);
 
         // TODO: Use hmac-sha256 algorithm on testResponse to verify integrity
-        byte[] message = cp.macMessage(resp, secretKey);
+        String message = cp.macMessage(resp, secretKey);
 
 //        if(signature.equals(""))
 //            return ResponseEntity.status(500).build();

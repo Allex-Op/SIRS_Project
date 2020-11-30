@@ -14,10 +14,7 @@ import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.security.spec.InvalidKeySpecException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 //TODO: This is just a possible sketch
 public class CustomProtocol {
@@ -83,9 +80,16 @@ public class CustomProtocol {
         return finalData;
     }
 
-    public TestResponse extractResponse(byte[] message) {
+    public TestResponse extractResponse(String message) throws IOException, ClassNotFoundException {
+        String messageDecoded64 = decodingFromBase64(message);
+        byte[] messageBytes = messageDecoded64.getBytes();
 
-        return null;
+        byte[] response = Arrays.copyOfRange(messageBytes, 0, messageBytes.length - 32);
+        ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(response));
+        TestResponse resp = (TestResponse) in.readObject();
+        in.close();
+
+        return resp;
     }
 
     public boolean verifyCertificate(Certificate certToCheck, String trustedAnchor) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
