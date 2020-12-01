@@ -44,7 +44,12 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.11.3</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.64</version>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>
