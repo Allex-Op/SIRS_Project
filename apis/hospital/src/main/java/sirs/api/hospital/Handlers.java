@@ -24,7 +24,6 @@ import java.util.Base64;
 public class Handlers {
     Repo repo = new Repo();
     Crypto cr = new Crypto();
-    CustomProtocol cp = new CustomProtocol();
 
     @GetMapping("/patient/{id}/name")
     @ResourceId(resourceId = "getPatientName")
@@ -110,11 +109,10 @@ public class Handlers {
     @ResourceId(resourceId = "getTestsResult")
     public ResponseEntity<TestResponse> sendTestToLab(@PathVariable int id) {
         try {
-            //TODO: ADD CUSTOM SECURITY CHANNEL HERE
+
             // Getting the certificate to send along with the data in TestRequest
             File crtFile = new File("src/main/resources/hospital.pem");
             String certificate = new String(Files.readAllBytes(crtFile.toPath()), Charset.defaultCharset());
-
             TestRequest req = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST", certificate);
 
             // Write body
@@ -129,30 +127,19 @@ public class Handlers {
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            //Read Response
             CustomProtocolResponse message = mapper.readValue(response.body(), CustomProtocolResponse.class);
+            //Generate secret key
+            SecretKey secretKey = CustomProtocol.generateSecretKey(message, "src/main/resources/hospitalKeystore.jks");
 
-            // Getting the encrypted random string from CustomProtocolResponse
-            String encryptedString64 = message.getEncryptedString();
-            byte[] encryptedStringBytes = Base64.getDecoder().decode(encryptedString64);
-
-            // Extract private key from hospitalKeyStore
-            File keyStoreFile = new File("src/main/resources/hospitalKeystore.jks");
-            PrivateKey privKey = cp.extractPrivKey(keyStoreFile);
-
-            // Decrypt random string received
-            byte[] decryptedStringBytes = cp.decryptData(encryptedStringBytes, privKey);
-
-            // Generate secret key
-            SecretKey secretKey = new SecretKeySpec(decryptedStringBytes, 0, decryptedStringBytes.length, "AES");
 
             // Only now the received response is verified by checking the TAG with the secret key
             // If the data was not tampered, the dataCheck function returns a testResponse object
             String data = message.getData();
-            TestResponse resp = cp.dataCheck(data, secretKey);
+            TestResponse resp = CustomProtocol.dataCheck(data, secretKey);
 
-            byte[] results64 = Base64.getDecoder().decode(resp.getResults());
-            String results = new String(results64);
-            String decryptedResults = cp.decryptWithSecretKey(results, secretKey);
+            String decryptedResults = CustomProtocol.decryptWithSecretKey(resp.getResults(), secretKey);
 
             System.out.println(decryptedResults);
 
