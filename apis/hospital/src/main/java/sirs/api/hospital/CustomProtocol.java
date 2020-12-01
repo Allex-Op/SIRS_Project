@@ -1,24 +1,16 @@
 package sirs.api.hospital;
 
-import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.ResponseEntity;
-import sirs.api.hospital.entities.CustomProtocolResponse;
-import sirs.api.hospital.entities.TestRequest;
 import sirs.api.hospital.entities.TestResponse;
 
 import javax.crypto.*;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
-import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
-//TODO: This is just a possible sketch
+
 public class CustomProtocol {
     String sessionKey;
 

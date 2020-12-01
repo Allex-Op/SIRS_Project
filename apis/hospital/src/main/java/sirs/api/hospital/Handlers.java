@@ -1,6 +1,5 @@
 package sirs.api.hospital;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.util.Base64;
 
 @RestController

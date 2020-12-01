@@ -2,7 +2,7 @@ package sirs.api.lab.entities;
 
 public class CustomProtocolResponse {
     String data;    // This data should provide the confidentiality, integrity, freshness...
-                    // Also this data should be in Base64 format cause binary data is not
+                    // Also this data is in Base64 format because binary data is not
                     // suitable to be transported over the HTTP protocol.
 
     String encryptedString;

@@ -1,23 +1,13 @@
 package sirs.api.lab;
 
-import sirs.api.lab.entities.CustomProtocolResponse;
-import sirs.api.lab.entities.TestRequest;
-import sirs.api.lab.entities.TestResponse;
-
 import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.nio.file.CopyOption;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
-import static java.nio.file.Files.readAllBytes;
-
-//TODO: This is just a possible sketch
 public class CustomProtocol {
     String sessionKey;  //TODO: Esta session key devem receber do hospital ou gerar aqui, decidam
                         // como acharem melhor... se receberem do hospital talvez adicionar um endpoint
