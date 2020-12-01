@@ -1,6 +1,15 @@
 package sirs.api.lab;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.X509Principal;
+import sirs.api.lab.entities.TestResponse;
+
 import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.security.*;
 import java.security.cert.*;
@@ -9,11 +18,11 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 public class CustomProtocol {
-    String sessionKey;  //TODO: Esta session key devem receber do hospital ou gerar aqui, decidam
+     //TODO: Esta session key devem receber do hospital ou gerar aqui, decidam
                         // como acharem melhor... se receberem do hospital talvez adicionar um endpoint
                         // especifico para isso?
 
-    public PublicKey extractPubKey(String certificate) throws CertificateException {
+    public static PublicKey extractPubKey(String certificate) throws CertificateException {
 
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         InputStream cert = new ByteArrayInputStream(certificate.getBytes());
@@ -23,7 +32,7 @@ public class CustomProtocol {
         return pubKey;
     }
 
-    public byte[] encryptData(byte[] randomString, PublicKey pubKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, BadPaddingException, IllegalBlockSizeException {
+    public static byte[] encryptData(byte[] randomString, PublicKey pubKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, BadPaddingException, IllegalBlockSizeException {
 
         // Encrypt the data adding Confidentiality, Integrity & Freshness
         Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
@@ -33,57 +42,50 @@ public class CustomProtocol {
         return cipheredText;
     }
 
-    public String encryptWithSecretKey(String stringToEncrypt, SecretKey secretKey) {
+    public static  String encryptWithSecretKey(String stringToEncrypt, SecretKey secretKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = null;
-        try {
             cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        }
-        try {
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        }
-        try {
             return Base64.getEncoder().encodeToString(cipher.doFinal(stringToEncrypt.getBytes("UTF-8")));
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
+
     }
 
-    public boolean verifyCertificate(Certificate certToCheck, String trustedAnchor) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    public static boolean verifyCertificate(Certificate certToCheck, String trustedAnchor, String expectedCN) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        List list = new ArrayList();
-        list.add(certToCheck);
+        //Verify CN
+        X509Certificate c = (X509Certificate)certToCheck;
+        X509Principal principal = PrincipalUtil.getSubjectX509Principal(c);
+        Vector<?> subjectCNs = principal.getValues(X509Name.CN);
 
-        CertPath cp = cf.generateCertPath(list);
-        FileInputStream in = new FileInputStream(trustedAnchor);
-        Certificate trust = cf.generateCertificate(in);
-        TrustAnchor anchor = new TrustAnchor((X509Certificate) trust, null);
-        PKIXParameters params = new PKIXParameters(Collections.singleton(anchor));
-        params.setRevocationEnabled(false);
-        CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
-        PKIXCertPathValidatorResult result = null;
+        if(subjectCNs.get(0).equals("hospital")) {
+            System.out.println("Correct CN " );
 
-        try {
-            result = (PKIXCertPathValidatorResult) cpv.validate(cp, params);
-            return true;
-        } catch (CertPathValidatorException e) {
-            System.out.println("Invalid Certificate");
+
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            List list = new ArrayList();
+            list.add(certToCheck);
+
+            CertPath cp = cf.generateCertPath(list);
+            FileInputStream in = new FileInputStream(trustedAnchor);
+            Certificate trust = cf.generateCertificate(in);
+            TrustAnchor anchor = new TrustAnchor((X509Certificate) trust, null);
+            PKIXParameters params = new PKIXParameters(Collections.singleton(anchor));
+            params.setRevocationEnabled(false);
+            CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
+            PKIXCertPathValidatorResult result = null;
+
+            try {
+                result = (PKIXCertPathValidatorResult) cpv.validate(cp, params);
+                return true;
+            } catch (CertPathValidatorException e) {
+                System.out.println("Invalid Certificate");
+                return false;
+            }
+        }else
             return false;
-        }
     }
 
-    public String macMessage(byte[] responseBytes, SecretKey secretKey) throws InvalidKeyException, NoSuchAlgorithmException {
+    public static String macMessage(byte[] responseBytes, SecretKey secretKey) throws InvalidKeyException, NoSuchAlgorithmException {
         // Creating Mac object and initializing
         Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(secretKey);
@@ -99,7 +101,19 @@ public class CustomProtocol {
         return message64;
     }
 
-    public boolean verifyIntegrity(String data) {
+
+
+
+    public static String encryptRandomStrng(String certificate, byte[] randomString) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, CertificateException {
+        PublicKey pubKey = extractPubKey(certificate);
+        // Encrypt random string with pub key
+        byte[] encrypted_data = encryptData(randomString, pubKey);
+       return java.util.Base64.getEncoder().encodeToString(encrypted_data);
+
+    }
+
+
+    public static boolean verifyIntegrity(String data) {
         //TODO
         return true;
     }
