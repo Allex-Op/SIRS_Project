@@ -1,5 +1,7 @@
 package sirs.api.hospital;
 
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import sirs.api.hospital.entities.CustomProtocolResponse;
 import sirs.api.hospital.entities.TestRequest;
@@ -72,6 +74,29 @@ public class CustomProtocol {
         in.close();
 
         return resp;
+    }
+
+    public TestResponse dataCheck(String data, SecretKey secretKey) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+        // Creating Mac object and initializing
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(secretKey);
+        ObjectMapper mapper = new ObjectMapper();
+
+        byte[] decodedDataBytes = Base64.getDecoder().decode(data);
+
+        byte[] message = Arrays.copyOfRange(decodedDataBytes, 0, decodedDataBytes.length - 32);
+        byte[] tag = Arrays.copyOfRange(decodedDataBytes, decodedDataBytes.length - 32, decodedDataBytes.length);
+
+        byte[] check_tag = mac.doFinal(message);
+
+        if(Arrays.equals(check_tag, tag)) {
+            System.out.println("Tags are equal. Data received was not tampered.");
+            TestResponse resp = mapper.readValue(message, TestResponse.class);
+            return resp;
+        }
+
+        System.out.println("Message not secure.");
+        return null;
     }
 
     public boolean verifyIntegrity(String data) {

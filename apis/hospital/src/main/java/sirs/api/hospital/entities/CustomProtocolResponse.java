@@ -6,11 +6,6 @@ public class CustomProtocolResponse {
     // suitable to be transported over the HTTP protocol.
     String encryptedString;
 
-    public CustomProtocolResponse(String data, String encryptedString) {
-        this.data = data;
-        this.encryptedString = encryptedString;
-    }
-
     public String getData() {
         return data;
     }

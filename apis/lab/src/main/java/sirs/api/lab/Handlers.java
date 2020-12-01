@@ -65,7 +65,7 @@ public class Handlers {
 
         // Encrypt random string with pub key
         byte[] encrypted_data = cp.encryptData(randomString, pubKey);
-        String encrypted_string64 = cp.encodingInBase64(encrypted_data);
+        String encrypted_string64 = java.util.Base64.getEncoder().encodeToString(encrypted_data);
 
         // Generating secretKey from randomString
         SecretKey secretKey = new SecretKeySpec(randomString, 0, randomString.length, "AES");

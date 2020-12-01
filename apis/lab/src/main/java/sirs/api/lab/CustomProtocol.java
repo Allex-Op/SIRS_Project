@@ -43,13 +43,6 @@ public class CustomProtocol {
         return cipheredText;
     }
 
-    public String decryptData(CustomProtocolResponse cipheredData) {
-        //TODO: Decrypt the data, verify integrity and freshness
-        String decryptedData = "some data";
-        return decryptedData;
-    }
-
-
     public String encryptWithSecretKey(String stringToEncrypt, SecretKey secretKey) {
         Cipher cipher = null;
         try {
@@ -74,12 +67,6 @@ public class CustomProtocol {
             e.printStackTrace();
         }
         return null;
-    }
-
-    public String encodingInBase64(byte[] data) {
-        byte[] data_base64 = org.apache.tomcat.util.codec.binary.Base64.encodeBase64(data);
-        String data_string64 = new String(data_base64);
-        return data_string64;
     }
 
     public boolean verifyCertificate(Certificate certToCheck, String trustedAnchor) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
@@ -117,8 +104,7 @@ public class CustomProtocol {
 
         System.arraycopy(response, 0, message, 0, response.length);
         System.arraycopy(tag, 0, message, response.length, tag.length);
-
-        String message64 = encodingInBase64(message);
+        String message64 = Base64.getEncoder().encodeToString(message);
 
         return message64;
     }
