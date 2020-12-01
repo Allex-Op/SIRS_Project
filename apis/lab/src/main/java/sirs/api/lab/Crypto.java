@@ -1,12 +1,20 @@
 package sirs.api.lab;
 
-import java.io.File;
-import java.io.IOException;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
+
+import java.io.*;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 public class Crypto {
     private static final String SIGNATURE = "SHA256WithRSA";
@@ -21,7 +29,8 @@ public class Crypto {
             Signature signature = Signature.getInstance(SIGNATURE);
             SecureRandom secureRandom = new SecureRandom();
 
-            PrivateKey privKey = privateKeyReader("vagrant/examples/certificates/lab1.key");
+            File file = new File("src/main/resources/private.der");
+            PrivateKey privKey = extractPrivKey(file);
             signature.initSign(privKey, secureRandom);
             signature.update(data.getBytes("UTF-8"));
             byte[] digitalSignature = signature.sign();
@@ -31,15 +40,42 @@ public class Crypto {
 
         } catch(Exception e) {
             System.out.println("Something went wrong while signing the data...");
-            return null;
+            return "";
         }
     }
 
-    public static PrivateKey privateKeyReader(String filename) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-        byte[] keyBytes = Files.readAllBytes(Paths.get(filename));
+    public static PrivateKey extractPrivKey(File file) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+//        String privateKeyPEM = file
+//                .replace("-----BEGIN RSA PRIVATE KEY-----", "")
+//                .replaceAll(System.lineSeparator(), "")
+//                .replace("-----END RSA PRIVATE KEY-----", "");
+//
+//        byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
+//
+//        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+//        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
+//        return keyFactory.generatePrivate(keySpec);
+
+        // read private key DER file
+//        DataInputStream dis = new DataInputStream(new FileInputStream(file));
+//        byte[] privKeyBytes = new byte[(int)file.length()];
+//        dis.read(privKeyBytes);
+//        dis.close();
+//
+//        // decode private key
+//        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+//        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privKeyBytes);
+//        RSAPrivateKey privKey = (RSAPrivateKey) keyFactory.generatePrivate(privSpec);
+//        return privKey;
+
+//        try( Reader r = new FileReader(file) ){
+//            KeyPair pair = new JcaPEMKeyConverter().getKeyPair((PEMKeyPair)new PEMParser(r).readObject());
+//        }
+
+        byte[] keyBytes = Files.readAllBytes(Paths.get(file.getPath()));
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
-
         return kf.generatePrivate(spec);
     }
+
 }

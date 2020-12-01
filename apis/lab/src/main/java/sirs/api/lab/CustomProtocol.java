@@ -1,15 +1,10 @@
 package sirs.api.lab;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
-import sirs.api.lab.entities.TestResponse;
 
 import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.security.*;
 import java.security.cert.*;
@@ -102,7 +97,7 @@ public class CustomProtocol {
         // Encrypt random string with pub key
         PublicKey pubKey = extractPubKey(certificate);
         byte[] encrypted_data = encryptData(randomString, pubKey);
-       return java.util.Base64.getEncoder().encodeToString(encrypted_data);
+        return java.util.Base64.getEncoder().encodeToString(encrypted_data);
 
     }
 

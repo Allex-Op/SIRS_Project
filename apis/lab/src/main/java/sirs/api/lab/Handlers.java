@@ -69,12 +69,11 @@ public class Handlers {
             String respData = mapper.writeValueAsString(resp);
             String data = CustomProtocol.macMessage(respData.getBytes(), secretKey);
 
-
             // This object contains the encrypted data after MAC + random string encrypted with the hospitals pubKey
             CustomProtocolResponse response = new CustomProtocolResponse(data, encrypted_string64);
 
-//        if(signature.equals(""))
-//            return ResponseEntity.status(500).build();
+            if(signature.equals(""))
+                return ResponseEntity.status(500).build();
 
             return ResponseEntity.ok(response);
 
