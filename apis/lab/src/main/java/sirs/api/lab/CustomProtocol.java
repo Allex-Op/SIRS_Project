@@ -18,9 +18,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 public class CustomProtocol {
-     //TODO: Esta session key devem receber do hospital ou gerar aqui, decidam
-                        // como acharem melhor... se receberem do hospital talvez adicionar um endpoint
-                        // especifico para isso?
 
     public static PublicKey extractPubKey(String certificate) throws CertificateException {
 
@@ -101,17 +98,13 @@ public class CustomProtocol {
         return message64;
     }
 
-
-
-
-    public static String encryptRandomStrng(String certificate, byte[] randomString) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, CertificateException {
-        PublicKey pubKey = extractPubKey(certificate);
+    public static String encryptRandomString(String certificate, byte[] randomString) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, CertificateException {
         // Encrypt random string with pub key
+        PublicKey pubKey = extractPubKey(certificate);
         byte[] encrypted_data = encryptData(randomString, pubKey);
        return java.util.Base64.getEncoder().encodeToString(encrypted_data);
 
     }
-
 
     public static boolean verifyIntegrity(String data) {
         //TODO

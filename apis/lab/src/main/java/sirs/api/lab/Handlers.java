@@ -53,14 +53,11 @@ public class Handlers {
             SecretKey secretKey = new SecretKeySpec(randomString, 0, randomString.length, "AES");
 
             // Encrypt random string with pub key
-            String encrypted_string64 = CustomProtocol.encryptRandomStrng(certificate,randomString);
-
-
+            String encrypted_string64 = CustomProtocol.encryptRandomString(certificate,randomString);
 
             // Encrypting test results with secret key
             String results = "25/05/2020 Covid19:True,Pneumonia:True...";
             String encryptedResults = CustomProtocol.encryptWithSecretKey(results, secretKey);
-
 
             // Object containing encrypted random string + encrypted test results + signature
             String signature = Crypto.signData(results);

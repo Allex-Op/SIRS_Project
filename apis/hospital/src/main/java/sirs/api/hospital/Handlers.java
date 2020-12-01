@@ -133,7 +133,6 @@ public class Handlers {
             //Generate secret key
             SecretKey secretKey = CustomProtocol.generateSecretKey(message, "src/main/resources/hospitalKeystore.jks");
 
-
             // Only now the received response is verified by checking the TAG with the secret key
             // If the data was not tampered, the dataCheck function returns a testResponse object
             String data = message.getData();

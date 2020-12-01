@@ -1,6 +1,12 @@
 package sirs.api.lab;
 
-import java.security.Signature;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 public class Crypto {
     private static final String SIGNATURE = "SHA256WithRSA";
@@ -12,14 +18,28 @@ public class Crypto {
      */
     public static String signData(String data) {
         try {
-            //TODO: Read the private key from a keyStore, for that you first have to find out
-            //TODO: how to add key to privateStore...
-            //TODO: (ps important: use the algorithm specified in the algo variable)
             Signature signature = Signature.getInstance(SIGNATURE);
-            return "";
+            SecureRandom secureRandom = new SecureRandom();
+
+            PrivateKey privKey = privateKeyReader("vagrant/examples/certificates/lab1.key");
+            signature.initSign(privKey, secureRandom);
+            signature.update(data.getBytes("UTF-8"));
+            byte[] digitalSignature = signature.sign();
+            String digitalSign = new String(digitalSignature);
+
+            return digitalSign;
+
         } catch(Exception e) {
             System.out.println("Something went wrong while signing the data...");
-            return "";
+            return null;
         }
+    }
+
+    public static PrivateKey privateKeyReader(String filename) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+        byte[] keyBytes = Files.readAllBytes(Paths.get(filename));
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+
+        return kf.generatePrivate(spec);
     }
 }
