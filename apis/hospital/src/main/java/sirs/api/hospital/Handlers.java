@@ -118,6 +118,10 @@ public class Handlers {
             // Write body
             ObjectMapper mapper = new ObjectMapper();
             String reqBody = mapper.writeValueAsString(req);
+            //TODO: 1 HTTPCLIENT "http://localhost:8082/handshake/" -- send certificate
+            //receive cenas
+            //TODO: 1 HTTPCLIENT "http://localhost:8082/teststoanalyze/"" -- send nonce + testrequest + somehow identity
+            //receive cenas
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
