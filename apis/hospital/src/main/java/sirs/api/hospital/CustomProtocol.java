@@ -2,6 +2,7 @@ package sirs.api.hospital;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import sirs.api.hospital.entities.CustomProtocolResponse;
+import sirs.api.hospital.entities.HandshakeResponse;
 import sirs.api.hospital.entities.TestResponse;
 
 import javax.crypto.*;
@@ -42,24 +43,6 @@ public class CustomProtocol {
         return new String(cipher.doFinal(Base64.getDecoder().decode(stringToDecrypt)));
     }
 
-    public static String decodingFromBase64(String data) {
-        byte[] decodedData = Base64.getDecoder().decode(data);
-        String finalData = new String(decodedData);
-        return finalData;
-    }
-
-    public static TestResponse extractResponse(String message) throws IOException, ClassNotFoundException {
-        String messageDecoded64 = decodingFromBase64(message);
-        byte[] messageBytes = messageDecoded64.getBytes();
-
-        byte[] response = Arrays.copyOfRange(messageBytes, 0, messageBytes.length - 32);
-        ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(response));
-        TestResponse resp = (TestResponse) in.readObject();
-        in.close();
-
-        return resp;
-    }
-
     public static TestResponse dataCheck(String data, SecretKey secretKey) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         // Creating Mac object and initializing
         Mac mac = Mac.getInstance("HmacSHA256");
@@ -88,9 +71,9 @@ public class CustomProtocol {
         return true;
     }
 
-    public static SecretKey generateSecretKey(CustomProtocolResponse message, String path) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchPaddingException {
+    public static SecretKey generateSecretKey(HandshakeResponse message, String path) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchPaddingException {
         // Getting the encrypted random string from CustomProtocolResponse
-        String encryptedString64 = message.getEncryptedString();
+        String encryptedString64 = message.getRandomString();
         byte[] encryptedStringBytes = Base64.getDecoder().decode(encryptedString64);
 
         // Extract private key from hospitalKeyStore

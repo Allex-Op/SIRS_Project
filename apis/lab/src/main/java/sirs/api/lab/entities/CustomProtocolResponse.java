@@ -5,11 +5,8 @@ public class CustomProtocolResponse {
                     // Also this data is in Base64 format because binary data is not
                     // suitable to be transported over the HTTP protocol.
 
-    String encryptedString;
-
-    public CustomProtocolResponse(String data, String encryptedString) {
+    public CustomProtocolResponse(String data) {
         this.data = data;
-        this.encryptedString = encryptedString;
     }
 
     public String getData() {
@@ -19,8 +16,4 @@ public class CustomProtocolResponse {
     public void setData(String data) {
         this.data = data;
     }
-
-    public void setEncryptedString(String encryptedString) { this.encryptedString = encryptedString; }
-
-    public String getEncryptedString() { return encryptedString; }
 }

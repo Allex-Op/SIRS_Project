@@ -113,29 +113,44 @@ public class Handlers {
             // Getting the certificate to send along with the data in TestRequest
             File crtFile = new File("src/main/resources/hospital.pem");
             String certificate = new String(Files.readAllBytes(crtFile.toPath()), Charset.defaultCharset());
-            TestRequest req = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST", certificate);
+            HandshakeRequest handshakeRequest = new HandshakeRequest(certificate);
+            TestRequest testRequest = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST");
 
             // Write body
             ObjectMapper mapper = new ObjectMapper();
-            String reqBody = mapper.writeValueAsString(req);
-            //TODO: 1 HTTPCLIENT "http://localhost:8082/handshake/" -- send certificate
-            //receive cenas
-            //TODO: 1 HTTPCLIENT "http://localhost:8082/teststoanalyze/"" -- send nonce + testrequest + somehow identity
-            //receive cenas
+
+            // Send certificate and receive response that makes possible to create the secret key
+            String reqBody = mapper.writeValueAsString(handshakeRequest);
+            HttpClient handshakeClient = HttpClient.newHttpClient();
+            HttpRequest handshakeReq = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8082/beginhandshake"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(reqBody))
+                    .build();
+
+            HttpResponse<String> handshakeResponse = handshakeClient.send(handshakeReq, HttpResponse.BodyHandlers.ofString());
+            HandshakeResponse hsResponse = mapper.readValue(handshakeResponse.body(), HandshakeResponse.class);
+
+            // TODO: DESENCRIPTAR A RESPOSTA POIS VEM COM NONCE E RANDOMSTRING, ESSA STRING E PARA A SECRET KEY
+
+            // Generate secret key
+            SecretKey secretKey = CustomProtocol.generateSecretKey(hsResponse, "src/main/resources/hospitalKeystore.jks");
+
+            // TODO: MAC THE TESTREQUEST DATA + NONCE AND SEND
+
+            // Sending the testReq (including data) and nonce, after using MAC on them
+            String testReqBody = mapper.writeValueAsString(testRequest);
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("http://localhost:8082/teststoanalyze/" + id))
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(reqBody))
+                    .POST(HttpRequest.BodyPublishers.ofString(testReqBody))
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
             //Read Response
             CustomProtocolResponse message = mapper.readValue(response.body(), CustomProtocolResponse.class);
-            //Generate secret key
-            SecretKey secretKey = CustomProtocol.generateSecretKey(message, "src/main/resources/hospitalKeystore.jks");
 
             // Only now the received response is verified by checking the TAG with the secret key
             // If the data was not tampered, the dataCheck function returns a testResponse object

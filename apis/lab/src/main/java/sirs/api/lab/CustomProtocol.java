@@ -5,6 +5,7 @@ import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
 
 import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.security.*;
 import java.security.cert.*;
@@ -13,6 +14,21 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 public class CustomProtocol {
+    SecretKey secretKey;
+
+    public String createRandomString(String certificate) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, CertificateException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException {
+        // Generating random string
+        byte[] randomString = new byte[32];
+        new Random().nextBytes(randomString);
+
+        // Generating secretKey from randomString
+        secretKey = new SecretKeySpec(randomString, 0, randomString.length, "AES");
+
+        // Encrypt random string with pub key
+        String encryptedString64 = CustomProtocol.encryptRandomString(certificate, randomString);
+
+        return encryptedString64;
+    }
 
     public static PublicKey extractPubKey(String certificate) throws CertificateException {
 
@@ -34,7 +50,7 @@ public class CustomProtocol {
         return cipheredText;
     }
 
-    public static  String encryptWithSecretKey(String stringToEncrypt, SecretKey secretKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
+    public String encryptWithSecretKey(String stringToEncrypt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = null;
             cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
@@ -77,7 +93,7 @@ public class CustomProtocol {
             return false;
     }
 
-    public static String macMessage(byte[] responseBytes, SecretKey secretKey) throws InvalidKeyException, NoSuchAlgorithmException {
+    public String macMessage(byte[] responseBytes) throws InvalidKeyException, NoSuchAlgorithmException {
         // Creating Mac object and initializing
         Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(secretKey);
@@ -101,8 +117,4 @@ public class CustomProtocol {
 
     }
 
-    public static boolean verifyIntegrity(String data) {
-        //TODO
-        return true;
-    }
 }
