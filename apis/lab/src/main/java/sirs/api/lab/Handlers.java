@@ -26,6 +26,16 @@ import java.util.Random;
 @RestController
 public class Handlers {
 
+   // @PostMapping("/beginhandshake/")
+    //TODO: receive certificate
+    // check certificate
+    //originate nonce
+    //originate secret key
+    //mac (nonce + secret key)
+    // return nonce , session key +  tag
+
+
+
     @PostMapping("/teststoanalyze/{id}")
     public ResponseEntity<CustomProtocolResponse> testsToAnalyze(@PathVariable int id, @RequestBody TestRequest testreq) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, CertificateException {
         // Because for simplicity reasons we only answer to requests with id 1
