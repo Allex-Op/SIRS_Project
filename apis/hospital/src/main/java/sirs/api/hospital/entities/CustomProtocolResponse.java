@@ -1,27 +1,29 @@
 package sirs.api.hospital.entities;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Base64;
+
 public class CustomProtocolResponse {
     /**
      *
-     * String data:
-     *      This string is a result of using mapper on testResponse, transforming that object into a string.
-     *      It is encrypted in base64, after applying macs algorithm on it.
-     *
      **/
-    String data;
-    String nonce;
-    String tag;
+    String mac;
 
-    public CustomProtocolResponse(String data, String nonce, String tag) {
-        this.data = data;
-        this.nonce = nonce;
-        this.tag = tag;
+    public CustomProtocolResponse(String mac) {
+        this.mac = mac;
     }
 
-    public String getData() { return data; }
+    public String getData() { return mac; }
 
-    public String getNonce() { return nonce; }
+    public TestResponse getTestResponse() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        byte[] decodedMacBytes = Base64.getDecoder().decode(mac);
+        byte[] testResponse = Arrays.copyOfRange(decodedMacBytes, 0, decodedMacBytes.length - 32);
 
-    public String getTag() { return tag; }
+        return mapper.readValue(testResponse, TestResponse.class);
+    }
 
 }

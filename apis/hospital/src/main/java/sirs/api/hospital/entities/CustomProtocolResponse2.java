@@ -1,5 +1,11 @@
 package sirs.api.hospital.entities;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Base64;
+
 public class CustomProtocolResponse2 {
 
 
@@ -21,6 +27,12 @@ public class CustomProtocolResponse2 {
         return mac;
     }
 
+    public HandshakeResponse getHandshakeResponse() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        byte[] decodedMacBytes = Base64.getDecoder().decode(mac);
+        byte[] handshakeResponse = Arrays.copyOfRange(decodedMacBytes, 0, decodedMacBytes.length - 32);
 
+        return mapper.readValue(handshakeResponse, HandshakeResponse.class);
+    }
 
 }

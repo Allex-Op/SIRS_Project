@@ -3,12 +3,12 @@ package sirs.api.lab.entities;
 public class TestResponse {
     String results;
     String digitalSignature;
-//    String freshness;
+    String nonce;
 
-    public TestResponse(String results, String digitalSignature) {
+    public TestResponse(String results, String digitalSignature, String nonce) {
         this.results = results;
         this.digitalSignature = digitalSignature;
-//        this.freshness = freshness;
+        this.nonce = nonce;
     }
 
     public String getResults() {
@@ -27,7 +27,4 @@ public class TestResponse {
         this.results = results;
     }
 
-//    public String getFreshness() { return freshness; }
-//
-//    public void setFreshness(String freshness) { this.freshness = freshness; }
 }

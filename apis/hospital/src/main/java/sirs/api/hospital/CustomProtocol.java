@@ -1,9 +1,6 @@
 package sirs.api.hospital;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import sirs.api.hospital.entities.HandshakeResponse;
-import sirs.api.hospital.entities.TestResponse;
-
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
@@ -15,9 +12,6 @@ import java.util.*;
 
 public class CustomProtocol {
     private SecretKey secretKey;
-
-
-
     private String nonce;
 
     public byte[] decryptData(byte[] cipheredData, PrivateKey privKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
@@ -43,11 +37,33 @@ public class CustomProtocol {
         return new String(cipher.doFinal(Base64.getDecoder().decode(stringToDecrypt)));
     }
 
-    public TestResponse dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public String macMessage(byte[] responseBytes) throws InvalidKeyException, NoSuchAlgorithmException {
+        // Creating Mac object and initializing
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(secretKey);
+
+        byte[] response = Arrays.copyOfRange(responseBytes, 0, responseBytes.length);
+        byte[] tag = mac.doFinal(response);
+        byte[] message = new byte[response.length + tag.length];
+
+        System.arraycopy(response, 0, message, 0, response.length);
+        System.arraycopy(tag, 0, message, response.length, tag.length);
+
+        return Base64.getEncoder().encodeToString(message);
+    }
+
+//    public String encryptRespData(String certificate, byte[] randomString) throws NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, CertificateException {
+//        // Encrypt random string with pub key
+//        PublicKey pubKey = extractPubKey(certificate);
+//        byte[] encrypted_data = encryptData(randomString, pubKey);
+//        return java.util.Base64.getEncoder().encodeToString(encrypted_data);
+//    }
+
+
+    public boolean dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         // Creating Mac object and initializing
         Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(this.secretKey);
-        ObjectMapper mapper = new ObjectMapper();
 
         byte[] decodedDataBytes = Base64.getDecoder().decode(data);
 
@@ -58,14 +74,14 @@ public class CustomProtocol {
 
         if(Arrays.equals(check_tag, tag)) {
             System.out.println("Tags are equal. Data received was not tampered.");
-            return mapper.readValue(message, TestResponse.class);
+            return true;
         }
 
         System.out.println("Message not secure.");
-        return null;
+        return false;
     }
 
-    public boolean checkIntegrity(String message, String tag ) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public boolean checkIntegrity(String message, String tag) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         // Creating Mac object and initializing
         Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(this.secretKey);
@@ -82,9 +98,6 @@ public class CustomProtocol {
         }
             System.out.println("Message not secure.");
             return false;
-
-
-
     }
 
     public void verifyNonce(String nonce, String randomString, String tag) throws InvalidKeyException, NoSuchAlgorithmException {
@@ -124,19 +137,6 @@ public class CustomProtocol {
 
         this.secretKey = new SecretKeySpec(decryptedStringBytes, 0, decryptedStringBytes.length, "AES");
     }
-
-    public String createNonce() {
-        //TODO: VERIFY IF IT'S UNIQUE -DATABASE
-        byte[] randomString = new byte[32];
-        new Random().nextBytes(randomString);
-        nonce = new String(randomString);
-        return nonce;
-    }
-
-    public String getNonce() {
-        return nonce;
-    }
-
 
 }
 

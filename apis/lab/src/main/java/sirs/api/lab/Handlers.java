@@ -42,9 +42,6 @@ public class Handlers {
             String randomString = customProtocol.createRandomString(certificate);
             String nonce = customProtocol.createNonce();
 
-            // Concatenating randomString with nonce, generates a tag with mac
-           // String tag = customProtocol.macTwoStrings(randomString, nonce);
-
             HandshakeResponse handshakeResponse = new HandshakeResponse(randomString, nonce);
 
             // Using mapper to transform testResponse into string
@@ -53,11 +50,8 @@ public class Handlers {
             String respData = mapper.writeValueAsString(handshakeResponse);
             String mac = customProtocol.macMessage(respData.getBytes());
 
-
-
-
-
-            CustomProtocolResponse2 response = new CustomProtocolResponse2( mac);
+            // mac = tag + respData (json string -> handshakeResponse)
+            CustomProtocolResponse2 response = new CustomProtocolResponse2(mac);
 
             return ResponseEntity.ok(response);
 
@@ -75,27 +69,27 @@ public class Handlers {
         if(id != 1)
             return ResponseEntity.status(404).build();
 
+        // TODO: o testRequest que se este endpoint recebe no body
+        //  vai ter o nonce que tem de ser verificado aqui
+
         // Encrypting test results with secret key
         String results = "25/05/2020 Covid19:True,Pneumonia:True...";
         String encryptedResults = customProtocol.encryptWithSecretKey(results);
 
-        // Object containing encrypted random string + encrypted test results + signature
+        // Object containing encrypted random string + encrypted test results + signature + nonce
         String signature = Crypto.signData(results);
+        String nonce = customProtocol.createNonce();
 
-        TestResponse resp = new TestResponse(encryptedResults, signature);
+        TestResponse resp = new TestResponse(encryptedResults, signature, nonce);
 
         // Using mapper to transform testResponse into string
         // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
         ObjectMapper mapper = new ObjectMapper();
         String respData = mapper.writeValueAsString(resp);
 
-        String data = customProtocol.macMessage(respData.getBytes());
-        String nonce = customProtocol.createNonce();
+        String mac = customProtocol.macMessage(respData.getBytes());
 
-        // nonce is not encrypted in base 64 whatsoever
-        String tag = customProtocol.macTwoStrings(data, nonce);
-
-        CustomProtocolResponse response = new CustomProtocolResponse(data, nonce, tag);
+        CustomProtocolResponse response = new CustomProtocolResponse(mac);
 
         if(signature.equals(""))
             return ResponseEntity.status(500).build();

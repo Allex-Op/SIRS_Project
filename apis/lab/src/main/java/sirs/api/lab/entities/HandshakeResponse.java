@@ -12,12 +12,9 @@ public class HandshakeResponse {
     String randomString;
     String nonce;
 
-
-
     public HandshakeResponse(String randomString, String nonce) {
         this.randomString = randomString;
         this.nonce = nonce;
-
     }
 
     public String getRandomString() { return randomString; }

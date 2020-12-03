@@ -134,7 +134,6 @@ public class CustomProtocol {
         PublicKey pubKey = extractPubKey(certificate);
         byte[] encrypted_data = encryptData(randomString, pubKey);
         return java.util.Base64.getEncoder().encodeToString(encrypted_data);
-
     }
 
     public String createNonce() {
