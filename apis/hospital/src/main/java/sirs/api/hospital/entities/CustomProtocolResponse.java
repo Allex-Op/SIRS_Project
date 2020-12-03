@@ -1,20 +1,27 @@
 package sirs.api.hospital.entities;
 
 public class CustomProtocolResponse {
-    String data;    // This data should provide the confidentiality, integrity, freshness...
-    // Also this data should be in Base64 format cause binary data is not
-    // suitable to be transported over the HTTP protocol.
-    String encryptedString;
+    /**
+     *
+     * String data:
+     *      This string is a result of using mapper on testResponse, transforming that object into a string.
+     *      It is encrypted in base64, after applying macs algorithm on it.
+     *
+     **/
+    String data;
+    String nonce;
+    String tag;
 
-    public String getData() {
-        return data;
-    }
-
-    public void setData(String data) {
+    public CustomProtocolResponse(String data, String nonce, String tag) {
         this.data = data;
+        this.nonce = nonce;
+        this.tag = tag;
     }
 
-    public void setEncryptedString(String encryptedString) { this.encryptedString = encryptedString; }
+    public String getData() { return data; }
 
-    public String getEncryptedString() { return encryptedString; }
+    public String getNonce() { return nonce; }
+
+    public String getTag() { return tag; }
+
 }

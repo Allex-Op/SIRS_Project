@@ -17,7 +17,7 @@ import java.util.*;
 public class CustomProtocol {
     SecretKey secretKey;
 
-    public String createRandomString(String certificate) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, CertificateException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException {
+    public String createRandomString(String certificate) throws NoSuchPaddingException, NoSuchAlgorithmException, CertificateException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException {
         // Generating random string
         byte[] randomString = new byte[32];
         new Random().nextBytes(randomString);
@@ -26,9 +26,7 @@ public class CustomProtocol {
         secretKey = new SecretKeySpec(randomString, 0, randomString.length, "AES");
 
         // Encrypt random string with pub key
-        String encryptedString64 = encryptRandomString(certificate, randomString);
-
-        return encryptedString64;
+        return encryptRandomString(certificate, randomString);
     }
 
     public PublicKey extractPubKey(String certificate) throws CertificateException {
@@ -36,19 +34,17 @@ public class CustomProtocol {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         InputStream cert = new ByteArrayInputStream(certificate.getBytes());
         Certificate final_certificate = cf.generateCertificate(cert);
-        PublicKey pubKey = final_certificate.getPublicKey();
 
-        return pubKey;
+        return final_certificate.getPublicKey();
     }
 
-    public byte[] encryptData(byte[] randomString, PublicKey pubKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, BadPaddingException, IllegalBlockSizeException {
+    public byte[] encryptData(byte[] randomString, PublicKey pubKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
 
         // Encrypt the data adding Confidentiality, Integrity & Freshness
         Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, pubKey);
-        byte[] cipheredText = cipher.doFinal(randomString);
 
-        return cipheredText;
+        return cipher.doFinal(randomString);
     }
 
     public String encryptWithSecretKey(String stringToEncrypt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
@@ -106,9 +102,8 @@ public class CustomProtocol {
         System.arraycopy(message, 0, randomStringB, nonceB.length, randomStringB.length);
 
         byte[] tag = mac.doFinal(message);
-        String tag64 = Base64.getEncoder().encodeToString(tag);
 
-        return tag64;
+        return Base64.getEncoder().encodeToString(tag);
     }
 
     public String macMessage(byte[] responseBytes) throws InvalidKeyException, NoSuchAlgorithmException {
@@ -122,12 +117,11 @@ public class CustomProtocol {
 
         System.arraycopy(response, 0, message, 0, response.length);
         System.arraycopy(tag, 0, message, response.length, tag.length);
-        String message64 = Base64.getEncoder().encodeToString(message);
 
-        return message64;
+        return Base64.getEncoder().encodeToString(message);
     }
 
-    public String encryptRandomString(String certificate, byte[] randomString) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, CertificateException {
+    public String encryptRandomString(String certificate, byte[] randomString) throws NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, CertificateException {
         // Encrypt random string with pub key
         PublicKey pubKey = extractPubKey(certificate);
         byte[] encrypted_data = encryptData(randomString, pubKey);
@@ -138,8 +132,7 @@ public class CustomProtocol {
     public String createNonce() {
         byte[] randomString = new byte[32];
         new Random().nextBytes(randomString);
-        String nonce = new String(randomString);
-        return nonce;
+        return new String(randomString);
     }
 
 }

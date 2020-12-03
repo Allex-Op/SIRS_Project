@@ -17,16 +17,4 @@ public class CustomProtocolResponse {
         this.nonce = nonce;
         this.tag = tag;
     }
-
-    public String getData() { return data; }
-
-    public void setData(String data) { this.data = data; }
-
-    public String getNonce() { return nonce; }
-
-    public void setNonce(String nonce) { this.nonce = nonce; }
-
-    public String getTag() { return tag; }
-
-    public void setTag(String tag) { this.tag = tag; }
 }

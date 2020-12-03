@@ -8,8 +8,6 @@ import sirs.api.hospital.db.Repo;
 import sirs.api.hospital.entities.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -17,8 +15,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.security.PrivateKey;
-import java.util.Base64;
+
 
 @RestController
 public class Handlers {
@@ -113,7 +110,7 @@ public class Handlers {
 
             // Getting the certificate to send along with the data in TestRequest
             File crtFile = new File("src/main/resources/hospital.pem");
-            String certificate = new String(Files.readAllBytes(crtFile.toPath()), Charset.defaultCharset());
+            String certificate = Files.readString(crtFile.toPath(), Charset.defaultCharset());
             HandshakeRequest handshakeRequest = new HandshakeRequest(certificate);
             TestRequest testRequest = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST");
 
@@ -153,6 +150,9 @@ public class Handlers {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             //Read Response
             CustomProtocolResponse message = mapper.readValue(response.body(), CustomProtocolResponse.class);
+
+            // TODO: ALSO NEED TO VERIFY IF THIS NONCE ALREADY IS SAVED IN DATABASE
+            customProtocol.verifyNonce(message.getData(), message.getNonce(), message.getTag());
 
             // Only now the received response is verified by checking the TAG with the secret key
             // If the data was not tampered, the dataCheck function returns a testResponse object

@@ -1,7 +1,6 @@
 package sirs.api.hospital;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.ResponseEntity;
 import sirs.api.hospital.entities.HandshakeResponse;
 import sirs.api.hospital.entities.TestResponse;
 
@@ -21,9 +20,7 @@ public class CustomProtocol {
         // Decrypt the data, verify integrity and freshness
         Cipher decrypt=Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
         decrypt.init(Cipher.DECRYPT_MODE, privKey);
-        byte[] decryptedData = decrypt.doFinal(cipheredData);
-
-        return decryptedData;
+        return decrypt.doFinal(cipheredData);
     }
 
     public PrivateKey extractPrivKey(File keyStoreFile) throws IOException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException, CertificateException {
@@ -33,9 +30,7 @@ public class CustomProtocol {
         String alias = "hospital";
 
         keystore.load(is, password.toCharArray());
-        PrivateKey privKey = (PrivateKey) keystore.getKey(alias, password.toCharArray());
-
-        return privKey;
+        return (PrivateKey) keystore.getKey(alias, password.toCharArray());
     }
 
     public String decryptWithSecretKey(String stringToDecrypt) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
@@ -59,8 +54,7 @@ public class CustomProtocol {
 
         if(Arrays.equals(check_tag, tag)) {
             System.out.println("Tags are equal. Data received was not tampered.");
-            TestResponse resp = mapper.readValue(message, TestResponse.class);
-            return resp;
+            return mapper.readValue(message, TestResponse.class);
         }
 
         System.out.println("Message not secure.");
@@ -82,12 +76,11 @@ public class CustomProtocol {
         String tag64 = Base64.getEncoder().encodeToString(checkTag);
 
         try {
-            if (tag64.equals(tag64)) {
-                return;
+            if(tag64.equals(tag)) {
+                System.out.println("Tag verified.");
             }
         } catch (Exception e) {
             System.out.println("Unable to make HTTP Request");
-            return;
         }
     }
 

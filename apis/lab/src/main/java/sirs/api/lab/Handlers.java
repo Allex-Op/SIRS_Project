@@ -28,7 +28,7 @@ public class Handlers {
     // return nonce, randomString, mac (nonce + secret key)
 
     @PostMapping("/beginhandshake")
-    public ResponseEntity<HandshakeResponse> handshake(@RequestBody HandshakeRequest handshakeRequest) throws CertificateException, NoSuchPaddingException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException {
+    public ResponseEntity<HandshakeResponse> handshake(@RequestBody HandshakeRequest handshakeRequest) throws CertificateException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException {
         String certificate = handshakeRequest.getCertificate();
 
         byte [] decoded = Base64.decodeBase64(certificate.replaceAll("-----BEGIN CERTIFICATE-----\n", "").replaceAll("-----END CERTIFICATE-----", ""));
@@ -54,7 +54,7 @@ public class Handlers {
     }
 
     @PostMapping("/teststoanalyze/{id}")
-    public ResponseEntity<CustomProtocolResponse> testsToAnalyze(@PathVariable int id, @RequestBody TestRequest testreq) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, CertificateException {
+    public ResponseEntity<CustomProtocolResponse> testsToAnalyze(@PathVariable int id, @RequestBody TestRequest testreq) throws NoSuchAlgorithmException, IOException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
         // Because for simplicity reasons we only answer to requests with id 1
         // id is only for representation purposes in case this was a real system
         // we would have multiple id's...
