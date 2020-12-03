@@ -1,5 +1,6 @@
 package sirs.api.lab;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.http.ResponseEntity;
@@ -21,31 +22,44 @@ import java.security.spec.InvalidKeySpecException;
 
 @RestController
 public class Handlers {
-    CustomProtocol customProtocol = new CustomProtocol();
+    CustomProtocol customProtocol = null;
 
 
     //TODO:
     // return nonce, randomString, mac (nonce + secret key)
 
     @PostMapping("/beginhandshake")
-    public ResponseEntity<HandshakeResponse> handshake(@RequestBody HandshakeRequest handshakeRequest) throws CertificateException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException {
+    public ResponseEntity<CustomProtocolResponse2> handshake(@RequestBody HandshakeRequest handshakeRequest) throws CertificateException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, JsonProcessingException {
+        customProtocol = new CustomProtocol();
         String certificate = handshakeRequest.getCertificate();
 
-        byte [] decoded = Base64.decodeBase64(certificate.replaceAll("-----BEGIN CERTIFICATE-----\n", "").replaceAll("-----END CERTIFICATE-----", ""));
-        Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(decoded));
+
         try {
-            boolean valid = customProtocol.verifyCertificate(cert, "src/main/resources/myCA.crt", "hospital");
+            boolean valid = customProtocol.verifyCertificate(certificate, "src/main/resources/myCA.crt", "hospital");
             System.out.println("Certificate is " + valid);
 
+            //encrypted random string
             String randomString = customProtocol.createRandomString(certificate);
             String nonce = customProtocol.createNonce();
 
             // Concatenating randomString with nonce, generates a tag with mac
-            String tag = customProtocol.macTwoStrings(randomString, nonce);
+           // String tag = customProtocol.macTwoStrings(randomString, nonce);
 
-            HandshakeResponse handshakeResponse = new HandshakeResponse(randomString, nonce, tag);
+            HandshakeResponse handshakeResponse = new HandshakeResponse(randomString, nonce);
 
-            return ResponseEntity.ok(handshakeResponse);
+            // Using mapper to transform testResponse into string
+            // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
+            ObjectMapper mapper = new ObjectMapper();
+            String respData = mapper.writeValueAsString(handshakeResponse);
+            String mac = customProtocol.macMessage(respData.getBytes());
+
+
+
+
+
+            CustomProtocolResponse2 response = new CustomProtocolResponse2( mac);
+
+            return ResponseEntity.ok(response);
 
         } catch (InvalidAlgorithmParameterException | FileNotFoundException | NoSuchAlgorithmException e) {
             System.out.println("Ups NOT WORKING");

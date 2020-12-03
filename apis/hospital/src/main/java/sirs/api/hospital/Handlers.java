@@ -108,11 +108,10 @@ public class Handlers {
         try {
             CustomProtocol customProtocol = new CustomProtocol();
 
-            // Getting the certificate to send along with the data in TestRequest
+            // Getting the certificate
             File crtFile = new File("src/main/resources/hospital.pem");
             String certificate = Files.readString(crtFile.toPath(), Charset.defaultCharset());
             HandshakeRequest handshakeRequest = new HandshakeRequest(certificate);
-            TestRequest testRequest = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST");
 
             // Write body
             ObjectMapper mapper = new ObjectMapper();
@@ -126,16 +125,87 @@ public class Handlers {
                     .POST(HttpRequest.BodyPublishers.ofString(reqBody))
                     .build();
 
+            //HttpResponse<String> handshakeResponse = handshakeClient.send(handshakeReq, HttpResponse.BodyHandlers.ofString());
+            //HandshakeResponse hsResponse = mapper.readValue(handshakeResponse.body(), HandshakeResponse.class);
+
             HttpResponse<String> handshakeResponse = handshakeClient.send(handshakeReq, HttpResponse.BodyHandlers.ofString());
-            HandshakeResponse hsResponse = mapper.readValue(handshakeResponse.body(), HandshakeResponse.class);
+            CustomProtocolResponse2 hsResponse = mapper.readValue(handshakeResponse.body(), CustomProtocolResponse2.class);
+
+
+
+            HandshakeResponse hs = (HandshakeResponse) hsResponse.getMessage();
+            //Generate secret key
+             customProtocol.generateSecretKey(hs , "src/main/resources/hospitalKeystore.jks");
+
+
+            if( customProtocol.checkIntegrity( mapper.writeValueAsString( hsResponse.getMessage() ) , hsResponse.getTag() ) ) {
+                System.out.println("Integer");
+                customProtocol.createNonce();
+
+
+
+                TestRequest testRequest = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST",hs.getNonce());
+                System.out.println("working");
+
+
+
+
+
+
+
+                // Sending the testReq (including data) and nonce, after using MAC on them
+                String testReqBody = mapper.writeValueAsString(testRequest);
+
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:8082/teststoanalyze/" + id))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(testReqBody))
+                        .build();
+
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                //Read Response
+                CustomProtocolResponse message = mapper.readValue(response.body(), CustomProtocolResponse.class);
+
+                // TODO: ALSO NEED TO VERIFY IF THIS NONCE ALREADY IS SAVED IN DATABASE
+                customProtocol.verifyNonce(message.getData(), message.getNonce(), message.getTag());
+
+                // Only now the received response is verified by checking the TAG with the secret key
+                // If the data was not tampered, the dataCheck function returns a testResponse object
+                String data = message.getData();
+                TestResponse resp = customProtocol.dataCheck(data);
+
+                String decryptedResults = customProtocol.decryptWithSecretKey(resp.getResults());
+
+                System.out.println(decryptedResults);
+
+                return ResponseEntity.ok(resp);
+
+
+
+
+            }
+
+
+
+
+
+
+
+/*
 
             // TODO: ALSO NEED TO VERIFY IF THIS NONCE ALREADY IS SAVED IN DATABASE
-            customProtocol.verifyNonce(hsResponse.getRandomString(), hsResponse.getNonce(), hsResponse.getTag());
+            //customProtocol.verifyNonce(hsResponse.getRandomString(), hsResponse.getNonce(), hsResponse.getTag());
+              customProtocol.dataCheck(hsResponse.getRandomString() + hsResponse.getNonce(), hsResponse.getTag() );
 
             // Generate secret key
             customProtocol.generateSecretKey(hsResponse, "src/main/resources/hospitalKeystore.jks");
 
-            // TODO: MAC (TESTREQUEST DATA + NONCE) -> SEND
+            // TODO: MAC (TESTREQUEST DATA + NONCE) -> SEND*/
+
+/*
+            TestRequest testRequest = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST",nonce);
+
 
             // Sending the testReq (including data) and nonce, after using MAC on them
             String testReqBody = mapper.writeValueAsString(testRequest);
@@ -162,8 +232,10 @@ public class Handlers {
             String decryptedResults = customProtocol.decryptWithSecretKey(resp.getResults());
 
             System.out.println(decryptedResults);
+             return ResponseEntity.ok(resp);*/
 
-            return ResponseEntity.ok(resp);
+
+            return ResponseEntity.status(500).build();
 
         } catch(Exception e) {
             System.out.println("Unable to make HTTP Request");

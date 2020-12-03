@@ -15,7 +15,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 public class CustomProtocol {
-    SecretKey secretKey;
+   private  SecretKey secretKey;
+   private String nonce;
+
+
 
     public String createRandomString(String certificate) throws NoSuchPaddingException, NoSuchAlgorithmException, CertificateException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException {
         // Generating random string
@@ -55,14 +58,17 @@ public class CustomProtocol {
 
     }
 
-    public boolean verifyCertificate(Certificate certToCheck, String trustedAnchor, String expectedCN) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    public boolean verifyCertificate(String certificateToCheck, String trustedAnchor, String expectedCN) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+
+        byte [] decoded = org.apache.tomcat.util.codec.binary.Base64.decodeBase64(certificateToCheck.replaceAll("-----BEGIN CERTIFICATE-----\n", "").replaceAll("-----END CERTIFICATE-----", ""));
+        Certificate certToCheck = CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(decoded));
 
         //Verify CN
         X509Certificate c = (X509Certificate)certToCheck;
         X509Principal principal = PrincipalUtil.getSubjectX509Principal(c);
         Vector<?> subjectCNs = principal.getValues(X509Name.CN);
 
-        if(subjectCNs.get(0).equals("hospital")) {
+        if(subjectCNs.get(0).equals(expectedCN)) {
             System.out.println("Correct CN " );
 
 
@@ -89,6 +95,8 @@ public class CustomProtocol {
         } else
             return false;
     }
+
+
 
     public String macTwoStrings (String nonce, String randomString) throws InvalidKeyException, NoSuchAlgorithmException {
         Mac mac = Mac.getInstance("HmacSHA256");
@@ -130,9 +138,11 @@ public class CustomProtocol {
     }
 
     public String createNonce() {
+        //TODO: VERIFY IF IT'S UNIQUE -DATABASE
         byte[] randomString = new byte[32];
         new Random().nextBytes(randomString);
-        return new String(randomString);
+        nonce = new String(randomString);
+        return nonce;
     }
 
 }

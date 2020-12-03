@@ -11,13 +11,13 @@ public class HandshakeResponse {
 
     String randomString;
     String nonce;
-    String tag;
 
 
-    public HandshakeResponse(String randomString, String nonce, String tag) {
+
+    public HandshakeResponse(String randomString, String nonce) {
         this.randomString = randomString;
         this.nonce = nonce;
-        this.tag = tag;
+
     }
 
     public String getRandomString() { return randomString; }

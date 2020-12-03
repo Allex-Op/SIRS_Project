@@ -14,7 +14,11 @@ import java.util.*;
 
 
 public class CustomProtocol {
-    SecretKey secretKey;
+    private SecretKey secretKey;
+
+
+
+    private String nonce;
 
     public byte[] decryptData(byte[] cipheredData, PrivateKey privKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         // Decrypt the data, verify integrity and freshness
@@ -61,6 +65,28 @@ public class CustomProtocol {
         return null;
     }
 
+    public boolean checkIntegrity(String message, String tag ) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+        // Creating Mac object and initializing
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(this.secretKey);
+
+
+        byte[] decodedMessageBytes = Base64.getDecoder().decode(message);
+        byte[] decodedTagBytes = Base64.getDecoder().decode(message);
+
+        byte[] check_tag = mac.doFinal(decodedMessageBytes);
+
+        if(Arrays.equals(check_tag, decodedTagBytes)) {
+            System.out.println("Tags are equal. Data received was not tampered.");
+            return true;
+        }
+            System.out.println("Message not secure.");
+            return false;
+
+
+
+    }
+
     public void verifyNonce(String nonce, String randomString, String tag) throws InvalidKeyException, NoSuchAlgorithmException {
         Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(this.secretKey);
@@ -98,5 +124,19 @@ public class CustomProtocol {
 
         this.secretKey = new SecretKeySpec(decryptedStringBytes, 0, decryptedStringBytes.length, "AES");
     }
+
+    public String createNonce() {
+        //TODO: VERIFY IF IT'S UNIQUE -DATABASE
+        byte[] randomString = new byte[32];
+        new Random().nextBytes(randomString);
+        nonce = new String(randomString);
+        return nonce;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+
 }
 
