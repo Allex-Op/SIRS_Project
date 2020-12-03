@@ -1,21 +1,23 @@
 package sirs.api.hospital;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import sirs.api.hospital.entities.CustomProtocolResponse;
+import org.springframework.http.ResponseEntity;
 import sirs.api.hospital.entities.HandshakeResponse;
 import sirs.api.hospital.entities.TestResponse;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.*;
 import java.util.*;
 
 
 public class CustomProtocol {
+    SecretKey secretKey;
 
-    public static byte[] decryptData(byte[] cipheredData, PrivateKey privKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+    public byte[] decryptData(byte[] cipheredData, PrivateKey privKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         // Decrypt the data, verify integrity and freshness
         Cipher decrypt=Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
         decrypt.init(Cipher.DECRYPT_MODE, privKey);
@@ -24,8 +26,7 @@ public class CustomProtocol {
         return decryptedData;
     }
 
-
-    public static PrivateKey extractPrivKey(File keyStoreFile) throws IOException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException, CertificateException {
+    public PrivateKey extractPrivKey(File keyStoreFile) throws IOException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException, CertificateException {
         KeyStore keystore = KeyStore.getInstance("JKS");
         String password = "hospital";
         FileInputStream is = new FileInputStream(keyStoreFile);
@@ -37,16 +38,16 @@ public class CustomProtocol {
         return privKey;
     }
 
-    public static String decryptWithSecretKey(String stringToDecrypt, SecretKey secretKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
+    public String decryptWithSecretKey(String stringToDecrypt) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        cipher.init(Cipher.DECRYPT_MODE, this.secretKey);
         return new String(cipher.doFinal(Base64.getDecoder().decode(stringToDecrypt)));
     }
 
-    public static TestResponse dataCheck(String data, SecretKey secretKey) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public TestResponse dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         // Creating Mac object and initializing
         Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(secretKey);
+        mac.init(this.secretKey);
         ObjectMapper mapper = new ObjectMapper();
 
         byte[] decodedDataBytes = Base64.getDecoder().decode(data);
@@ -66,12 +67,31 @@ public class CustomProtocol {
         return null;
     }
 
-    public boolean verifyIntegrity(String data) {
-        //TODO
-        return true;
+    public void verifyNonce(String nonce, String randomString, String tag) throws InvalidKeyException, NoSuchAlgorithmException {
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(this.secretKey);
+
+        byte[] nonceB = nonce.getBytes(StandardCharsets.UTF_8);
+        byte[] randomStringB = randomString.getBytes(StandardCharsets.UTF_8);
+        byte[] message = new byte[nonceB.length + randomStringB.length];
+
+        System.arraycopy(message, 0, nonceB, 0, nonceB.length);
+        System.arraycopy(message, 0, randomStringB, nonceB.length, randomStringB.length);
+
+        byte[] checkTag = mac.doFinal(message);
+        String tag64 = Base64.getEncoder().encodeToString(checkTag);
+
+        try {
+            if (tag64.equals(tag64)) {
+                return;
+            }
+        } catch (Exception e) {
+            System.out.println("Unable to make HTTP Request");
+            return;
+        }
     }
 
-    public static SecretKey generateSecretKey(HandshakeResponse message, String path) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchPaddingException {
+    public void generateSecretKey(HandshakeResponse message, String path) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchPaddingException {
         // Getting the encrypted random string from CustomProtocolResponse
         String encryptedString64 = message.getRandomString();
         byte[] encryptedStringBytes = Base64.getDecoder().decode(encryptedString64);
@@ -83,9 +103,7 @@ public class CustomProtocol {
         // Decrypt random string received
         byte[] decryptedStringBytes = decryptData(encryptedStringBytes, privKey);
 
-        // Generate secret key
-        return new SecretKeySpec(decryptedStringBytes, 0, decryptedStringBytes.length, "AES");
-
+        this.secretKey = new SecretKeySpec(decryptedStringBytes, 0, decryptedStringBytes.length, "AES");
     }
 }
 

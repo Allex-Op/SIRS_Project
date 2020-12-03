@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import sirs.api.lab.entities.*;
 
 import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,18 +18,14 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Random;
-
 
 @RestController
 public class Handlers {
-    //TODO: receive certificate
-    // check certificate
-    // originate nonce
-    // originate secret key
-    // mac (nonce + secret key)
-    // return nonce , session key +  tag
     CustomProtocol customProtocol = new CustomProtocol();
+
+
+    //TODO:
+    // return nonce, randomString, mac (nonce + secret key)
 
     @PostMapping("/beginhandshake")
     public ResponseEntity<HandshakeResponse> handshake(@RequestBody HandshakeRequest handshakeRequest) throws CertificateException, NoSuchPaddingException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException {
@@ -39,14 +34,16 @@ public class Handlers {
         byte [] decoded = Base64.decodeBase64(certificate.replaceAll("-----BEGIN CERTIFICATE-----\n", "").replaceAll("-----END CERTIFICATE-----", ""));
         Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(decoded));
         try {
-            boolean valid = CustomProtocol.verifyCertificate(cert, "src/main/resources/myCA.crt", "hospital");
+            boolean valid = customProtocol.verifyCertificate(cert, "src/main/resources/myCA.crt", "hospital");
             System.out.println("Certificate is " + valid);
 
             String randomString = customProtocol.createRandomString(certificate);
+            String nonce = customProtocol.createNonce();
 
-            // TODO: FALTA O NONCE PARA JUNTAR A RANDOM STRING, E SEREM ENCRIPTADOS JUNTOS COM O MAC
-            //  DE MOMENTO APENAS ESTA A SER ENVIADA A RANDOM STRING PARA A KEY
-            HandshakeResponse handshakeResponse = new HandshakeResponse(randomString);
+            // Concatenating randomString with nonce, generates a tag with mac
+            String tag = customProtocol.macTwoStrings(randomString, nonce);
+
+            HandshakeResponse handshakeResponse = new HandshakeResponse(randomString, nonce, tag);
 
             return ResponseEntity.ok(handshakeResponse);
 
@@ -66,21 +63,25 @@ public class Handlers {
 
         // Encrypting test results with secret key
         String results = "25/05/2020 Covid19:True,Pneumonia:True...";
-        // TODO: ONDE VAI ESTAR ESTA SECRETKEY/SESSION KEY?
         String encryptedResults = customProtocol.encryptWithSecretKey(results);
 
         // Object containing encrypted random string + encrypted test results + signature
         String signature = Crypto.signData(results);
+
         TestResponse resp = new TestResponse(encryptedResults, signature);
 
         // Using mapper to transform testResponse into string
         // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
         ObjectMapper mapper = new ObjectMapper();
         String respData = mapper.writeValueAsString(resp);
-        String data = customProtocol.macMessage(respData.getBytes());
 
-        // This object contains the encrypted data after MAC + random string encrypted with the hospitals pubKey
-        CustomProtocolResponse response = new CustomProtocolResponse(data);
+        String data = customProtocol.macMessage(respData.getBytes());
+        String nonce = customProtocol.createNonce();
+
+        // nonce is not encrypted in base 64 whatsoever
+        String tag = customProtocol.macTwoStrings(data, nonce);
+
+        CustomProtocolResponse response = new CustomProtocolResponse(data, nonce, tag);
 
         if(signature.equals(""))
             return ResponseEntity.status(500).build();

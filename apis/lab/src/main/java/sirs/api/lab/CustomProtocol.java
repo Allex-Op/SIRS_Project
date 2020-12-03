@@ -7,6 +7,7 @@ import org.bouncycastle.jce.X509Principal;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
@@ -25,12 +26,12 @@ public class CustomProtocol {
         secretKey = new SecretKeySpec(randomString, 0, randomString.length, "AES");
 
         // Encrypt random string with pub key
-        String encryptedString64 = CustomProtocol.encryptRandomString(certificate, randomString);
+        String encryptedString64 = encryptRandomString(certificate, randomString);
 
         return encryptedString64;
     }
 
-    public static PublicKey extractPubKey(String certificate) throws CertificateException {
+    public PublicKey extractPubKey(String certificate) throws CertificateException {
 
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         InputStream cert = new ByteArrayInputStream(certificate.getBytes());
@@ -40,7 +41,7 @@ public class CustomProtocol {
         return pubKey;
     }
 
-    public static byte[] encryptData(byte[] randomString, PublicKey pubKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, BadPaddingException, IllegalBlockSizeException {
+    public byte[] encryptData(byte[] randomString, PublicKey pubKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException, IOException, BadPaddingException, IllegalBlockSizeException {
 
         // Encrypt the data adding Confidentiality, Integrity & Freshness
         Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
@@ -58,7 +59,7 @@ public class CustomProtocol {
 
     }
 
-    public static boolean verifyCertificate(Certificate certToCheck, String trustedAnchor, String expectedCN) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    public boolean verifyCertificate(Certificate certToCheck, String trustedAnchor, String expectedCN) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
 
         //Verify CN
         X509Certificate c = (X509Certificate)certToCheck;
@@ -89,8 +90,25 @@ public class CustomProtocol {
                 System.out.println("Invalid Certificate");
                 return false;
             }
-        }else
+        } else
             return false;
+    }
+
+    public String macTwoStrings (String nonce, String randomString) throws InvalidKeyException, NoSuchAlgorithmException {
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(secretKey);
+
+        byte[] nonceB = nonce.getBytes(StandardCharsets.UTF_8);
+        byte[] randomStringB = randomString.getBytes(StandardCharsets.UTF_8);
+        byte[] message = new byte[nonceB.length + randomStringB.length];
+
+        System.arraycopy(message, 0, nonceB, 0, nonceB.length);
+        System.arraycopy(message, 0, randomStringB, nonceB.length, randomStringB.length);
+
+        byte[] tag = mac.doFinal(message);
+        String tag64 = Base64.getEncoder().encodeToString(tag);
+
+        return tag64;
     }
 
     public String macMessage(byte[] responseBytes) throws InvalidKeyException, NoSuchAlgorithmException {
@@ -109,12 +127,19 @@ public class CustomProtocol {
         return message64;
     }
 
-    public static String encryptRandomString(String certificate, byte[] randomString) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, CertificateException {
+    public String encryptRandomString(String certificate, byte[] randomString) throws NoSuchPaddingException, NoSuchAlgorithmException, IOException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, CertificateException {
         // Encrypt random string with pub key
         PublicKey pubKey = extractPubKey(certificate);
         byte[] encrypted_data = encryptData(randomString, pubKey);
         return java.util.Base64.getEncoder().encodeToString(encrypted_data);
 
+    }
+
+    public String createNonce() {
+        byte[] randomString = new byte[32];
+        new Random().nextBytes(randomString);
+        String nonce = new String(randomString);
+        return nonce;
     }
 
 }

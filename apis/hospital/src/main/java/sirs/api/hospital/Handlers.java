@@ -109,6 +109,7 @@ public class Handlers {
     @ResourceId(resourceId = "getTestsResult")
     public ResponseEntity<TestResponse> sendTestToLab(@PathVariable int id) {
         try {
+            CustomProtocol customProtocol = new CustomProtocol();
 
             // Getting the certificate to send along with the data in TestRequest
             File crtFile = new File("src/main/resources/hospital.pem");
@@ -131,12 +132,13 @@ public class Handlers {
             HttpResponse<String> handshakeResponse = handshakeClient.send(handshakeReq, HttpResponse.BodyHandlers.ofString());
             HandshakeResponse hsResponse = mapper.readValue(handshakeResponse.body(), HandshakeResponse.class);
 
-            // TODO: DESENCRIPTAR A RESPOSTA POIS VEM COM NONCE E RANDOMSTRING, ESSA STRING E PARA A SECRET KEY
+            // TODO: ALSO NEED TO VERIFY IF THIS NONCE ALREADY IS SAVED IN DATABASE
+            customProtocol.verifyNonce(hsResponse.getRandomString(), hsResponse.getNonce(), hsResponse.getTag());
 
             // Generate secret key
-            SecretKey secretKey = CustomProtocol.generateSecretKey(hsResponse, "src/main/resources/hospitalKeystore.jks");
+            customProtocol.generateSecretKey(hsResponse, "src/main/resources/hospitalKeystore.jks");
 
-            // TODO: MAC THE TESTREQUEST DATA + NONCE AND SEND
+            // TODO: MAC (TESTREQUEST DATA + NONCE) -> SEND
 
             // Sending the testReq (including data) and nonce, after using MAC on them
             String testReqBody = mapper.writeValueAsString(testRequest);
@@ -155,9 +157,9 @@ public class Handlers {
             // Only now the received response is verified by checking the TAG with the secret key
             // If the data was not tampered, the dataCheck function returns a testResponse object
             String data = message.getData();
-            TestResponse resp = CustomProtocol.dataCheck(data, secretKey);
+            TestResponse resp = customProtocol.dataCheck(data);
 
-            String decryptedResults = CustomProtocol.decryptWithSecretKey(resp.getResults(), secretKey);
+            String decryptedResults = customProtocol.decryptWithSecretKey(resp.getResults());
 
             System.out.println(decryptedResults);
 
