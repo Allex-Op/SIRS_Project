@@ -1,5 +1,8 @@
 package sirs.api.lab.entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class HandshakeResponse {
     /**
      *
@@ -9,10 +12,10 @@ public class HandshakeResponse {
      *
      **/
 
-    String randomString;
-    String nonce;
-
-    public HandshakeResponse(String randomString, String nonce) {
+    private String randomString;
+    private String nonce;
+    @JsonCreator
+    public HandshakeResponse(@JsonProperty("randomString") String randomString, @JsonProperty("nonce") String nonce) {
         this.randomString = randomString;
         this.nonce = nonce;
     }

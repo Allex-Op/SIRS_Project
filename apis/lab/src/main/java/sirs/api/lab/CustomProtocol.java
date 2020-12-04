@@ -143,5 +143,28 @@ public class CustomProtocol {
         nonce = new String(randomString);
         return nonce;
     }
+    public boolean dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+        // Creating Mac object and initializing
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(this.secretKey);
+
+        byte[] decodedDataBytes = Base64.getDecoder().decode(data);
+
+        byte[] message = Arrays.copyOfRange(decodedDataBytes, 0, decodedDataBytes.length - 32);
+        byte[] tag = Arrays.copyOfRange(decodedDataBytes, decodedDataBytes.length - 32, decodedDataBytes.length);
+
+        byte[] check_tag = mac.doFinal(message);
+
+        if(Arrays.equals(check_tag, tag)) {
+            System.out.println("Tags are equal. Data received was not tampered.");
+            return true;
+        }
+
+        System.out.println("Message not secure.");
+        return false;
+    }
+    public boolean verifyNonce(String nonce) throws InvalidKeyException, NoSuchAlgorithmException {
+        return nonce.equals(this.nonce);
+    }
 
 }

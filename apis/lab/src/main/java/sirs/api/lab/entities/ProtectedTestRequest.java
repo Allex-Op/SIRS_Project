@@ -1,14 +1,12 @@
-package sirs.api.hospital.entities;
+package sirs.api.lab.entities;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Base64;
 
-public class CustomProtocolResponse2 {
+public class ProtectedTestRequest {
 
 
     /**
@@ -20,8 +18,8 @@ public class CustomProtocolResponse2 {
      **/
     public String mac;
 
-    @JsonCreator
-    public CustomProtocolResponse2(@JsonProperty("mac") String mac) {
+
+    public ProtectedTestRequest(String mac) {
         this.mac = mac;
     }
 
@@ -29,13 +27,13 @@ public class CustomProtocolResponse2 {
         return mac;
     }
 
-    public HandshakeResponse getHandshakeResponse() throws IOException {
+
+    public TestRequest getTestRequest() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         byte[] decodedMacBytes = Base64.getDecoder().decode(mac);
-        byte[] handshakeResponse = Arrays.copyOfRange(decodedMacBytes, 0, decodedMacBytes.length - 32);
+        byte[] testRequest = Arrays.copyOfRange(decodedMacBytes, 0, decodedMacBytes.length - 32);
 
-        return mapper.readValue(handshakeResponse, HandshakeResponse.class);
+        return mapper.readValue(testRequest, TestRequest.class);
     }
-
 
 }

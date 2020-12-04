@@ -136,11 +136,18 @@ public class Handlers {
 
                 TestRequest testRequest = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST", hsResponse.getNonce());
 
-                // TODO: maybe encrypt the request data with labs pubKey or mac, idk
-                // String mac = customProtocol.macMessage(data.getBytes());
+                // TODO: maybe encrypt the request data with labs pubKey  idk
+
+                // Using mapper to transform testResponse into string
+                // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
+                String req = mapper.writeValueAsString(testRequest);
+                String mac = customProtocol.macMessage(req.getBytes());
+
+                // mac = tag + respData (json string -> handshakeResponse)
+                ProtectedTestRequest protectedrequest= new ProtectedTestRequest(mac);
 
                 // Sending the testReq (including data and nonce)
-                String testReqBody = mapper.writeValueAsString(testRequest);
+                String testReqBody = mapper.writeValueAsString(protectedrequest);
 
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest request = HttpRequest.newBuilder()
@@ -155,8 +162,6 @@ public class Handlers {
 
                 if(customProtocol.dataCheck(cp2Response.getMac())) {
                     TestResponse testResponse = cpResponse.getTestResponse();
-
-                    // TODO: verify nonce
 
                     // decrypting the results
                     String decryptedResults = customProtocol.decryptWithSecretKey(testResponse.getResults());

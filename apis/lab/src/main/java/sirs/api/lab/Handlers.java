@@ -62,38 +62,51 @@ public class Handlers {
     }
 
     @PostMapping("/teststoanalyze/{id}")
-    public ResponseEntity<CustomProtocolResponse> testsToAnalyze(@PathVariable int id, @RequestBody TestRequest testreq) throws NoSuchAlgorithmException, IOException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
+    public ResponseEntity<CustomProtocolResponse> testsToAnalyze(@PathVariable int id, @RequestBody ProtectedTestRequest testreq) throws NoSuchAlgorithmException, IOException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
         // Because for simplicity reasons we only answer to requests with id 1
         // id is only for representation purposes in case this was a real system
         // we would have multiple id's...
         if(id != 1)
             return ResponseEntity.status(404).build();
 
-        // TODO: o testRequest que se este endpoint recebe no body
-        //  vai ter o nonce que tem de ser verificado aqui
 
-        // Encrypting test results with secret key
-        String results = "25/05/2020 Covid19:True,Pneumonia:True...";
-        String encryptedResults = customProtocol.encryptWithSecretKey(results);
+        //Generate secret key
+        //customProtocol.generateSecretKey(hsResponse, "src/main/resources/hospitalKeystore.jks");
+        TestRequest req = testreq.getTestRequest();
+        if(customProtocol.dataCheck(testreq.getMac()) && customProtocol.verifyNonce(req.getNonce())) {
 
-        // Object containing encrypted random string + encrypted test results + signature + nonce
-        String signature = Crypto.signData(results);
-        String nonce = customProtocol.createNonce();
+            //TODO: DECRYPT DATA ?
+            // Encrypting test results with secret key
+            String results = "25/05/2020 Covid19:True,Pneumonia:True...";
+            String encryptedResults = customProtocol.encryptWithSecretKey(results);
 
-        TestResponse resp = new TestResponse(encryptedResults, signature, nonce);
+            // Object containing encrypted random string + encrypted test results + signature + nonce
+            String signature = Crypto.signData(results);
+            String nonce = customProtocol.createNonce();
 
-        // Using mapper to transform testResponse into string
-        // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
-        ObjectMapper mapper = new ObjectMapper();
-        String respData = mapper.writeValueAsString(resp);
+            TestResponse resp = new TestResponse(encryptedResults, signature, nonce);
 
-        String mac = customProtocol.macMessage(respData.getBytes());
+            // Using mapper to transform testResponse into string
+            // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
+            ObjectMapper mapper = new ObjectMapper();
+            String respData = mapper.writeValueAsString(resp);
 
-        CustomProtocolResponse response = new CustomProtocolResponse(mac);
+            String mac = customProtocol.macMessage(respData.getBytes());
 
-        if(signature.equals(""))
-            return ResponseEntity.status(500).build();
+            CustomProtocolResponse response = new CustomProtocolResponse(mac);
 
-        return ResponseEntity.ok(response);
+            if(signature.equals(""))
+                return ResponseEntity.status(500).build();
+
+            return ResponseEntity.ok(response);
+
+
+        }
+
+
+        return ResponseEntity.status(500).build();
+
+
+
     }
 }

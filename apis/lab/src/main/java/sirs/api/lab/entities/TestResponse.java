@@ -1,11 +1,15 @@
 package sirs.api.lab.entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class TestResponse {
     String results;
     String digitalSignature;
     String nonce;
 
-    public TestResponse(String results, String digitalSignature, String nonce) {
+    @JsonCreator
+    public TestResponse(@JsonProperty("results") String results, @JsonProperty("digitalSignature") String digitalSignature, @JsonProperty("nonce") String nonce) {
         this.results = results;
         this.digitalSignature = digitalSignature;
         this.nonce = nonce;

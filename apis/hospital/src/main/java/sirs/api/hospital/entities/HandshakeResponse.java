@@ -1,5 +1,8 @@
 package sirs.api.hospital.entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class HandshakeResponse {
     /**
      *
@@ -9,15 +12,12 @@ public class HandshakeResponse {
      *
      **/
 
-    String randomString;
-    String nonce;
-    String tag;
-
-
-    public HandshakeResponse(String randomString, String nonce, String tag) {
+    private String randomString;
+    private String nonce;
+    @JsonCreator
+    public HandshakeResponse(@JsonProperty("randomString") String randomString, @JsonProperty("nonce") String nonce) {
         this.randomString = randomString;
         this.nonce = nonce;
-        this.tag = tag;
     }
 
     public String getRandomString() { return randomString; }
@@ -27,8 +27,4 @@ public class HandshakeResponse {
     public String getNonce() { return nonce; }
 
     public void setNonce(String nonce) { this.nonce = nonce; }
-
-    public String getTag() { return tag; }
-
-    public void setTag(String tag) { this.tag = tag; }
 }
