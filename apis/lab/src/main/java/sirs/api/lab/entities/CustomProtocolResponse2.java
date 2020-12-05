@@ -1,6 +1,7 @@
 package sirs.api.lab.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,13 +29,21 @@ public class CustomProtocolResponse2 {
     public String getMac() {
         return mac;
     }
-
+@JsonIgnore
     public HandshakeResponse getHandshakeResponse() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         byte[] decodedMacBytes = Base64.getDecoder().decode(mac);
         byte[] handshakeResponse = Arrays.copyOfRange(decodedMacBytes, 0, decodedMacBytes.length - 32);
 
         return mapper.readValue(handshakeResponse, HandshakeResponse.class);
+    }
+    @JsonIgnore
+    public TestResponse getTestResponse() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        byte[] decodedMacBytes = Base64.getDecoder().decode(mac);
+        byte[] testResponse = Arrays.copyOfRange(decodedMacBytes, 0, decodedMacBytes.length - 32);
+
+        return mapper.readValue(testResponse, TestResponse.class);
     }
 
 

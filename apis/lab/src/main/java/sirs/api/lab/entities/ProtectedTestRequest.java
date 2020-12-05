@@ -1,5 +1,7 @@
 package sirs.api.lab.entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -18,8 +20,8 @@ public class ProtectedTestRequest {
      **/
     public String mac;
 
-
-    public ProtectedTestRequest(String mac) {
+    @JsonCreator
+    public ProtectedTestRequest(@JsonProperty("mac") String mac) {
         this.mac = mac;
     }
 

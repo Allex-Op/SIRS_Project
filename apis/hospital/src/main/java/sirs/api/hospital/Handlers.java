@@ -158,7 +158,7 @@ public class Handlers {
 
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 //Read Response
-                CustomProtocolResponse cpResponse = mapper.readValue(response.body(), CustomProtocolResponse.class);
+                CustomProtocolResponse2 cpResponse = mapper.readValue(response.body(), CustomProtocolResponse2.class);
 
                 if(customProtocol.dataCheck(cp2Response.getMac())) {
                     TestResponse testResponse = cpResponse.getTestResponse();
