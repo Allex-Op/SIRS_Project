@@ -71,24 +71,6 @@ public class CustomProtocol {
         return false;
     }
 
-    public boolean checkIntegrity(String message, String tag) throws NoSuchAlgorithmException, InvalidKeyException {
-        // Creating Mac object and initializing
-        Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(this.secretKey);
-
-
-        byte[] decodedMessageBytes = Base64.getDecoder().decode(message);
-        byte[] decodedTagBytes = Base64.getDecoder().decode(message);
-
-        byte[] check_tag = mac.doFinal(decodedMessageBytes);
-
-        if(Arrays.equals(check_tag, decodedTagBytes)) {
-            return true;
-        }
-            System.out.println("Message not secure.");
-            return false;
-    }
-
     public void verifyNonce(String nonce, String randomString, String tag) throws InvalidKeyException, NoSuchAlgorithmException {
         Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(this.secretKey);
