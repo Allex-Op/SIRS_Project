@@ -126,15 +126,15 @@ public class Handlers {
                     .build();
 
             HttpResponse<String> handshakeResponse = handshakeClient.send(handshakeReq, HttpResponse.BodyHandlers.ofString());
-            CustomProtocolResponse2 cp2Response = mapper.readValue(handshakeResponse.body(), CustomProtocolResponse2.class);
+            CustomProtocolResponse cp2Response = mapper.readValue(handshakeResponse.body(), CustomProtocolResponse.class);
             HandshakeResponse hsResponse = cp2Response.getHandshakeResponse();
 
             //Generate secret key
              customProtocol.generateSecretKey(hsResponse, "src/main/resources/hospitalKeystore.jks");
 
             if(customProtocol.dataCheck(cp2Response.getMac())) {
-
-                TestRequest testRequest = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST", hsResponse.getNonce());
+                // TODO: WHERE DOES DATA COME FROM?
+                TestRequest testRequest = new TestRequest("SIMULATION OF A REQUEST.", hsResponse.getNonce());
 
                 // Using mapper to transform testResponse into string
                 // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
@@ -156,9 +156,9 @@ public class Handlers {
 
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 //Read Response
-                CustomProtocolResponse2 cpResponse = mapper.readValue(response.body(), CustomProtocolResponse2.class);
+                CustomProtocolResponse cpResponse = mapper.readValue(response.body(), CustomProtocolResponse.class);
 
-                if(customProtocol.dataCheck(cp2Response.getMac())) {
+                if(customProtocol.dataCheck(cpResponse.getMac())) {
                     TestResponse testResponse = cpResponse.getTestResponse();
 
                     // decrypting the results
@@ -166,7 +166,6 @@ public class Handlers {
                     System.out.println(decryptedResults);
 
                     return ResponseEntity.ok(testResponse);
-
                 }
             }
             return ResponseEntity.status(500).build();

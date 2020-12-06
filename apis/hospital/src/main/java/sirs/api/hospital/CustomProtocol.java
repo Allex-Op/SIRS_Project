@@ -12,7 +12,6 @@ import java.util.*;
 
 public class CustomProtocol {
     private SecretKey secretKey;
-    private String nonce;
 
     public byte[] decryptData(byte[] cipheredData, PrivateKey privKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         // Decrypt the data, verify integrity and freshness
@@ -52,15 +51,7 @@ public class CustomProtocol {
         return Base64.getEncoder().encodeToString(message);
     }
 
-//    public String encryptRespData(String certificate, byte[] randomString) throws NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, CertificateException {
-//        // Encrypt random string with pub key
-//        PublicKey pubKey = extractPubKey(certificate);
-//        byte[] encrypted_data = encryptData(randomString, pubKey);
-//        return java.util.Base64.getEncoder().encodeToString(encrypted_data);
-//    }
-
-
-    public boolean dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public boolean dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException {
         // Creating Mac object and initializing
         Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(this.secretKey);
@@ -73,7 +64,6 @@ public class CustomProtocol {
         byte[] check_tag = mac.doFinal(message);
 
         if(Arrays.equals(check_tag, tag)) {
-            System.out.println("Tags are equal. Data received was not tampered.");
             return true;
         }
 
@@ -81,7 +71,7 @@ public class CustomProtocol {
         return false;
     }
 
-    public boolean checkIntegrity(String message, String tag) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public boolean checkIntegrity(String message, String tag) throws NoSuchAlgorithmException, InvalidKeyException {
         // Creating Mac object and initializing
         Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(this.secretKey);
@@ -93,7 +83,6 @@ public class CustomProtocol {
         byte[] check_tag = mac.doFinal(decodedMessageBytes);
 
         if(Arrays.equals(check_tag, decodedTagBytes)) {
-            System.out.println("Tags are equal. Data received was not tampered.");
             return true;
         }
             System.out.println("Message not secure.");
@@ -116,7 +105,7 @@ public class CustomProtocol {
 
         try {
             if(tag64.equals(tag)) {
-                System.out.println("Tag verified.");
+                System.out.println("Everything looks good.");
             }
         } catch (Exception e) {
             System.out.println("Unable to make HTTP Request");

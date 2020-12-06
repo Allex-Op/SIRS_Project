@@ -7,20 +7,16 @@ import org.bouncycastle.jce.X509Principal;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
-import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 
 public class CustomProtocol {
    private  SecretKey secretKey;
    private String nonce;
 
-
-
-    public String createRandomString(String certificate) throws NoSuchPaddingException, NoSuchAlgorithmException, CertificateException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException {
+    public String createRandomString(String certificate) throws NoSuchPaddingException, NoSuchAlgorithmException, CertificateException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
         // Generating random string
         byte[] randomString = new byte[32];
         new Random().nextBytes(randomString);
@@ -33,7 +29,6 @@ public class CustomProtocol {
     }
 
     public PublicKey extractPubKey(String certificate) throws CertificateException {
-
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         InputStream cert = new ByteArrayInputStream(certificate.getBytes());
         Certificate final_certificate = cf.generateCertificate(cert);
@@ -42,7 +37,6 @@ public class CustomProtocol {
     }
 
     public byte[] encryptData(byte[] randomString, PublicKey pubKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
-
         // Encrypt the data adding Confidentiality, Integrity & Freshness
         Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, pubKey);
@@ -59,7 +53,6 @@ public class CustomProtocol {
     }
 
     public boolean verifyCertificate(String certificateToCheck, String trustedAnchor, String expectedCN) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-
         byte [] decoded = org.apache.tomcat.util.codec.binary.Base64.decodeBase64(certificateToCheck.replaceAll("-----BEGIN CERTIFICATE-----\n", "").replaceAll("-----END CERTIFICATE-----", ""));
         Certificate certToCheck = CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(decoded));
 
@@ -69,9 +62,6 @@ public class CustomProtocol {
         Vector<?> subjectCNs = principal.getValues(X509Name.CN);
 
         if(subjectCNs.get(0).equals(expectedCN)) {
-            System.out.println("Correct CN " );
-
-
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             List list = new ArrayList();
             list.add(certToCheck);
@@ -94,24 +84,6 @@ public class CustomProtocol {
             }
         } else
             return false;
-    }
-
-
-
-    public String macTwoStrings (String nonce, String randomString) throws InvalidKeyException, NoSuchAlgorithmException {
-        Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(secretKey);
-
-        byte[] nonceB = nonce.getBytes(StandardCharsets.UTF_8);
-        byte[] randomStringB = randomString.getBytes(StandardCharsets.UTF_8);
-        byte[] message = new byte[nonceB.length + randomStringB.length];
-
-        System.arraycopy(message, 0, nonceB, 0, nonceB.length);
-        System.arraycopy(message, 0, randomStringB, nonceB.length, randomStringB.length);
-
-        byte[] tag = mac.doFinal(message);
-
-        return Base64.getEncoder().encodeToString(tag);
     }
 
     public String macMessage(byte[] responseBytes) throws InvalidKeyException, NoSuchAlgorithmException {
@@ -143,7 +115,7 @@ public class CustomProtocol {
         nonce = new String(randomString);
         return nonce;
     }
-    public boolean dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public boolean dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException {
         // Creating Mac object and initializing
         Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(this.secretKey);
@@ -156,14 +128,12 @@ public class CustomProtocol {
         byte[] check_tag = mac.doFinal(message);
 
         if(Arrays.equals(check_tag, tag)) {
-            System.out.println("Tags are equal. Data received was not tampered.");
             return true;
         }
-
         System.out.println("Message not secure.");
         return false;
     }
-    public boolean verifyNonce(String nonce) throws InvalidKeyException, NoSuchAlgorithmException {
+    public boolean verifyNonce(String nonce) {
         return nonce.equals(this.nonce);
     }
 
