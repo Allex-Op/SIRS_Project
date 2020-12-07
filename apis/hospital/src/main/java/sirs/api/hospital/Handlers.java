@@ -149,6 +149,7 @@ public class Handlers {
 
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest request = HttpRequest.newBuilder()
+                        // TODO: id goes on testRequest
                         .uri(URI.create("http://localhost:8082/teststoanalyze/" + id))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(testReqBody))

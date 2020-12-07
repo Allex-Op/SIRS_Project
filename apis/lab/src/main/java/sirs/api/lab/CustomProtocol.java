@@ -109,7 +109,6 @@ public class CustomProtocol {
     }
 
     public String createNonce() {
-        //TODO: VERIFY IF IT'S UNIQUE -DATABASE
         byte[] randomString = new byte[32];
         new Random().nextBytes(randomString);
         nonce = new String(randomString);
