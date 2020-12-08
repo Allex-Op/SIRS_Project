@@ -22,6 +22,8 @@ public class Handlers {
     Repo repo = new Repo();
     Crypto cr = new Crypto();
 
+    String LAB_URL = System.getenv("LAB_URL");
+
     @GetMapping("/secret")
     @ResourceId(resourceId = "secret")
     public ResponseEntity<String> secret() {
@@ -95,18 +97,7 @@ public class Handlers {
 
     /**
      *  Requests test results from the lab, this handler must create & handle the custom secure channel.
-     *  How will it add confidentiality & integrity?
-     *
-     *  1º Request the certificate from the Lab by sending the hospital certificate
-     *  2º Validate certificate
-     *  3º Generate a random string, encrypt it with the public key of the Lab and send it.
-     *  4º Hospital and Lab generate the secret key from the random string.
-     *  5º Using the generated private key: encrypt the body, generate a tag and encrypt with same key (or generate another? it would be better)
-     *  6º After encryption send the message to the Lab and await response.
-     *  7º Decrypt, separate message from tag, validate tag & timestamp...
-     *  8º Save to db
-     *
-     */
+    */
     @JsonIgnoreProperties
     @GetMapping("/gettestresults/{id}")
     @ResourceId(resourceId = "getTestsResult")
@@ -126,7 +117,7 @@ public class Handlers {
             String reqBody = mapper.writeValueAsString(handshakeRequest);
             HttpClient handshakeClient = HttpClient.newHttpClient();
             HttpRequest handshakeReq = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8082/beginhandshake"))
+                    .uri(URI.create(LAB_URL + "/beginhandshake"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(reqBody))
                     .build();
@@ -156,7 +147,7 @@ public class Handlers {
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest request = HttpRequest.newBuilder()
                         // TODO: id goes on testRequest
-                        .uri(URI.create("http://localhost:8082/teststoanalyze/" + id))
+                        .uri(URI.create(LAB_URL + "/teststoanalyze/" + id))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(testReqBody))
                         .build();
