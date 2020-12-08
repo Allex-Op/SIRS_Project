@@ -1,19 +1,25 @@
 package sirs.api.lab.entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CustomProtocolResponse {
-    String data;    // This data should provide the confidentiality, integrity, freshness...
-                    // Also this data should be in Base64 format cause binary data is not
-                    // suitable to be transported over the HTTP protocol.
+    /**
+     *
+     * String mac:
+     *      This string is a result of using mac algorithm on a data string (that can
+     *      be either a HandshakeResponse object or a TestResponse object).
+     *
+     **/
+    public String mac;
 
-    public CustomProtocolResponse(String data) {
-        this.data = data;
+    @JsonCreator
+    public CustomProtocolResponse(@JsonProperty("mac") String mac) {
+        this.mac = mac;
     }
 
-    public String getData() {
-        return data;
+    public String getMac() {
+        return mac;
     }
 
-    public void setData(String data) {
-        this.data = data;
-    }
 }

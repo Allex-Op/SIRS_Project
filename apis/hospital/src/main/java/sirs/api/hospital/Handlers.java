@@ -1,16 +1,26 @@
 package sirs.api.hospital;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sirs.api.hospital.accessControl.ResourceId;
 import sirs.api.hospital.db.Repo;
 import sirs.api.hospital.entities.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.io.File;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+
 
 @RestController
 public class Handlers {
     Repo repo = new Repo();
     Crypto cr = new Crypto();
-    CustomProtocol cp = new CustomProtocol();
 
     @GetMapping("/secret")
     @ResourceId(resourceId = "secret")
@@ -97,24 +107,80 @@ public class Handlers {
      *  8º Save to db
      *
      */
+    @JsonIgnoreProperties
     @GetMapping("/gettestresults/{id}")
     @ResourceId(resourceId = "getTestsResult")
-    public ResponseEntity<String> sendTestToLab(@PathVariable int id) {
+    public ResponseEntity<TestResponse> sendTestToLab(@PathVariable int id) {
         try {
-            //TODO: ADD CUSTOM SECURITY CHANNEL HERE
-            TestRequest req = new TestRequest("RANDOM STUFF THIS DOESNT MATTER IS JUST TO SIMULATE A REQUEST");
-            cp.initHandshake();
-            String safeData = cp.encryptData(req);
+            CustomProtocol customProtocol = new CustomProtocol();
 
-            //URL url = new URL("https://192.168.57.11:8080/teststoanalyze/" + test_id);
-            //HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            //InputStream responseStream = connection.getInputStream();
+            // Getting the certificate
+            File crtFile = new File("src/main/resources/hospital.pem");
+            String certificate = Files.readString(crtFile.toPath(), Charset.defaultCharset());
+            HandshakeRequest handshakeRequest = new HandshakeRequest(certificate);
 
-            //TODO: After exchanging the data print it to the terminal
-            return ResponseEntity.ok().build();
+            // Write body
+            ObjectMapper mapper = new ObjectMapper();
+
+            // Send certificate and receive response that makes possible to create the secret key
+            String reqBody = mapper.writeValueAsString(handshakeRequest);
+            HttpClient handshakeClient = HttpClient.newHttpClient();
+            HttpRequest handshakeReq = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8082/beginhandshake"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(reqBody))
+                    .build();
+
+            HttpResponse<String> handshakeResponse = handshakeClient.send(handshakeReq, HttpResponse.BodyHandlers.ofString());
+            CustomProtocolResponse cp2Response = mapper.readValue(handshakeResponse.body(), CustomProtocolResponse.class);
+            HandshakeResponse hsResponse = cp2Response.getHandshakeResponse();
+
+            //Generate secret key
+             customProtocol.generateSecretKey(hsResponse, "src/main/resources/hospitalKeystore.jks");
+
+            if(customProtocol.dataCheck(cp2Response.getMac())) {
+                // TODO: WHERE DOES DATA COME FROM?
+                TestRequest testRequest = new TestRequest("SIMULATION OF A REQUEST.", hsResponse.getNonce());
+
+                // Using mapper to transform testResponse into string
+                // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
+                String req = mapper.writeValueAsString(testRequest);
+                String mac = customProtocol.macMessage(req.getBytes());
+
+                // mac = tag + respData (json string -> handshakeResponse)
+                ProtectedTestRequest protectedTestRequest= new ProtectedTestRequest(mac);
+
+                // Sending the testReq (including data and nonce)
+                String testReqBody = mapper.writeValueAsString(protectedTestRequest);
+
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest request = HttpRequest.newBuilder()
+                        // TODO: id goes on testRequest
+                        .uri(URI.create("http://localhost:8082/teststoanalyze/" + id))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(testReqBody))
+                        .build();
+
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                //Read Response
+                CustomProtocolResponse cpResponse = mapper.readValue(response.body(), CustomProtocolResponse.class);
+
+                if(customProtocol.dataCheck(cpResponse.getMac())) {
+                    TestResponse testResponse = cpResponse.getTestResponse();
+
+                    // decrypting the results
+                    String decryptedResults = customProtocol.decryptWithSecretKey(testResponse.getResults());
+                    System.out.println(decryptedResults);
+
+                    return ResponseEntity.ok(testResponse);
+                }
+            }
+            return ResponseEntity.status(500).build();
+
         } catch(Exception e) {
             System.out.println("Unable to make HTTP Request");
             return ResponseEntity.status(500).build();
         }
     }
 }
+

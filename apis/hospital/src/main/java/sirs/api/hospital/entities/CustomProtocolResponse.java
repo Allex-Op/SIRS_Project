@@ -1,19 +1,49 @@
 package sirs.api.hospital.entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Base64;
+
 public class CustomProtocolResponse {
-    String data;    // This data should provide the confidentiality, integrity, freshness...
-    // Also this data should be in Base64 format cause binary data is not
-    // suitable to be transported over the HTTP protocol.
+    /**
+     *
+     * String mac:
+     *      This string is a result of using mac algorithm on a data string (that can
+     *      be either a HandshakeResponse object or a TestResponse object).
+     *
+     **/
+    public String mac;
 
-    public CustomProtocolResponse(String data) {
-        this.data = data;
+    @JsonCreator
+    public CustomProtocolResponse(@JsonProperty("mac") String mac) {
+        this.mac = mac;
     }
 
-    public String getData() {
-        return data;
+    public String getMac() {
+        return mac;
     }
 
-    public void setData(String data) {
-        this.data = data;
+    @JsonIgnore
+    public HandshakeResponse getHandshakeResponse() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        byte[] decodedMacBytes = Base64.getDecoder().decode(mac);
+        byte[] handshakeResponse = Arrays.copyOfRange(decodedMacBytes, 0, decodedMacBytes.length - 32);
+
+        return mapper.readValue(handshakeResponse, HandshakeResponse.class);
     }
+
+    @JsonIgnore
+    public TestResponse getTestResponse() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        byte[] decodedMacBytes = Base64.getDecoder().decode(mac);
+        byte[] testResponse = Arrays.copyOfRange(decodedMacBytes, 0, decodedMacBytes.length - 32);
+
+        return mapper.readValue(testResponse, TestResponse.class);
+    }
+
 }

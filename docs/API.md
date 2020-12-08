@@ -190,6 +190,25 @@ Authorization: r6C6xEEZSKYrHX8i...
 
 # Partner Lab API
 
+## `POST /beginhandshake`
+
+### Description: 
+- Initiates an handshake with the lab to generate the session keys used in the next requests
+
+### Parameters: 
+- None
+
+### E.g. Request:
+{
+  "certificate":"----BEGIN CERTIFICATE----......----END CERTIFICATE---"
+}
+
+### E.g. Response:
+{
+  "sessionKey":"encryptedStringWithNonce+tag"
+}
+
+
 ## `POST /teststoanalyze/{id}`
 
 ### Description:
