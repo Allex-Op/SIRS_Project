@@ -7,6 +7,7 @@ import org.bouncycastle.jce.X509Principal;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
@@ -15,6 +16,7 @@ import java.util.*;
 public class CustomProtocol {
    private  SecretKey secretKey;
    private String nonce;
+   private final ArrayList<String> receivedNonces  = new ArrayList<String>();
 
     public String createRandomString(String certificate) throws NoSuchPaddingException, NoSuchAlgorithmException, CertificateException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
         // Generating random string
@@ -48,7 +50,7 @@ public class CustomProtocol {
         Cipher cipher = null;
             cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            return Base64.getEncoder().encodeToString(cipher.doFinal(stringToEncrypt.getBytes("UTF-8")));
+            return Base64.getEncoder().encodeToString(cipher.doFinal(stringToEncrypt.getBytes(StandardCharsets.UTF_8)));
 
     }
 
@@ -111,8 +113,9 @@ public class CustomProtocol {
     public String createNonce() {
         byte[] randomString = new byte[32];
         new Random().nextBytes(randomString);
-        nonce = new String(randomString);
+        nonce = new String(randomString )+ Long.toString(System.currentTimeMillis());
         return nonce;
+
     }
 
     public boolean dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException {
@@ -135,7 +138,13 @@ public class CustomProtocol {
     }
 
     public boolean verifyNonce(String nonce) {
-        return nonce.equals(this.nonce);
+       boolean received = receivedNonces.contains(nonce);
+       if(!received) {
+           receivedNonces.add(nonce);
+           return true;
+       }else
+           return false;
+
     }
 
 }

@@ -1,4 +1,4 @@
-package sirs.api.hospital.entities;
+package sirs.api.hospital.messages;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -31,4 +31,7 @@ public class TestResponse {
         this.results = results;
     }
 
+    public String getNonce() {
+        return nonce;
+    }
 }

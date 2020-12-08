@@ -1,8 +1,9 @@
-package sirs.api.hospital.entities;
+package sirs.api.hospital.messages;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import sirs.api.hospital.messages.TestRequest;
 
 import java.io.IOException;
 import java.util.Arrays;

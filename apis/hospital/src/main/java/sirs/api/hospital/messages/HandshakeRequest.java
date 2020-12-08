@@ -1,4 +1,4 @@
-package sirs.api.hospital.entities;
+package sirs.api.hospital.messages;
 
 public class HandshakeRequest {
     String certificate;

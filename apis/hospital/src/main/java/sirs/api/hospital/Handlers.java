@@ -7,6 +7,7 @@ import sirs.api.hospital.accessControl.ResourceId;
 import sirs.api.hospital.db.Repo;
 import sirs.api.hospital.entities.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import sirs.api.hospital.messages.*;
 
 import java.io.File;
 import java.net.URI;
@@ -21,6 +22,7 @@ import java.nio.file.Files;
 public class Handlers {
     Repo repo = new Repo();
     Crypto cr = new Crypto();
+    CustomProtocol customProtocol = new CustomProtocol();
 
     String LAB_URL = System.getenv("LAB_URL");
 
@@ -103,7 +105,6 @@ public class Handlers {
     @ResourceId(resourceId = "getTestsResult")
     public ResponseEntity<TestResponse> sendTestToLab(@PathVariable int id) {
         try {
-            CustomProtocol customProtocol = new CustomProtocol();
 
             // Getting the certificate
             File crtFile = new File("src/main/resources/hospital.pem");
@@ -129,8 +130,8 @@ public class Handlers {
             //Generate secret key
              customProtocol.generateSecretKey(hsResponse, "src/main/resources/hospitalKeystore.jks");
 
-            if(customProtocol.dataCheck(cp2Response.getMac())) {
-                TestRequest testRequest = new TestRequest(id, hsResponse.getNonce());
+            if(customProtocol.dataCheck(cp2Response.getMac()) && customProtocol.verifyNonce(hsResponse.getNonce())) {
+                TestRequest testRequest = new TestRequest(id, customProtocol.createNonce());
 
                 // Using mapper to transform testResponse into string
                 // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
@@ -156,12 +157,14 @@ public class Handlers {
 
                 if(customProtocol.dataCheck(cpResponse.getMac())) {
                     TestResponse testResponse = cpResponse.getTestResponse();
+                    if(customProtocol.verifyNonce(testResponse.getNonce())) {
 
-                    // decrypting the results
-                    String decryptedResults = customProtocol.decryptWithSecretKey(testResponse.getResults());
-                    System.out.println(decryptedResults);
+                        // decrypting the results
+                        String decryptedResults = customProtocol.decryptWithSecretKey(testResponse.getResults());
+                        System.out.println(decryptedResults);
 
-                    return ResponseEntity.ok(testResponse);
+                        return ResponseEntity.ok(testResponse);
+                    }
                 }
             }
             return ResponseEntity.status(500).build();

@@ -1,6 +1,6 @@
 package sirs.api.hospital;
 
-import sirs.api.hospital.entities.HandshakeResponse;
+import sirs.api.hospital.messages.HandshakeResponse;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
@@ -12,6 +12,8 @@ import java.util.*;
 
 public class CustomProtocol {
     private SecretKey secretKey;
+    private String nonce;
+    private final ArrayList<String> receivedNonces  = new ArrayList<String>();
 
     public byte[] decryptData(byte[] cipheredData, PrivateKey privKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         // Decrypt the data, verify integrity and freshness
@@ -71,28 +73,7 @@ public class CustomProtocol {
         return false;
     }
 
-    public void verifyNonce(String nonce, String randomString, String tag) throws InvalidKeyException, NoSuchAlgorithmException {
-        Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(this.secretKey);
 
-        byte[] nonceB = nonce.getBytes(StandardCharsets.UTF_8);
-        byte[] randomStringB = randomString.getBytes(StandardCharsets.UTF_8);
-        byte[] message = new byte[nonceB.length + randomStringB.length];
-
-        System.arraycopy(message, 0, nonceB, 0, nonceB.length);
-        System.arraycopy(message, 0, randomStringB, nonceB.length, randomStringB.length);
-
-        byte[] checkTag = mac.doFinal(message);
-        String tag64 = Base64.getEncoder().encodeToString(checkTag);
-
-        try {
-            if(tag64.equals(tag)) {
-                System.out.println("Everything looks good.");
-            }
-        } catch (Exception e) {
-            System.out.println("Unable to make HTTP Request");
-        }
-    }
 
     public void generateSecretKey(HandshakeResponse message, String path) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchPaddingException {
         // Getting the encrypted random string from CustomProtocolResponse
@@ -108,6 +89,26 @@ public class CustomProtocol {
 
         this.secretKey = new SecretKeySpec(decryptedStringBytes, 0, decryptedStringBytes.length, "AES");
     }
+
+    public String createNonce() {
+        byte[] randomString = new byte[32];
+        new Random().nextBytes(randomString);
+        nonce = new String(randomString )+ Long.toString(System.currentTimeMillis());
+        return nonce;
+
+    }
+
+
+    public boolean verifyNonce(String nonce) {
+        boolean received = receivedNonces.contains(nonce);
+        if(!received) {
+            receivedNonces.add(nonce);
+            return true;
+        }else
+            return false;
+
+    }
+
 
 }
 

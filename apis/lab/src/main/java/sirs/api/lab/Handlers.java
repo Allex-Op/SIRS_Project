@@ -17,12 +17,12 @@ import java.security.spec.InvalidKeySpecException;
 
 @RestController
 public class Handlers {
-    CustomProtocol customProtocol = null;
+    CustomProtocol customProtocol = new CustomProtocol();
 
     // Return nonce, randomString, mac (nonce + secret key)
     @PostMapping("/beginhandshake")
     public ResponseEntity<CustomProtocolResponse> handshake(@RequestBody HandshakeRequest handshakeRequest) throws CertificateException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, JsonProcessingException {
-        customProtocol = new CustomProtocol();
+
         String certificate = handshakeRequest.getCertificate();
 
         try {
