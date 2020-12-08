@@ -114,6 +114,7 @@ public class CustomProtocol {
         nonce = new String(randomString);
         return nonce;
     }
+
     public boolean dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException {
         // Creating Mac object and initializing
         Mac mac = Mac.getInstance("HmacSHA256");
@@ -132,6 +133,7 @@ public class CustomProtocol {
         System.out.println("Message not secure.");
         return false;
     }
+
     public boolean verifyNonce(String nonce) {
         return nonce.equals(this.nonce);
     }
