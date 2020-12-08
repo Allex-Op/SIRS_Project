@@ -4,25 +4,19 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TestRequest {
-    String data;
-
-
-
+    int id;
     String nonce;
 
     @JsonCreator
-    public TestRequest(@JsonProperty("data") String data, @JsonProperty("nonce")  String nonce) {
-        this.data = data;
+    public TestRequest(@JsonProperty("data") int id, @JsonProperty("nonce")  String nonce) {
+        this.id = id;
         this.nonce = nonce;
     }
 
-    public String getData() {
-        return data;
-    }
+    public int getId() { return id; }
 
-    public void setData(String data) {
-        this.data = data;
-    }
+    public void setId(int id) { this.id = id; }
+
     public String getNonce() {
         return nonce;
     }

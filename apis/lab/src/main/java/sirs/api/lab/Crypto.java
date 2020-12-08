@@ -45,33 +45,6 @@ public class Crypto {
     }
 
     public static PrivateKey extractPrivKey(File file) throws NoSuchAlgorithmException, InvalidKeySpecException, IOException {
-//        String privateKeyPEM = file
-//                .replace("-----BEGIN RSA PRIVATE KEY-----", "")
-//                .replaceAll(System.lineSeparator(), "")
-//                .replace("-----END RSA PRIVATE KEY-----", "");
-//
-//        byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
-//
-//        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-//        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
-//        return keyFactory.generatePrivate(keySpec);
-
-        // read private key DER file
-//        DataInputStream dis = new DataInputStream(new FileInputStream(file));
-//        byte[] privKeyBytes = new byte[(int)file.length()];
-//        dis.read(privKeyBytes);
-//        dis.close();
-//
-//        // decode private key
-//        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-//        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privKeyBytes);
-//        RSAPrivateKey privKey = (RSAPrivateKey) keyFactory.generatePrivate(privSpec);
-//        return privKey;
-
-//        try( Reader r = new FileReader(file) ){
-//            KeyPair pair = new JcaPEMKeyConverter().getKeyPair((PEMKeyPair)new PEMParser(r).readObject());
-//        }
-
         byte[] keyBytes = Files.readAllBytes(Paths.get(file.getPath()));
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");

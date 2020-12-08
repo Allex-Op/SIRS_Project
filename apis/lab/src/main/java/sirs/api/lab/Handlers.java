@@ -53,17 +53,19 @@ public class Handlers {
         }
     }
 
-    @PostMapping("/teststoanalyze/{id}")
-    public ResponseEntity<CustomProtocolResponse> testsToAnalyze(@PathVariable int id, @RequestBody ProtectedTestRequest testreq) throws NoSuchAlgorithmException, IOException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
-        // Because for simplicity reasons we only answer to requests with id 1
-        // id is only for representation purposes in case this was a real system
-        // we would have multiple id's...
-        if(id != 1)
-            return ResponseEntity.status(404).build();
-
+    @PostMapping("/teststoanalyze")
+    public ResponseEntity<CustomProtocolResponse> testsToAnalyze(@RequestBody ProtectedTestRequest testreq) throws NoSuchAlgorithmException, IOException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
         //Generate secret key
         //customProtocol.generateSecretKey(hsResponse, "src/main/resources/hospitalKeystore.jks");
         TestRequest req = testreq.getTestRequest();
+
+        // Because for simplicity reasons we only answer to requests with id 1
+        // id is only for representation purposes in case this was a real system
+        // we would have multiple id's...
+
+        if(req.getId() != 1)
+            return ResponseEntity.status(404).build();
+
         if(customProtocol.dataCheck(testreq.getMac()) && customProtocol.verifyNonce(req.getNonce())) {
 
             // Encrypting test results with secret key

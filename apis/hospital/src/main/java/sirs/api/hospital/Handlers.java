@@ -130,8 +130,7 @@ public class Handlers {
              customProtocol.generateSecretKey(hsResponse, "src/main/resources/hospitalKeystore.jks");
 
             if(customProtocol.dataCheck(cp2Response.getMac())) {
-                // TODO: WHERE DOES DATA COME FROM?
-                TestRequest testRequest = new TestRequest("SIMULATION OF A REQUEST.", hsResponse.getNonce());
+                TestRequest testRequest = new TestRequest(id, hsResponse.getNonce());
 
                 // Using mapper to transform testResponse into string
                 // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
@@ -146,8 +145,7 @@ public class Handlers {
 
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest request = HttpRequest.newBuilder()
-                        // TODO: id goes on testRequest
-                        .uri(URI.create(LAB_URL + "/teststoanalyze/" + id))
+                        .uri(URI.create(LAB_URL + "/teststoanalyze"))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(testReqBody))
                         .build();
