@@ -10,7 +10,7 @@ sudo apt-get -y install ansible
 
 # prepare to setup SSH Trust
 cp /home/vagrant/examples/mgmtkeys/id* .ssh/
-
+sudo cp /home/vagrant/examples/certificates/myCA.crt /usr/local/share/ca-certificates/myCA.crt && sudo update-ca-certificates
 
 # configure hosts file for the internal network defined by Vagrantfile
 cat >> /etc/hosts <<EOL
@@ -18,7 +18,6 @@ cat >> /etc/hosts <<EOL
 # vagrant environment nodes
 192.168.56.9  mgmt
 192.168.56.11  hospital
-192.168.56.12  hospitalPdp
+192.168.56.12  pdp
 192.168.57.11  lab1
-192.168.57.12  labPdp1
 EOL

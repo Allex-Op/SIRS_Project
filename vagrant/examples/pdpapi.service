@@ -1,0 +1,9 @@
+[Unit]
+Description=A goddamn PDP API
+ 
+[Service]
+Environment="POLICIES_PATH=/home/vagrant/examples/policies.json"
+ExecStart=/bin/sh -c "/home/vagrant/examples/snapshots/pdp-0.0.1-SNAPSHOT.jar >> /var/log/pdp.log"
+ 
+[Install] 
+WantedBy=multi-user.target

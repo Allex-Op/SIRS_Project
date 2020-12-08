@@ -17,7 +17,8 @@ public class Dbconn {
             String url = "jdbc:postgresql://localhost/sirsDb?user=administrator&password=administrator";
             this.conn = DriverManager.getConnection(url);
         } catch(Exception e) {
-            System.out.println("Well unlucky but this ain't gonna work...");
+            System.out.println("Error creating database connection:");
+            e.printStackTrace();
         }
     }
 }

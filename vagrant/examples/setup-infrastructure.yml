@@ -28,26 +28,12 @@
 
   - name: install JDK 
     apt:
-      name: default-jdk
+      name: openjdk-11-jdk
       state: present
       update_cache: yes
-
-  - name: install maven
-    apt:
-      name: maven
-      state: present
-      update_cache: yes
-
-  - name: clone repo git
-    git:
-      repo: "https://github.com/Alex-Pena-Ok/SIRS_Project"
-      clone: yes
-      dest: '/home/vagrant/project'
-    become: yes
-    become_method: sudo
 
   - name: Install root CA
-    shell: cp /home/vagrant/project/vagrant/examples/certificates/myCA.crt /usr/local/share/ca-certificates/myCA.crt && update-ca-certificates
+    shell: cp /home/vagrant/examples/certificates/myCA.crt /usr/local/share/ca-certificates/myCA.crt && update-ca-certificates
 
   handlers:
 
@@ -108,7 +94,7 @@
                state=present
 
 
-# Hospital API configuration Deployment (not the actual code only the config)
+# Hospital API configuration  
 - hosts: hosp
   remote_user: vagrant
   become: yes
@@ -116,5 +102,36 @@
   gather_facts: true
 
   tasks:
-    - name: Deploy API Service
-      shell: cp /home/vagrant/project/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service
+    - name: Deploy Hospital API Service
+      shell: cp /home/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service
+
+    - name: Add PDP to /etc/hosts file
+      become: yes
+      become_user: root
+      lineinfile:
+        path: /etc/hosts
+        line: "192.168.56.12   pdp"
+        state: present
+
+# PDP API configuration  
+- hosts: auth
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+    - name: Deploy PDP API Service
+      shell: cp /home/vagrant/examples/pdpapi.service /etc/systemd/system/pdpapi.service
+
+
+# LAB API configuration  
+- hosts: lab
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+    - name: Deploy Lab API Service
+      shell: cp /home/vagrant/examples/labapi.service /etc/systemd/system/labapi.service

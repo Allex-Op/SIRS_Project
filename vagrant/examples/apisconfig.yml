@@ -1,0 +1,36 @@
+# Hospital API configuration  
+- hosts: hosp
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+    - name: Deploy Hospital API Service
+      shell: cp /home/vagrant/examples/hospitalapi.service /etc/systemd/system/hospitalapi.service
+
+
+
+# PDP API configuration  
+- hosts: auth
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+    - name: Deploy PDP API Service
+      shell: cp /home/vagrant/examples/pdpapi.service /etc/systemd/system/pdpapi.service
+
+
+
+# LAB API configuration  
+- hosts: lab
+  remote_user: vagrant
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  tasks:
+    - name: Deploy Lab API Service
+      shell: cp /home/vagrant/examples/labapi.service /etc/systemd/system/labapi.service

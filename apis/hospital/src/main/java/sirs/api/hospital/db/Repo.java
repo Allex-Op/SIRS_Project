@@ -260,7 +260,8 @@ public class Repo {
             //Fallback when everything goes wrong and there is no session/token
             return "";
         } catch(Exception e) {
-            System.out.println("Unlucky something went wrong, no sql queries for you...");
+            System.out.println("[Repo] Error executing getSessionToken function.");
+            e.printStackTrace();
             return "";
         }
     }
@@ -295,7 +296,8 @@ public class Repo {
 
             return rs.getString(1);
         } catch(Exception e) {
-            System.out.println("Unlucky something went wrong, no sql queries for you...");
+            System.out.println("[Repo] Error executing validateToken function");
+            e.printStackTrace();
             return "";
         }
     }

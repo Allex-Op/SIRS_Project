@@ -22,6 +22,12 @@ public class Handlers {
     Repo repo = new Repo();
     Crypto cr = new Crypto();
 
+    @GetMapping("/secret")
+    @ResourceId(resourceId = "secret")
+    public ResponseEntity<String> secret() {
+        return ResponseEntity.ok("top secret endpoint for debugging");
+    }
+
     @GetMapping("/patient/{id}/name")
     @ResourceId(resourceId = "getPatientName")
     public ResponseEntity<Patient> getPatientName(@PathVariable int id) {
