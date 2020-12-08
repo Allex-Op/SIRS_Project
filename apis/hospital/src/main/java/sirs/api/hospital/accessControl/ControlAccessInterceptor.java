@@ -59,9 +59,8 @@ public class ControlAccessInterceptor implements HandlerInterceptor {
 
         System.out.println("[AC Interceptor] Asking PDP decision on: ["+req.getMethod()+"] ["+req.getRole()+"] ["+req.getResourceId()+"]");
         // Builds the XACMLRequest, forwards it to the PDP and if authorized lets request continue
-//        XACMLRequest xreq = buildxacmlreq(req);
-//        return checkAuthorization(xreq);
-        return true;
+        XACMLRequest xreq = buildxacmlreq(req);
+        return checkAuthorization(xreq);
     }
 
     /**
