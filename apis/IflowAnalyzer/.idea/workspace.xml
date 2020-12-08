@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f487259b-04df-4f53-a7c7-f9f12bb09e2a" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHome" value="$APPLICATION_HOME_DIR$/plugins/maven/lib/maven3" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectId" id="1kvQ4GseT4nfckvWAjRpHVRkuxP" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../../SSOF/project2/IFlowAnalyzer-SSOF/IflowAnalyzer" />
+  </component>
+  <component name="RunManager">
+    <configuration name="IFlowAnalyzer" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="IFlowAnalyzer" />
+      <module name="IflowAnalyzer" />
+      <option name="PROGRAM_PARAMETERS" value="$PROJECT_DIR$/../../../../SSOF/project2/proj-slices/1a-basic-flow.json $PROJECT_DIR$/../../../../SSOF/project2/proj-slices/1a-basic-flow-vuln-pattern.json" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.IFlowAnalyzer" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f487259b-04df-4f53-a7c7-f9f12bb09e2a" name="Default Changelist" comment="" />
+      <created>1606578394938</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1606578394938</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="778" y="200" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1606580719249">
+      <screen x="0" y="27" width="1920" height="1011" />
+    </state>
+    <state x="778" y="200" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.27.1920.1011@0.27.1920.1011" timestamp="1606580719249" />
+    <state x="664" y="202" width="582" height="668" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog" timestamp="1606581971158">
+      <screen x="0" y="27" width="1920" height="1011" />
+    </state>
+    <state x="664" y="202" width="582" height="668" key="#com.intellij.ide.util.frameworkSupport.AddFrameworkSupportDialog/0.27.1920.1011@0.27.1920.1011" timestamp="1606581971158" />
+    <state x="743" y="290" width="424" height="491" key="FileChooserDialogImpl" timestamp="1606582146910">
+      <screen x="0" y="27" width="1920" height="1011" />
+    </state>
+    <state x="743" y="290" width="424" height="491" key="FileChooserDialogImpl/0.27.1920.1011@0.27.1920.1011" timestamp="1606582146910" />
+    <state width="1874" height="262" key="GridCell.Tab.0.bottom" timestamp="1606582148954">
+      <screen x="0" y="27" width="1920" height="1011" />
+    </state>
+    <state width="1874" height="262" key="GridCell.Tab.0.bottom/0.27.1920.1011@0.27.1920.1011" timestamp="1606582148954" />
+    <state width="1874" height="262" key="GridCell.Tab.0.center" timestamp="1606582148954">
+      <screen x="0" y="27" width="1920" height="1011" />
+    </state>
+    <state width="1874" height="262" key="GridCell.Tab.0.center/0.27.1920.1011@0.27.1920.1011" timestamp="1606582148954" />
+    <state width="1874" height="262" key="GridCell.Tab.0.left" timestamp="1606582148954">
+      <screen x="0" y="27" width="1920" height="1011" />
+    </state>
+    <state width="1874" height="262" key="GridCell.Tab.0.left/0.27.1920.1011@0.27.1920.1011" timestamp="1606582148954" />
+    <state width="1874" height="262" key="GridCell.Tab.0.right" timestamp="1606582148954">
+      <screen x="0" y="27" width="1920" height="1011" />
+    </state>
+    <state width="1874" height="262" key="GridCell.Tab.0.right/0.27.1920.1011@0.27.1920.1011" timestamp="1606582148954" />
+  </component>
+</project>
