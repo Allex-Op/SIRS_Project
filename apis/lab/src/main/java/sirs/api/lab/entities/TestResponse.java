@@ -31,4 +31,7 @@ public class TestResponse {
         this.results = results;
     }
 
+    public String getNonce() {
+        return nonce;
+    }
 }
