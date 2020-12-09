@@ -1,6 +1,5 @@
 package sirs.api.lab;
 
-import com.fasterxml.jackson.databind.ser.Serializers;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
@@ -21,10 +20,15 @@ import java.util.*;
 public class CustomProtocol {
    private  SecretKey secretKey;
    private String nonce;
-   private final ArrayList<String> receivedNonces  = new ArrayList<String>();
+   private final ArrayList<String> receivedNonces  = new ArrayList<>();
 
 
-   //diffie-helman
+    /**
+     * *************************************
+     * Start of Diffie Hellman's Functions  *
+     * *************************************
+     * */
+
 
     public String diffieLabPublicKey() throws NoSuchAlgorithmException, InvalidKeyException {
         /*
@@ -44,7 +48,6 @@ public class CustomProtocol {
         byte[] alicePubKeyEnc = aliceKpair.getPublic().getEncoded();
 
         return Base64.getEncoder().encodeToString(alicePubKeyEnc);
-
     }
 
     public String diffieHospitalKey(String alicepubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
@@ -60,7 +63,6 @@ public class CustomProtocol {
         X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(alicePubKeyEnc);
 
         PublicKey alicePubKey = bobKeyFac.generatePublic(x509KeySpec);
-
 
         /*
          * Bob gets the DH parameters associated with Alice's public key.
@@ -83,110 +85,117 @@ public class CustomProtocol {
         // Bob encodes his public key, and sends it over to Alice.
         byte[] bobPubKeyEnc = bobKpair.getPublic().getEncoded();
         return Base64.getEncoder().encodeToString(bobPubKeyEnc);
-
-
     }
 
+    
+    public Key firstPhaseLab(String bobpubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+        /*
+         * Alice uses Bob's public key for the first (and only) phase
+         * of her version of the DH
+         * protocol.
+         * Before she can do so, she has to instantiate a DH public key
+         * from Bob's encoded key material.
+         */
+        byte [] bobPubKeyEnc= Base64.getDecoder().decode(bobpubkey);
 
-
-
-
-    /*
-     * Alice uses Bob's public key for the first (and only) phase
-     * of her version of the DH
-     * protocol.
-     * Before she can do so, she has to instantiate a DH public key
-     * from Bob's encoded key material.
-     */
-    KeyFactory aliceKeyFac = KeyFactory.getInstance("DH");
-    x509KeySpec = new X509EncodedKeySpec(bobPubKeyEnc);
-    PublicKey bobPubKey = aliceKeyFac.generatePublic(x509KeySpec);
+        KeyFactory aliceKeyFac = KeyFactory.getInstance("DH");
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(bobPubKeyEnc);
+        PublicKey bobPubKey = aliceKeyFac.generatePublic(x509KeySpec);
         System.out.println("ALICE: Execute PHASE1 ...");
-        aliceKeyAgree.doPhase(bobPubKey, true);
+        KeyAgreement aliceKeyAgree = null;
+        return aliceKeyAgree.doPhase(bobPubKey, true);
+    }
 
-    /*
-     * Bob uses Alice's public key for the first (and only) phase
-     * of his version of the DH
-     * protocol.
-     */
+    public Key firtPhaseHospital(String alicepubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+        /*
+         * Bob uses Alice's public key for the first (and only) phase
+         * of his version of the DH
+         * protocol.
+         */
+        byte [] alicePubKeyEnc= Base64.getDecoder().decode(alicepubkey);
+
+        KeyFactory bobKeyFac = KeyFactory.getInstance("DH");
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(alicePubKeyEnc);
+
+        PublicKey alicePubKey = bobKeyFac.generatePublic(x509KeySpec);
         System.out.println("BOB: Execute PHASE1 ...");
-        bobKeyAgree.doPhase(alicePubKey, true);
+        KeyAgreement bobKeyAgree = null;
+        return bobKeyAgree.doPhase(alicePubKey, true);
+    }
 
     /*
      * At this stage, both Alice and Bob have completed the DH key
      * agreement protocol.
      * Both generate the (same) shared secret.
      */
-        try {
+    public void generateSharedSecret(KeyAgreement aliceKeyAgree, KeyAgreement bobKeyAgree) throws Exception {
         byte[] aliceSharedSecret = aliceKeyAgree.generateSecret();
         int aliceLen = aliceSharedSecret.length;
+
         byte[] bobSharedSecret = new byte[aliceLen];
-        int bobLen;
-    } catch (ShortBufferException e) {
-        System.out.println(e.getMessage());
-    }        // provide output buffer of required size
-    bobLen = bobKeyAgree.generateSecret(bobSharedSecret, 0);
-        System.out.println("Alice secret: " +
-    toHexString(aliceSharedSecret));
-        System.out.println("Bob secret: " +
-    toHexString(bobSharedSecret));
+
+        int bobLen = bobKeyAgree.generateSecret(bobSharedSecret, 0);
+
+        System.out.println("Alice secret: " + toHexString(aliceSharedSecret));
+        System.out.println("Bob secret: " + toHexString(bobSharedSecret));
+
         if (!java.util.Arrays.equals(aliceSharedSecret, bobSharedSecret))
-            throw new Exception("Shared secrets differ");
-        System.out.println("Shared secrets are the same");
+            throw new Exception("Shared secrets differ.");
+        System.out.println("Shared secrets are the same.");
 
-    /*
-     * Now let's create a SecretKey object using the shared secret
-     * and use it for encryption. First, we generate SecretKeys for the
-     * "AES" algorithm (based on the raw shared secret data) and
-     * Then we use AES in CBC mode, which requires an initialization
-     * vector (IV) parameter. Note that you have to use the same IV
-     * for encryption and decryption: If you use a different IV for
-     * decryption than you used for encryption, decryption will fail.
-     *
-     * If you do not specify an IV when you initialize the Cipher
-     * object for encryption, the underlying implementation will generate
-     * a random one, which you have to retrieve using the
-     * javax.crypto.Cipher.getParameters() method, which returns an
-     * instance of java.security.AlgorithmParameters. You need to transfer
-     * the contents of that object (e.g., in encoded format, obtained via
-     * the AlgorithmParameters.getEncoded() method) to the party who will
-     * do the decryption. When initializing the Cipher for decryption,
-     * the (reinstantiated) AlgorithmParameters object must be explicitly
-     * passed to the Cipher.init() method.
-     */
+
+        /*
+         * Now let's create a SecretKey object using the shared secret
+         * and use it for encryption. First, we generate SecretKeys for the
+         * "AES" algorithm (based on the raw shared secret data) and
+         * Then we use AES in CBC mode, which requires an initialization
+         * vector (IV) parameter. Note that you have to use the same IV
+         * for encryption and decryption: If you use a different IV for
+         * decryption than you used for encryption, decryption will fail.
+         *
+         * If you do not specify an IV when you initialize the Cipher
+         * object for encryption, the underlying implementation will generate
+         * a random one, which you have to retrieve using the
+         * javax.crypto.Cipher.getParameters() method, which returns an
+         * instance of java.security.AlgorithmParameters. You need to transfer
+         * the contents of that object (e.g., in encoded format, obtained via
+         * the AlgorithmParameters.getEncoded() method) to the party who will
+         * do the decryption. When initializing the Cipher for decryption,
+         * the (re-instantiated) AlgorithmParameters object must be explicitly
+         * passed to the Cipher.init() method.
+         */
+
         System.out.println("Use shared secret as SecretKey object ...");
-    SecretKeySpec bobAesKey = new SecretKeySpec(bobSharedSecret, 0, 16, "AES");
-    SecretKeySpec aliceAesKey = new SecretKeySpec(aliceSharedSecret, 0, 16, "AES");
+        SecretKeySpec bobAesKey = new SecretKeySpec(bobSharedSecret, 0, 16, "AES");
+        SecretKeySpec aliceAesKey = new SecretKeySpec(aliceSharedSecret, 0, 16, "AES");
 
-    /*
-     * Bob encrypts, using AES in CBC mode
-     */
-    Cipher bobCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        /*
+         * Bob encrypts, using AES in CBC mode
+         */
+        Cipher bobCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         bobCipher.init(Cipher.ENCRYPT_MODE, bobAesKey);
-    byte[] cleartext = "This is just an example".getBytes();
-    byte[] ciphertext = bobCipher.doFinal(cleartext);
+        byte[] cleartext = "This is just an example".getBytes();
+        byte[] ciphertext = bobCipher.doFinal(cleartext);
 
-    // Retrieve the parameter that was used, and transfer it to Alice in
-    // encoded format
-    byte[] encodedParams = bobCipher.getParameters().getEncoded();
+        // Retrieve the parameter that was used, and transfer it to Alice in
+        // encoded format
+        byte[] encodedParams = bobCipher.getParameters().getEncoded();
 
-    /*
-     * Alice decrypts, using AES in CBC mode
-     */
-
-    // Instantiate AlgorithmParameters object from parameter encoding
-    // obtained from Bob
-    AlgorithmParameters aesParams = AlgorithmParameters.getInstance("AES");
+        /*
+         * Alice decrypts, using AES in CBC mode
+         */
+        // Instantiate AlgorithmParameters object from parameter encoding
+        // obtained from Bob
+        AlgorithmParameters aesParams = AlgorithmParameters.getInstance("AES");
         aesParams.init(encodedParams);
-    Cipher aliceCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        Cipher aliceCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         aliceCipher.init(Cipher.DECRYPT_MODE, aliceAesKey, aesParams);
-    byte[] recovered = aliceCipher.doFinal(ciphertext);
+        byte[] recovered = aliceCipher.doFinal(ciphertext);
         if (!java.util.Arrays.equals(cleartext, recovered))
-            throw new Exception("AES in CBC mode recovered text is " +
-                                        "different from cleartext");
-        System.out.println("AES in CBC mode recovered text is "
-                "same as cleartext");
-}
+            throw new Exception("AES in CBC mode recovered text is " + "different from cleartext");
+        System.out.println("AES in CBC mode recovered text is same as cleartext");
+    }
+
 
     /*
      * Converts a byte to hex digit and writes to the supplied buffer
@@ -214,27 +223,13 @@ public class CustomProtocol {
         }
         return buf.toString();
     }
-}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /**
+     * ***********************************
+     * End of Diffie Hellman's Functions  *
+     * ***********************************
+     * */
 
 
     public String createRandomString(String certificate) throws NoSuchPaddingException, NoSuchAlgorithmException, CertificateException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
@@ -248,8 +243,6 @@ public class CustomProtocol {
         // Encrypt random string with pub key
         return encryptRandomString(certificate, randomString);
     }
-
-
 
     public PublicKey extractPubKey(String certificate) throws CertificateException {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
@@ -365,7 +358,6 @@ public class CustomProtocol {
            return true;
        }else
            return false;
-
     }
 
 }
