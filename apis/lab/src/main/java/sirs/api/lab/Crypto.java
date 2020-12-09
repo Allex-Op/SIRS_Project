@@ -34,9 +34,9 @@ public class Crypto {
             signature.initSign(privKey, secureRandom);
             signature.update(data.getBytes("UTF-8"));
             byte[] digitalSignature = signature.sign();
-            String digitalSign = new String(digitalSignature);
+            //String digitalSign = new String(digitalSignature);
 
-            return digitalSign;
+            return  Base64.getEncoder().encodeToString(digitalSignature);
 
         } catch(Exception e) {
             System.out.println("Something went wrong while signing the data...");

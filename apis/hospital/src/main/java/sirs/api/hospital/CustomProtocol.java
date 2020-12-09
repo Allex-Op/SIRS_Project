@@ -94,15 +94,17 @@ public class CustomProtocol {
         byte[] randomString = new byte[32];
         new Random().nextBytes(randomString);
         nonce = new String(randomString )+ Long.toString(System.currentTimeMillis());
-        return nonce;
+        return  Base64.getEncoder().encodeToString(nonce.getBytes());
 
     }
 
 
     public boolean verifyNonce(String nonce) {
-        boolean received = receivedNonces.contains(nonce);
+        String decnonce = Base64.getDecoder().decode(nonce).toString();
+
+        boolean received = receivedNonces.contains(decnonce);
         if(!received) {
-            receivedNonces.add(nonce);
+            receivedNonces.add(decnonce);
             return true;
         }else
             return false;
