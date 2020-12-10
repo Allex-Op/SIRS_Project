@@ -23,7 +23,6 @@ public class CustomProtocol {
    private String nonce;
    private final ArrayList<String> receivedNonces  = new ArrayList<>();
 
-
     /**
      * *************************************
      * Start of Diffie Hellman's Functions  *
@@ -51,13 +50,11 @@ public class CustomProtocol {
         DHParameterSpec dhParamFromAlicePubKey = ((DHPublicKey) alicePubKey).getParams();
 
         // Bob creates his own DH key pair
-        System.out.println("BOB: Generate DH keypair ...");
         KeyPairGenerator bobKpairGen = KeyPairGenerator.getInstance("DH");
         bobKpairGen.initialize(dhParamFromAlicePubKey);
         KeyPair bobKpair = bobKpairGen.generateKeyPair();
 
         // Bob creates and initializes his DH KeyAgreement object
-        System.out.println("BOB: Initialization ...");
         bobKeyAgree = KeyAgreement.getInstance("DH");
         bobKeyAgree.init(bobKpair.getPrivate());
 
@@ -70,8 +67,7 @@ public class CustomProtocol {
     public void firstPhaseLab(String alicepubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
         /*
          * Bob uses Alice's public key for the first (and only) phase
-         * of his version of the DH
-         * protocol.
+         * of his version of the DH protocol.
          */
         byte [] alicePubKeyEnc= Base64.getDecoder().decode(alicepubkey);
 
@@ -79,7 +75,6 @@ public class CustomProtocol {
         X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(alicePubKeyEnc);
         PublicKey alicePubKey = bobKeyFac.generatePublic(x509KeySpec);
 
-        System.out.println("BOB: Execute PHASE1 ...");
         bobKeyAgree.doPhase(alicePubKey, true);
     }
 
@@ -90,63 +85,13 @@ public class CustomProtocol {
      */
     public void generateSharedSecret(String alicepubkey) throws Exception {
         firstPhaseLab(alicepubkey);
-
-
         byte[] bobSharedSecret = bobKeyAgree.generateSecret();
-
-        System.out.println("Bob secret: " + toHexString(bobSharedSecret));
 
         /*
          * Now let's create a SecretKey object using the shared secret
-         * and use it for encryption. First, we generate SecretKeys for the
-         * "AES" algorithm (based on the raw shared secret data) and
-         * Then we use AES in CBC mode, which requires an initialization
-         * vector (IV) parameter. Note that you have to use the same IV
-         * for encryption and decryption: If you use a different IV for
-         * decryption than you used for encryption, decryption will fail.
-         *
-         * If you do not specify an IV when you initialize the Cipher
-         * object for encryption, the underlying implementation will generate
-         * a random one, which you have to retrieve using the
-         * javax.crypto.Cipher.getParameters() method, which returns an
-         * instance of java.security.AlgorithmParameters. You need to transfer
-         * the contents of that object (e.g., in encoded format, obtained via
-         * the AlgorithmParameters.getEncoded() method) to the party who will
-         * do the decryption. When initializing the Cipher for decryption,
-         * the (re-instantiated) AlgorithmParameters object must be explicitly
-         * passed to the Cipher.init() method.
+         * and use it for encryption.
          */
-
         secretKey = new SecretKeySpec(bobSharedSecret, 0, 16, "AES");
-        System.out.println("Secret key Bob" + secretKey.toString());
-    }
-
-
-    /*
-     * Converts a byte to hex digit and writes to the supplied buffer
-     */
-    private static void byte2hex(byte b, StringBuffer buf) {
-        char[] hexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
-                '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-        int high = ((b & 0xf0) >> 4);
-        int low = (b & 0x0f);
-        buf.append(hexChars[high]);
-        buf.append(hexChars[low]);
-    }
-
-    /*
-     * Converts a byte array to hex string
-     */
-    private static String toHexString(byte[] block) {
-        StringBuffer buf = new StringBuffer();
-        int len = block.length;
-        for (int i = 0; i < len; i++) {
-            byte2hex(block[i], buf);
-            if (i < len-1) {
-                buf.append(":");
-            }
-        }
-        return buf.toString();
     }
 
 
@@ -156,36 +101,7 @@ public class CustomProtocol {
      * ***********************************
      * */
 
-
-    public String createRandomString(String certificate) throws NoSuchPaddingException, NoSuchAlgorithmException, CertificateException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
-        // Generating random string
-        byte[] randomString = new byte[32];
-        new Random().nextBytes(randomString);
-
-        // Generating secretKey from randomString
-        secretKey = new SecretKeySpec(randomString, 0, randomString.length, "AES");
-
-        // Encrypt random string with pub key
-        return encryptRandomString(certificate, randomString);
-    }
-
-    public PublicKey extractPubKey(String certificate) throws CertificateException {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        InputStream cert = new ByteArrayInputStream(certificate.getBytes());
-        Certificate final_certificate = cf.generateCertificate(cert);
-
-        return final_certificate.getPublicKey();
-    }
-
-    public byte[] encryptData(byte[] randomString, PublicKey pubKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
-        // Encrypt the data adding Confidentiality, Integrity & Freshness
-        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, pubKey);
-
-        return cipher.doFinal(randomString);
-    }
-
-    public String encryptWithSecretKey(String stringToEncrypt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
+    public String encryptWithSecretKey(String stringToEncrypt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = null;
             cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
@@ -242,19 +158,11 @@ public class CustomProtocol {
         return Base64.getEncoder().encodeToString(message);
     }
 
-    public String encryptRandomString(String certificate, byte[] randomString) throws NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, CertificateException {
-        // Encrypt random string with pub key
-        PublicKey pubKey = extractPubKey(certificate);
-        byte[] encrypted_data = encryptData(randomString, pubKey);
-        return java.util.Base64.getEncoder().encodeToString(encrypted_data);
-    }
-
     public String createNonce() {
         byte[] randomString = new byte[32];
         new Random().nextBytes(randomString);
         nonce = new String(randomString )+ Long.toString(System.currentTimeMillis());
         return nonce;
-
     }
 
     public boolean dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException {

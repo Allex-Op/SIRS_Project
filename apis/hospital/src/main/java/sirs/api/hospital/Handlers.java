@@ -129,12 +129,8 @@ public class Handlers {
             HandshakeResponse hsResponse = cp2Response.getHandshakeResponse();
 
             //Generate secret key
-
             String labPubKey = hsResponse.getLabKeyString();
             customProtocol.generateSharedSecret(labPubKey);
-
-
-             //customProtocol.generateSecretKey(hsResponse, "src/main/resources/hospitalKeystore.jks");
 
             if(customProtocol.dataCheck(cp2Response.getMac()) && customProtocol.verifyNonce(hsResponse.getNonce())) {
                 TestRequest testRequest = new TestRequest(id, customProtocol.createNonce());
