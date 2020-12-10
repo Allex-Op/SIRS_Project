@@ -15,6 +15,7 @@ public class CustomProtocolResponse {
      * String mac:
      *      This string is a result of using mac algorithm on a data string (that can
      *      be either a HandshakeResponse object or a TestResponse object).
+     *      mac = Object + Tag
      *
      **/
     public String mac;

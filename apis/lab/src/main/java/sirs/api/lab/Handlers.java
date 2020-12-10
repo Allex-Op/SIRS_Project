@@ -20,20 +20,24 @@ public class Handlers {
     CustomProtocol customProtocol = new CustomProtocol();
 
     @PostMapping("/beginhandshake")
-    public ResponseEntity<CustomProtocolResponse> handshake(@RequestBody HandshakeRequest handshakeRequest) throws CertificateException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, JsonProcessingException {
+    public ResponseEntity<CustomProtocolResponse> handshake(@RequestBody HandshakeRequest handshakeRequest) throws Exception {
 
         String certificate = handshakeRequest.getCertificate();
 
         try {
             boolean valid = customProtocol.verifyCertificate(certificate, "src/main/resources/myCA.crt", "hospital");
             System.out.println("Certificate is " + valid);
+            String hospitalPubKey = handshakeRequest.getHospitalPubKey();
+
+            String diffieLabKey = customProtocol.diffieHospitalPublicKey(hospitalPubKey);
 
             //encrypted random string
 //            String randomString = customProtocol.createRandomString(certificate);
             String nonce = customProtocol.createNonce();
-            String diffieLabKey = customProtocol.diffieLabPublicKey();
-
             HandshakeResponse handshakeResponse = new HandshakeResponse(diffieLabKey, nonce);
+
+            // TODO: CREATE SECRET KEY
+            customProtocol.generateSharedSecret(hospitalPubKey, diffieLabKey);
 
             // Using mapper to transform testResponse into string
             // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse

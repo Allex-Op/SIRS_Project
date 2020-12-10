@@ -109,7 +109,8 @@ public class Handlers {
             // Getting the certificate
             File crtFile = new File("src/main/resources/hospital.pem");
             String certificate = Files.readString(crtFile.toPath(), Charset.defaultCharset());
-            HandshakeRequest handshakeRequest = new HandshakeRequest(certificate);
+            String hospitalPubKey = customProtocol.diffieHospitalPublicKey();
+            HandshakeRequest handshakeRequest = new HandshakeRequest(certificate, hospitalPubKey);
 
             // Write body
             ObjectMapper mapper = new ObjectMapper();
