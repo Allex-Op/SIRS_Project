@@ -19,7 +19,6 @@ import java.security.spec.InvalidKeySpecException;
 public class Handlers {
     CustomProtocol customProtocol = new CustomProtocol();
 
-    // Return nonce, randomString, mac (nonce + secret key)
     @PostMapping("/beginhandshake")
     public ResponseEntity<CustomProtocolResponse> handshake(@RequestBody HandshakeRequest handshakeRequest) throws CertificateException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, JsonProcessingException {
 
@@ -30,10 +29,11 @@ public class Handlers {
             System.out.println("Certificate is " + valid);
 
             //encrypted random string
-            String randomString = customProtocol.createRandomString(certificate);
+//            String randomString = customProtocol.createRandomString(certificate);
             String nonce = customProtocol.createNonce();
+            String diffieLabKey = customProtocol.diffieLabPublicKey();
 
-            HandshakeResponse handshakeResponse = new HandshakeResponse(randomString, nonce);
+            HandshakeResponse handshakeResponse = new HandshakeResponse(diffieLabKey, nonce);
 
             // Using mapper to transform testResponse into string
             // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
