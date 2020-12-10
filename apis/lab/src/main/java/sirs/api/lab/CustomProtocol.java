@@ -67,7 +67,7 @@ public class CustomProtocol {
     }
 
 
-    public KeyAgreement firstPhaseLab(String alicepubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+    public void firstPhaseLab(String alicepubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
         /*
          * Bob uses Alice's public key for the first (and only) phase
          * of his version of the DH
@@ -80,7 +80,7 @@ public class CustomProtocol {
         PublicKey alicePubKey = bobKeyFac.generatePublic(x509KeySpec);
 
         System.out.println("BOB: Execute PHASE1 ...");
-        return (KeyAgreement) bobKeyAgree.doPhase(alicePubKey, true);
+        bobKeyAgree.doPhase(alicePubKey, true);
     }
 
     /*
@@ -88,35 +88,13 @@ public class CustomProtocol {
      * agreement protocol.
      * Both generate the (same) shared secret.
      */
-    public void generateSharedSecret(String alicepubkey, String bobpubkey) throws Exception {
+    public void generateSharedSecret(String alicepubkey) throws Exception {
+        firstPhaseLab(alicepubkey);
 
-        byte [] bobPubKeyEnc= Base64.getDecoder().decode(bobpubkey);
-        KeyFactory bobKeyFac = KeyFactory.getInstance("DH");
-        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(bobPubKeyEnc);
-        PublicKey alicePubKey = bobKeyFac.generatePublic(x509KeySpec);
 
-        KeyFactory aliceKeyFac = KeyFactory.getInstance("DH");
-        x509KeySpec = new X509EncodedKeySpec(bobPubKeyEnc);
-        PublicKey bobPubKey = aliceKeyFac.generatePublic(x509KeySpec);
-        System.out.println("ALICE: Execute PHASE1 ...");
-        KeyAgreement aliceKeyAgree = null;
-        aliceKeyAgree.doPhase(bobPubKey, true);
+        byte[] bobSharedSecret = bobKeyAgree.generateSecret();
 
-        bobKeyAgree = firstPhaseLab(alicepubkey);
-
-        byte[] aliceSharedSecret = aliceKeyAgree.generateSecret();
-        int aliceLen = aliceSharedSecret.length;
-
-        byte[] bobSharedSecret = new byte[aliceLen];
-
-        int bobLen = bobKeyAgree.generateSecret(bobSharedSecret, 0);
-
-        System.out.println("Alice secret: " + toHexString(aliceSharedSecret));
         System.out.println("Bob secret: " + toHexString(bobSharedSecret));
-
-        if (!java.util.Arrays.equals(aliceSharedSecret, bobSharedSecret))
-            throw new Exception("Shared secrets differ.");
-        System.out.println("Shared secrets are the same.");
 
         /*
          * Now let's create a SecretKey object using the shared secret
@@ -140,6 +118,7 @@ public class CustomProtocol {
          */
 
         secretKey = new SecretKeySpec(bobSharedSecret, 0, 16, "AES");
+        System.out.println("Secret key Bob" + secretKey.toString());
     }
 
 

@@ -12,17 +12,17 @@ public class HandshakeResponse {
      *
      **/
 
-    private String randomString;
+    private String labKeyString;
     private String nonce;
     @JsonCreator
-    public HandshakeResponse(@JsonProperty("randomString") String randomString, @JsonProperty("nonce") String nonce) {
-        this.randomString = randomString;
+    public HandshakeResponse(@JsonProperty("labKeyString") String labKeyString, @JsonProperty("nonce") String nonce) {
+        this.labKeyString = labKeyString;
         this.nonce = nonce;
     }
 
-    public String getRandomString() { return randomString; }
+    public String getLabKeyString() { return labKeyString; }
 
-    public void setRandomString(String randomString) { this.randomString = randomString; }
+    public void setLabKeyString(String randomString) { this.labKeyString = randomString; }
 
     public String getNonce() { return nonce; }
 

@@ -15,7 +15,7 @@ public class HandshakeResponse {
     private String labKeyString;
     private String nonce;
     @JsonCreator
-    public HandshakeResponse(@JsonProperty("randomString") String labKeyString, @JsonProperty("nonce") String nonce) {
+    public HandshakeResponse(@JsonProperty("labKeyString") String labKeyString, @JsonProperty("nonce") String nonce) {
         this.labKeyString = labKeyString;
         this.nonce = nonce;
     }

@@ -46,7 +46,7 @@ public class CustomProtocol {
         return Base64.getEncoder().encodeToString(alicePubKeyEnc);
     }
 
-    public Key firstPhaseLab(String bobpubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+    public void firstPhaseLab(String bobpubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
         /*
          * Alice uses Bob's public key for the first (and only) phase
          * of her version of the DH
@@ -55,16 +55,15 @@ public class CustomProtocol {
          * from Bob's encoded key material.
          */
         byte [] bobPubKeyEnc= Base64.getDecoder().decode(bobpubkey);
-        KeyFactory bobKeyFac = KeyFactory.getInstance("DH");
-        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(bobPubKeyEnc);
-        PublicKey alicePubKey = bobKeyFac.generatePublic(x509KeySpec);
+
 
         KeyFactory aliceKeyFac = KeyFactory.getInstance("DH");
-        x509KeySpec = new X509EncodedKeySpec(bobPubKeyEnc);
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(bobPubKeyEnc);
         PublicKey bobPubKey = aliceKeyFac.generatePublic(x509KeySpec);
         System.out.println("ALICE: Execute PHASE1 ...");
-        KeyAgreement aliceKeyAgree = null;
-        return aliceKeyAgree.doPhase(bobPubKey, true);
+        aliceKeyAgree.doPhase(bobPubKey, true);
+
+
     }
 
     /*
@@ -72,35 +71,17 @@ public class CustomProtocol {
      * agreement protocol.
      * Both generate the (same) shared secret.
      */
-    public void generateSharedSecret(String bobpubkey, String alicepubkey) throws Exception {
+    public void generateSharedSecret(String bobpubkey) throws Exception {
         /*
          * Bob uses Alice's public key for the first (and only) phase
          * of his version of the DH
          * protocol.
          */
-        byte [] alicePubKeyEnc= Base64.getDecoder().decode(alicepubkey);
-
-        KeyFactory bobKeyFac = KeyFactory.getInstance("DH");
-        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(alicePubKeyEnc);
-        PublicKey alicePubKey = bobKeyFac.generatePublic(x509KeySpec);
-
-        System.out.println("BOB: Execute PHASE1 ...");
-        KeyAgreement bobKeyAgree = null;
-        bobKeyAgree.doPhase(alicePubKey, true);
-        
-        byte[] aliceSharedSecret = bobKeyAgree.generateSecret();
-        int aliceLen = aliceSharedSecret.length;
-
-        byte[] bobSharedSecret = new byte[aliceLen];
-
-        int bobLen = bobKeyAgree.generateSecret(bobSharedSecret, 0);
+        firstPhaseLab(bobpubkey);
+        byte[] aliceSharedSecret = aliceKeyAgree.generateSecret();
 
         System.out.println("Alice secret: " + toHexString(aliceSharedSecret));
-        System.out.println("Bob secret: " + toHexString(bobSharedSecret));
 
-        if (!java.util.Arrays.equals(aliceSharedSecret, bobSharedSecret))
-            throw new Exception("Shared secrets differ.");
-        System.out.println("Shared secrets are the same.");
 
 
         /*
@@ -125,8 +106,9 @@ public class CustomProtocol {
          */
 
         System.out.println("Use shared secret as SecretKey object ...");
-        SecretKeySpec bobAesKey = new SecretKeySpec(bobSharedSecret, 0, 16, "AES");
         SecretKeySpec aliceAesKey = new SecretKeySpec(aliceSharedSecret, 0, 16, "AES");
+        secretKey = aliceAesKey;
+        System.out.println("Secret key Bob" + aliceAesKey.toString());
     }
 
 
@@ -225,7 +207,7 @@ public class CustomProtocol {
 
 
 
-    public void generateSecretKey(HandshakeResponse message, String path) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchPaddingException {
+    /*public void generateSecretKey(HandshakeResponse message, String path) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchPaddingException {
         // Getting the encrypted random string from CustomProtocolResponse
         String encryptedString64 = message.getRandomString();
         byte[] encryptedStringBytes = Base64.getDecoder().decode(encryptedString64);
@@ -238,7 +220,7 @@ public class CustomProtocol {
         byte[] decryptedStringBytes = decryptData(encryptedStringBytes, privKey);
 
         this.secretKey = new SecretKeySpec(decryptedStringBytes, 0, decryptedStringBytes.length, "AES");
-    }
+    }*/
 
     public String createNonce() {
         byte[] randomString = new byte[32];

@@ -30,14 +30,13 @@ public class Handlers {
             String hospitalPubKey = handshakeRequest.getHospitalPubKey();
 
             String diffieLabKey = customProtocol.diffieHospitalPublicKey(hospitalPubKey);
+            customProtocol.generateSharedSecret(hospitalPubKey);
+
 
             //encrypted random string
 //            String randomString = customProtocol.createRandomString(certificate);
             String nonce = customProtocol.createNonce();
             HandshakeResponse handshakeResponse = new HandshakeResponse(diffieLabKey, nonce);
-
-            // TODO: CREATE SECRET KEY
-            customProtocol.generateSharedSecret(hospitalPubKey, diffieLabKey);
 
             // Using mapper to transform testResponse into string
             // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
