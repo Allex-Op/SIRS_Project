@@ -168,7 +168,8 @@ public class CustomProtocol {
         byte[] randomString = new byte[32];
         new Random().nextBytes(randomString);
         nonce = new String(randomString )+ Long.toString(System.currentTimeMillis());
-        return nonce;
+
+        return  Base64.getEncoder().encodeToString(nonce.getBytes());
     }
 
     public boolean dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException {
