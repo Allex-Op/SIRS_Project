@@ -19,7 +19,7 @@ import java.util.*;
 
 public class CustomProtocol {
    private SecretKey secretKey;
-   private KeyAgreement bobKeyAgree;
+   private KeyAgreement labKeyAgree;
    private String nonce;
    private final ArrayList<String> receivedNonces  = new ArrayList<>();
 
@@ -30,68 +30,68 @@ public class CustomProtocol {
      * */
 
 
-    public String diffieHospitalPublicKey(String alicepubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
+    public String diffieLabPublicKey(String hospitalpubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
         /*
-        * Let's turn over to Bob. Bob has received Alice's public key
+        * Let's turn over to lab. Lab has received hospital's public key
         * in encoded format.
         * He instantiates a DH public key from the encoded key material.
         *
         */
-        byte [] alicePubKeyEnc= Base64.getDecoder().decode( alicepubkey);
-        KeyFactory bobKeyFac = KeyFactory.getInstance("DH");
-        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(alicePubKeyEnc);
-        PublicKey alicePubKey = bobKeyFac.generatePublic(x509KeySpec);
+        byte [] hospitalPubKeyEnc= Base64.getDecoder().decode( hospitalpubkey);
+        KeyFactory labKeyFac = KeyFactory.getInstance("DH");
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(hospitalPubKeyEnc);
+        PublicKey hospitalPubKey = labKeyFac.generatePublic(x509KeySpec);
 
         /*
-         * Bob gets the DH parameters associated with Alice's public key.
+         * Lab gets the DH parameters associated with hospital's public key.
          * He must use the same parameters when he generates his own key
          * pair.
          */
-        DHParameterSpec dhParamFromAlicePubKey = ((DHPublicKey) alicePubKey).getParams();
+        DHParameterSpec dhParamFromhospitalPubKey = ((DHPublicKey) hospitalPubKey).getParams();
 
-        // Bob creates his own DH key pair
-        KeyPairGenerator bobKpairGen = KeyPairGenerator.getInstance("DH");
-        bobKpairGen.initialize(dhParamFromAlicePubKey);
-        KeyPair bobKpair = bobKpairGen.generateKeyPair();
+        // Lab creates his own DH key pair
+        KeyPairGenerator labKpairGen = KeyPairGenerator.getInstance("DH");
+        labKpairGen.initialize(dhParamFromhospitalPubKey);
+        KeyPair labKpair = labKpairGen.generateKeyPair();
 
-        // Bob creates and initializes his DH KeyAgreement object
-        bobKeyAgree = KeyAgreement.getInstance("DH");
-        bobKeyAgree.init(bobKpair.getPrivate());
+        // Lab creates and initializes his DH KeyAgreement object
+        labKeyAgree = KeyAgreement.getInstance("DH");
+        labKeyAgree.init(labKpair.getPrivate());
 
-        // Bob encodes his public key, and sends it over to Alice.
-        byte[] bobPubKeyEnc = bobKpair.getPublic().getEncoded();
-        return Base64.getEncoder().encodeToString(bobPubKeyEnc);
+        // Lab encodes his public key, and sends it over to hospital.
+        byte[] labPubKeyEnc = labKpair.getPublic().getEncoded();
+        return Base64.getEncoder().encodeToString(labPubKeyEnc);
     }
 
 
-    public void firstPhaseLab(String alicepubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+    public void firstPhaseLab(String hospitalpubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
         /*
-         * Bob uses Alice's public key for the first (and only) phase
+         * Lab uses hospital's public key for the first (and only) phase
          * of his version of the DH protocol.
          */
-        byte [] alicePubKeyEnc= Base64.getDecoder().decode(alicepubkey);
+        byte [] hospitalPubKeyEnc= Base64.getDecoder().decode(hospitalpubkey);
 
-        KeyFactory bobKeyFac = KeyFactory.getInstance("DH");
-        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(alicePubKeyEnc);
-        PublicKey alicePubKey = bobKeyFac.generatePublic(x509KeySpec);
+        KeyFactory labKeyFac = KeyFactory.getInstance("DH");
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(hospitalPubKeyEnc);
+        PublicKey hospitalPubKey = labKeyFac.generatePublic(x509KeySpec);
 
-        bobKeyAgree.doPhase(alicePubKey, true);
+        labKeyAgree.doPhase(hospitalPubKey, true);
     }
 
     /*
-     * At this stage, both Alice and Bob have completed the DH key
+     * At this stage, both hospital and lab have completed the DH key
      * agreement protocol.
      * Both generate the (same) shared secret.
      */
-    public void generateSharedSecret(String alicepubkey) throws Exception {
-        firstPhaseLab(alicepubkey);
-        byte[] bobSharedSecret = bobKeyAgree.generateSecret();
+    public void generateSharedSecret(String hospitalpubkey) throws Exception {
+        firstPhaseLab(hospitalpubkey);
+        byte[] labSharedSecret = labKeyAgree.generateSecret();
 
         /*
          * Now let's create a SecretKey object using the shared secret
          * and use it for encryption.
          */
-        secretKey = new SecretKeySpec(bobSharedSecret, 0, 16, "AES");
+        secretKey = new SecretKeySpec(labSharedSecret, 0, 16, "AES");
     }
 
 

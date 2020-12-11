@@ -26,7 +26,7 @@ public class Handlers {
             System.out.println("Certificate is " + valid);
             String hospitalPubKey = handshakeRequest.getHospitalPubKey();
 
-            String diffieLabKey = customProtocol.diffieHospitalPublicKey(hospitalPubKey);
+            String diffieLabKey = customProtocol.diffieLabPublicKey(hospitalPubKey);
             customProtocol.generateSharedSecret(hospitalPubKey);
 
 

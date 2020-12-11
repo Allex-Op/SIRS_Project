@@ -11,7 +11,7 @@ import java.util.*;
 
 public class CustomProtocol {
     private SecretKey secretKey;
-    private KeyAgreement aliceKeyAgree;
+    private KeyAgreement hospitalKeyAgree;
     private String nonce;
     private final ArrayList<String> receivedNonces  = new ArrayList<>();
 
@@ -22,53 +22,53 @@ public class CustomProtocol {
      * */
 
     public String diffieHospitalPublicKey() throws NoSuchAlgorithmException, InvalidKeyException {
-        // Alice creates her own DH key pair with 2048-bit key size
-        KeyPairGenerator aliceKpairGen = KeyPairGenerator.getInstance("DH");
-        aliceKpairGen.initialize(2048);
-        KeyPair aliceKpair = aliceKpairGen.generateKeyPair();
+        // Hospital creates her own DH key pair with 2048-bit key size
+        KeyPairGenerator hospitalKpairGen = KeyPairGenerator.getInstance("DH");
+        hospitalKpairGen.initialize(2048);
+        KeyPair hospitalKpair = hospitalKpairGen.generateKeyPair();
 
-        // Alice creates and initializes her DH KeyAgreement object
-        aliceKeyAgree = KeyAgreement.getInstance("DH");
-        aliceKeyAgree.init(aliceKpair.getPrivate());
+        // Hospital creates and initializes her DH KeyAgreement object
+        hospitalKeyAgree = KeyAgreement.getInstance("DH");
+        hospitalKeyAgree.init(hospitalKpair.getPrivate());
 
-        // Alice encodes her public key, and sends it over to Bob.
-        byte[] alicePubKeyEnc = aliceKpair.getPublic().getEncoded();
+        // Hospital encodes her public key, and sends it over to lab.
+        byte[] hospitalPubKeyEnc = hospitalKpair.getPublic().getEncoded();
 
-        return Base64.getEncoder().encodeToString(alicePubKeyEnc);
+        return Base64.getEncoder().encodeToString(hospitalPubKeyEnc);
     }
 
-    public void firstPhaseLab(String bobpubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+    public void firstPhaseHospital(String labpubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
         /*
-         * Alice uses Bob's public key for the first (and only) phase
+         * Hospital uses lab's public key for the first (and only) phase
          * of her version of the DH
          * protocol.
          * Before she can do so, she has to instantiate a DH public key
-         * from Bob's encoded key material.
+         * from lab's encoded key material.
          */
-        byte [] bobPubKeyEnc= Base64.getDecoder().decode(bobpubkey);
+        byte [] labPubKeyEnc= Base64.getDecoder().decode(labpubkey);
 
-        KeyFactory aliceKeyFac = KeyFactory.getInstance("DH");
-        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(bobPubKeyEnc);
-        PublicKey bobPubKey = aliceKeyFac.generatePublic(x509KeySpec);
-        aliceKeyAgree.doPhase(bobPubKey, true);
+        KeyFactory hospitalKeyFac = KeyFactory.getInstance("DH");
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(labPubKeyEnc);
+        PublicKey labPubKey = hospitalKeyFac.generatePublic(x509KeySpec);
+        hospitalKeyAgree.doPhase(labPubKey, true);
     }
 
     /*
-     * At this stage, both Alice and Bob have completed the DH key
+     * At this stage, both hospital and lab have completed the DH key
      * agreement protocol.
      * Both generate the (same) shared secret.
      */
-    public void generateSharedSecret(String bobpubkey) throws Exception {
+    public void generateSharedSecret(String labpubkey) throws Exception {
         /*
-         * Bob uses Alice's public key for the first (and only) phase
+         * Lab uses hospital's public key for the first (and only) phase
          * of his version of the DH protocol.
          */
-        firstPhaseLab(bobpubkey);
-        byte[] aliceSharedSecret = aliceKeyAgree.generateSecret();
+        firstPhaseHospital(labpubkey);
+        byte[] hospitalSharedSecret = hospitalKeyAgree.generateSecret();
 
         // Creating a SecretKey object using the shared secret and use it for encryption.
-        SecretKeySpec aliceAesKey = new SecretKeySpec(aliceSharedSecret, 0, 16, "AES");
-        secretKey = aliceAesKey;
+        SecretKeySpec hospitalAesKey = new SecretKeySpec(hospitalSharedSecret, 0, 16, "AES");
+        secretKey = hospitalAesKey;
     }
 
 
