@@ -7,6 +7,7 @@ import org.bouncycastle.jce.X509Principal;
 import javax.crypto.*;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -101,17 +102,25 @@ public class CustomProtocol {
      * ***********************************
      * */
 
-    public String encryptWithSecretKey(String stringToEncrypt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+    public String[] encryptWithSecretKey(String stringToEncrypt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
         Cipher cipher = null;
-            cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            return Base64.getEncoder().encodeToString(cipher.doFinal(stringToEncrypt.getBytes(StandardCharsets.UTF_8)));
+        cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
+        SecureRandom randomSecureRandom = new SecureRandom();
+        byte[] iv = new byte[cipher.getBlockSize()];
+        randomSecureRandom.nextBytes(iv);
+        IvParameterSpec ivParams = new IvParameterSpec(iv);
+        String ivString = Base64.getEncoder().encodeToString(iv);
+
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParams);
+        return new String[] { Base64.getEncoder().encodeToString(cipher.doFinal(stringToEncrypt.getBytes(StandardCharsets.UTF_8))), ivString };
     }
 
-    public String decryptWithSecretKey(String stringToDecrypt) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
+    public String decryptWithSecretKey(String stringToDecrypt, String iv) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-        cipher.init(Cipher.DECRYPT_MODE, this.secretKey);
+
+        IvParameterSpec ivParams = new IvParameterSpec(Base64.getDecoder().decode(iv));
+        cipher.init(Cipher.DECRYPT_MODE, this.secretKey, ivParams);
         return new String(cipher.doFinal(Base64.getDecoder().decode(stringToDecrypt)));
     }
 
@@ -199,4 +208,5 @@ public class CustomProtocol {
        }else
            return false;
     }
+
 }

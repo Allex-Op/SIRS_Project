@@ -25,6 +25,7 @@ public class Handlers {
     CustomProtocol customProtocol = new CustomProtocol();
 
     String LAB_URL = System.getenv("LAB_URL");
+    String PROJECT_PATH = System.getenv("PROJECT_PATH");
 
     @GetMapping("/secret")
     @ResourceId(resourceId = "secret")
@@ -68,20 +69,6 @@ public class Handlers {
         return ResponseEntity.ok(treatment);
     }
 
-    //TODO: Needs further testing
-    @GetMapping("/checkauthenticity/{id}")
-    @ResourceId(resourceId = "checkAuthenticity")
-    public ResponseEntity<AuthenticityCheck> getTestAuthenticity(@PathVariable int id) {
-        String[] info = repo.getResult(id);
-        if(info[0] == null || info[1] == null || info[2] == null)
-            return ResponseEntity.notFound().build();
-
-        if(cr.verifySignature(info[0], info[1], info[2]))
-            return ResponseEntity.ok(new AuthenticityCheck("Test result is authentic!"));
-        else
-            return ResponseEntity.ok(new AuthenticityCheck("Test result test validity is compromised, do not use it."));
-    }
-
     @PostMapping("/login")
     @ResourceId(resourceId = "login")
     public ResponseEntity<TokenEntity> login(@RequestBody LoginBody credentials) {
@@ -97,6 +84,19 @@ public class Handlers {
         }
     }
 
+    @GetMapping("/checkauthenticity/{id}")
+    @ResourceId(resourceId = "checkAuthenticity")
+    public ResponseEntity<AuthenticityCheck> getTestAuthenticity(@PathVariable int id) {
+        String[] info = repo.getResult(id);
+        if(info[0] == null || info[1] == null || info[2] == null)
+            return ResponseEntity.notFound().build();
+
+        if(cr.verifySignature(info[0], info[1], info[2]))
+            return ResponseEntity.ok(new AuthenticityCheck("Test result is authentic!"));
+        else
+            return ResponseEntity.ok(new AuthenticityCheck("Test results validity is compromised, do not use it."));
+    }
+
     /**
      *  Requests test results from the lab, this handler must create & handle the custom secure channel.
     */
@@ -105,9 +105,66 @@ public class Handlers {
     @ResourceId(resourceId = "getTestsResult")
     public ResponseEntity<String> sendTestToLab(@PathVariable int id) {
         try {
+            System.out.println("[Debug] Starting test results to lab request...");
+            CustomProtocolResponse cp2Response = initHandshake();
+            if(cp2Response == null)
+                return ResponseEntity.status(500).build();
+
+            HandshakeResponse hsResponse = cp2Response.getHandshakeResponse();
+            System.out.println("[Debug] Received handshake response from lab...");
+
+            //Generate secret key
+            String labPubKey = hsResponse.getLabKeyString();
+            customProtocol.generateSharedSecret(labPubKey);
+
+            // Evaluates the integrity of the response and validates its not replayed
+            if(customProtocol.dataCheck(cp2Response.getMac()) && customProtocol.verifyNonce(hsResponse.getNonce())) {
+                System.out.println("[Debug] Requesting test results from lab...");
+                CustomProtocolResponse cpResponse = requestTestResults(id);
+                if(cpResponse == null)
+                    return ResponseEntity.status(500).build();
+                System.out.println("[Debug] Received test results from lab...");
+
+                if(customProtocol.dataCheck(cpResponse.getMac())) {
+                    TestResponse testResponse = cpResponse.getTestResponse();
+                    if(customProtocol.verifyNonce(testResponse.getNonce())) {
+
+                        // decrypting the results
+                        String decryptedResults = customProtocol.decryptWithSecretKey(testResponse.getResults(), cpResponse.getIv());
+                        System.out.println(decryptedResults);
+                        if(!repo.insertTestResultsFromLab(2, decryptedResults, 1, testResponse.getDigitalSignature())) {
+                            System.out.println("Error saving the test results received from the Lab");
+                            return ResponseEntity.status(500).build();
+                        }
+
+                        return ResponseEntity.ok(decryptedResults);
+                    }
+                }
+            }
+
+            System.out.println("[Debug] An attack is happening? Freshness or Integrity test failed.");
+            return ResponseEntity.status(500).build();
+        } catch(Exception e) {
+            System.out.println("GetTestResults failed");
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    /**
+     *  Initiates an handshake with the lab with the goal
+     *  to generate the session keys used for the request & transmission
+     *  of the test results.
+     *
+     *  Returns a 'CustomProtocolResponse' object which contains in an encrypted way
+     *  the results, nonce and digitalSignature.
+     */
+    private CustomProtocolResponse initHandshake() {
+        try {
+            System.out.println("[Debug] Preparing init handshake request...");
 
             // Getting the certificate
-            File crtFile = new File("src/main/resources/hospital.pem");
+            File crtFile = new File(PROJECT_PATH + "certificates/hospital.pem");
             String certificate = Files.readString(crtFile.toPath(), Charset.defaultCharset());
             String hospitalPubKey = customProtocol.diffieHospitalPublicKey();
             HandshakeRequest handshakeRequest = new HandshakeRequest(certificate, hospitalPubKey);
@@ -125,55 +182,62 @@ public class Handlers {
                     .build();
 
             HttpResponse<String> handshakeResponse = handshakeClient.send(handshakeReq, HttpResponse.BodyHandlers.ofString());
-            CustomProtocolResponse cp2Response = mapper.readValue(handshakeResponse.body(), CustomProtocolResponse.class);
-            HandshakeResponse hsResponse = cp2Response.getHandshakeResponse();
-
-            //Generate secret key
-            String labPubKey = hsResponse.getLabKeyString();
-            customProtocol.generateSharedSecret(labPubKey);
-
-            if(customProtocol.dataCheck(cp2Response.getMac()) && customProtocol.verifyNonce(hsResponse.getNonce())) {
-                TestRequest testRequest = new TestRequest(customProtocol.encryptWithSecretKey(String.valueOf(id)), customProtocol.createNonce());
-
-                // Using mapper to transform testResponse into string
-                // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
-                String req = mapper.writeValueAsString(testRequest);
-                String mac = customProtocol.macMessage(req.getBytes());
-
-                // mac = tag + respData (json string -> handshakeResponse)
-                ProtectedTestRequest protectedTestRequest= new ProtectedTestRequest(mac);
-
-                // Sending the testReq (including data and nonce)
-                String testReqBody = mapper.writeValueAsString(protectedTestRequest);
-
-                HttpClient client = HttpClient.newHttpClient();
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(LAB_URL + "/teststoanalyze"))
-                        .header("Content-Type", "application/json")
-                        .POST(HttpRequest.BodyPublishers.ofString(testReqBody))
-                        .build();
-
-                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                //Read Response
-                CustomProtocolResponse cpResponse = mapper.readValue(response.body(), CustomProtocolResponse.class);
-
-                if(customProtocol.dataCheck(cpResponse.getMac())) {
-                    TestResponse testResponse = cpResponse.getTestResponse();
-                    if(customProtocol.verifyNonce(testResponse.getNonce())) {
-
-                        // decrypting the results
-                        String decryptedResults = customProtocol.decryptWithSecretKey(testResponse.getResults());
-                        System.out.println(decryptedResults);
-
-                        return ResponseEntity.ok(decryptedResults);
-                    }
-                }
-            }
-            return ResponseEntity.status(500).build();
+            String body = handshakeResponse.body();
+            return mapper.readValue(body, CustomProtocolResponse.class);
 
         } catch(Exception e) {
-            System.out.println("Unable to make HTTP Request");
-            return ResponseEntity.status(500).build();
+            System.out.println("Error during handshake with Lab");
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Called after the handshake.
+     * Creates a test results request with id X and receives
+     * the tests results associated with that id.
+     *
+     * Data is protected using session keys generated during handshake.
+     *
+     * Returns a 'CustomProtocolResponse'
+     */
+    private CustomProtocolResponse requestTestResults(int id) {
+        try {
+            System.out.println("[Debug] Preparing test results request...");
+            ObjectMapper mapper = new ObjectMapper();
+
+            String[] testReqValues = customProtocol.encryptWithSecretKey(String.valueOf(id));
+            TestRequest testRequest = new TestRequest(testReqValues[0], customProtocol.createNonce());
+
+            // Using mapper to transform testResponse into string
+            // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
+            String req = mapper.writeValueAsString(testRequest);
+            String mac = customProtocol.macMessage(req.getBytes());
+
+            // mac = tag + respData (json string -> handshakeResponse)
+            ProtectedTestRequest protectedTestRequest = new ProtectedTestRequest(mac, testReqValues[1]);
+
+            // Sending the testReq (including data and nonce)
+            String testReqBody = mapper.writeValueAsString(protectedTestRequest);
+
+            System.out.println("[Debug] Sending Protected test request to lab...");
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(LAB_URL + "/teststoanalyze"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(testReqBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("[Debug] Received test request response from lab...");
+            //Read Response
+            String body = response.body();
+            return mapper.readValue(body, CustomProtocolResponse.class);
+        } catch(Exception e) {
+            System.out.println("Error during test results request");
+            System.out.println(e.getMessage());
+            return null;
         }
     }
 }

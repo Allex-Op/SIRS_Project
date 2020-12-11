@@ -113,6 +113,14 @@
         line: "192.168.56.12   pdp"
         state: present
 
+    - name: Add Lab1 to /etc/hosts file
+      become: yes
+      become_user: root
+      lineinfile:
+        path: /etc/hosts
+        line: "192.168.57.11   lab1"
+        state: present
+
 # PDP API configuration  
 - hosts: auth
   remote_user: vagrant

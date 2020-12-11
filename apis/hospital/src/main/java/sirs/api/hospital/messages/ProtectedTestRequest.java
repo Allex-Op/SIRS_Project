@@ -1,10 +1,6 @@
 package sirs.api.hospital.messages;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import sirs.api.hospital.messages.TestRequest;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Base64;
@@ -20,16 +16,28 @@ public class ProtectedTestRequest {
      *
      **/
     public String mac;
+    public String iv;
 
-    @JsonCreator
-    public ProtectedTestRequest(@JsonProperty("mac") String mac) {
+    public ProtectedTestRequest(String mac, String iv) {
         this.mac = mac;
+        this.iv = iv;
     }
 
     public String getMac() {
         return mac;
     }
 
+    public void setMac(String mac) {
+        this.mac = mac;
+    }
+
+    public String getIv() {
+        return iv;
+    }
+
+    public void setIv(String iv) {
+        this.iv = iv;
+    }
 
     public TestRequest getTestRequest() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -38,5 +46,4 @@ public class ProtectedTestRequest {
 
         return mapper.readValue(testRequest, TestRequest.class);
     }
-
 }

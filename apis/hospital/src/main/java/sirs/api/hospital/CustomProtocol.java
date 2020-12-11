@@ -1,6 +1,7 @@
 package sirs.api.hospital;
 
 import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -79,10 +80,27 @@ public class CustomProtocol {
      * */
 
 
-    public String decryptWithSecretKey(String stringToDecrypt) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
+    public String decryptWithSecretKey(String stringToDecrypt, String iv) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-        cipher.init(Cipher.DECRYPT_MODE, this.secretKey);
+
+        IvParameterSpec ivParams = new IvParameterSpec(Base64.getDecoder().decode(iv));
+        cipher.init(Cipher.DECRYPT_MODE, this.secretKey, ivParams);
         return new String(cipher.doFinal(Base64.getDecoder().decode(stringToDecrypt)));
+    }
+
+    public String[] encryptWithSecretKey(String stringToEncrypt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException {
+        Cipher cipher = null;
+        cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+
+        SecureRandom randomSecureRandom = new SecureRandom();
+        byte[] iv = new byte[cipher.getBlockSize()];
+        randomSecureRandom.nextBytes(iv);
+        IvParameterSpec ivParams = new IvParameterSpec(iv);
+        String ivString = Base64.getEncoder().encodeToString(iv);
+
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParams);
+        return new String[] { Base64.getEncoder().encodeToString(cipher.doFinal(stringToEncrypt.getBytes(StandardCharsets.UTF_8))), ivString };
+
     }
 
     public String macMessage(byte[] responseBytes) throws InvalidKeyException, NoSuchAlgorithmException {
@@ -125,7 +143,6 @@ public class CustomProtocol {
         new Random().nextBytes(randomString);
         nonce = new String(randomString )+ Long.toString(System.currentTimeMillis());
         return  Base64.getEncoder().encodeToString(nonce.getBytes());
-
     }
 
     public boolean verifyNonce(String nonce) {
@@ -138,13 +155,5 @@ public class CustomProtocol {
         }else
             return false;
     }
-    public String encryptWithSecretKey(String stringToEncrypt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-        Cipher cipher = null;
-        cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        return Base64.getEncoder().encodeToString(cipher.doFinal(stringToEncrypt.getBytes(StandardCharsets.UTF_8)));
-
-    }
-
 }
 

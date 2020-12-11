@@ -2,6 +2,7 @@
 Description=A goddamn Lab API
  
 [Service]
+Environment="PROJECT_PATH=/home/vagrant/examples/"
 ExecStart=/bin/sh -c "/home/vagrant/examples/snapshots/lab-0.0.1-SNAPSHOT.jar >> /var/log/lab.log"
  
 [Install] 

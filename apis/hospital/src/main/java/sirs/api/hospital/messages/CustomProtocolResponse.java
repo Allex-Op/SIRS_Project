@@ -20,13 +20,14 @@ public class CustomProtocolResponse {
      **/
     public String mac;
 
-    @JsonCreator
-    public CustomProtocolResponse(@JsonProperty("mac") String mac) {
-        this.mac = mac;
-    }
+    public String iv;
 
     public String getMac() {
         return mac;
+    }
+
+    public void setMac(String mac) {
+        this.mac = mac;
     }
 
     @JsonIgnore
@@ -47,4 +48,11 @@ public class CustomProtocolResponse {
         return mapper.readValue(testResponse, TestResponse.class);
     }
 
+    public String getIv() {
+        return iv;
+    }
+
+    public void setIv(String iv) {
+        this.iv = iv;
+    }
 }

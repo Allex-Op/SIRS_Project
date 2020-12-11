@@ -18,6 +18,7 @@ import java.util.Base64;
 
 public class Crypto {
     private static final String SIGNATURE = "SHA256WithRSA";
+    private static final String PROJECT_PATH = System.getenv("PROJECT_PATH");
 
     /**
      *  Used to digitally sign the test results,
@@ -29,7 +30,7 @@ public class Crypto {
             Signature signature = Signature.getInstance(SIGNATURE);
             SecureRandom secureRandom = new SecureRandom();
 
-            File file = new File("src/main/resources/private.der");
+            File file = new File(PROJECT_PATH + "certificates/private.der");
             PrivateKey privKey = extractPrivKey(file);
             signature.initSign(privKey, secureRandom);
             signature.update(data.getBytes("UTF-8"));

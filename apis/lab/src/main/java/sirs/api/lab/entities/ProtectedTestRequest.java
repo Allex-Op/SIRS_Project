@@ -20,9 +20,12 @@ public class ProtectedTestRequest {
      **/
     public String mac;
 
+    public String iv;
+
     @JsonCreator
-    public ProtectedTestRequest(@JsonProperty("mac") String mac) {
+    public ProtectedTestRequest(@JsonProperty("mac") String mac, String iv) {
         this.mac = mac;
+        this.iv = iv;
     }
 
     public String getMac() {
@@ -38,4 +41,11 @@ public class ProtectedTestRequest {
         return mapper.readValue(testRequest, TestRequest.class);
     }
 
+    public String getIv() {
+        return iv;
+    }
+
+    public void setIv(String iv) {
+        this.iv = iv;
+    }
 }

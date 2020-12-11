@@ -13,13 +13,23 @@ public class CustomProtocolResponse {
      **/
     public String mac;
 
+    public String iv;
+
     @JsonCreator
-    public CustomProtocolResponse(@JsonProperty("mac") String mac) {
+    public CustomProtocolResponse(@JsonProperty("mac") String mac, String iv) {
         this.mac = mac;
+        this.iv = iv;
     }
 
     public String getMac() {
         return mac;
     }
 
+    public String getIv() {
+        return iv;
+    }
+
+    public void setIv(String iv) {
+        this.iv = iv;
+    }
 }

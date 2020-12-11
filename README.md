@@ -37,7 +37,11 @@ administrator:administrator
 Vagrant virtualboxes:
 vagrant:vagrant
 
-
+To test the API's locally you need to have installed a POSTGRESQL database with database name 'sirsDb' and a user 'administrator' with total rights.
+Also it's requited to have 3 environment variables declared:
+LAB_URL=http://localhost:8002
+PDP_URL=http://localhost:8001
+POLICIES_PATH=...project_path/vagrant/examples/policies.json
 
 
 ## Secrets & PKI

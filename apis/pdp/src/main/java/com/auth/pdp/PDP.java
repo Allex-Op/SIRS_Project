@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 
 public class PDP {
-    final String POLICIES_PATH = System.getenv("POLICIES_PATH");
+    final String PROJECT_PATH = System.getenv("PROJECT_PATH");
 
     public boolean checkPolicies(XACMLRequest xreq) {
         PolicySet pc = readPolicies();
@@ -69,7 +69,7 @@ public class PDP {
 
     private PolicySet readPolicies() {
         try {
-            File policiesFile = new File(POLICIES_PATH);
+            File policiesFile = new File(PROJECT_PATH + "policies.json");
             FileInputStream fis = new FileInputStream(policiesFile);
             byte[] data = new byte[(int) policiesFile.length()];
             fis.read(data);
