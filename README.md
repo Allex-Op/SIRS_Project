@@ -15,6 +15,9 @@ Project developed in the context of the curricular unit of SIRS (Segurança Info
 
 ## Deployment Setup
 
+Before starting:
+This process was only tested on Linux Ubuntu 20.04, we can't guarantee it will work on other operating systems but, it should.
+
 To deploy and create the necessary infrastructure you require Vagrant (https://www.vagrantup.com/) installed on your computer. 
 After installing vagrant navigate to the "vagrant" folder and issue the command "vagrant up".
 
@@ -37,12 +40,41 @@ administrator:administrator
 Vagrant virtualboxes:
 vagrant:vagrant
 
-To test the API's locally you need to have installed a POSTGRESQL database with database name 'sirsDb' and a user 'administrator' with total rights.
+To test the API's locally you need to have installed a POSTGRESQL database with database name 'sirsDb' and a user 'administrator' with all permissions.
 Also it's requited to have 3 environment variables declared:
 LAB_URL=http://localhost:8002
 PDP_URL=http://localhost:8001
-POLICIES_PATH=...project_path/vagrant/examples/policies.json
+PROJECT_PATH=...project_path/vagrant/examples/
 
+
+For convenience we included the JAR's to be used in the deploy process in the folder "../vagrant/examples/snapshots", in case it's desired to do even this process
+manually, go to each folder in "../apis/" (hospital, pdp, lab) and run "mvn clean package". Notice, you must be using JAVA 11 Version ("export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"). Then copy the snapshot generated in the folder "target" of each of this directories and place it in "...project_path/vagrant/examples/snapshots".
+
+Or, run the script "compile.sh" from the main folder of the cloned/downloaded repo:
+
+```
+currDir=$(echo $PWD)
+hospitalDir="$currDir/apis/hospital"
+hospitalSnapshot="$hospitalDir/target/hospital-0.0.1-SNAPSHOT.jar"
+pdpDir="$currDir/apis/pdp"
+pdpSnapshot="$pdpDir/target/pdp-0.0.1-SNAPSHOT.jar"
+labDir="$currDir/apis/lab"
+labSnapshot="$labDir/target/lab-0.0.1-SNAPSHOT.jar"
+destDir="$currDir/vagrant/examples/snapshots"
+
+cd $hospitalDir
+mvn clean package
+cp $hospitalSnapshot $destDir
+
+cd $pdpDir
+mvn clean package
+cp $pdpSnapshot $destDir
+
+cd $labDir
+mvn clean package
+cp $labSnapshot $destDir
+
+```
 
 ## Secrets & PKI
 
