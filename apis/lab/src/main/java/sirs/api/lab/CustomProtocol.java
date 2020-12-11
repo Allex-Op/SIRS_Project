@@ -109,6 +109,12 @@ public class CustomProtocol {
 
     }
 
+    public String decryptWithSecretKey(String stringToDecrypt) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+        cipher.init(Cipher.DECRYPT_MODE, this.secretKey);
+        return new String(cipher.doFinal(Base64.getDecoder().decode(stringToDecrypt)));
+    }
+
     public boolean verifyCertificate(String certificateToCheck, String trustedAnchor, String expectedCN) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         byte [] decoded = org.apache.tomcat.util.codec.binary.Base64.decodeBase64(certificateToCheck.replaceAll("-----BEGIN CERTIFICATE-----\n", "").replaceAll("-----END CERTIFICATE-----", ""));
         Certificate certToCheck = CertificateFactory.getInstance("X.509").generateCertificate(new ByteArrayInputStream(decoded));

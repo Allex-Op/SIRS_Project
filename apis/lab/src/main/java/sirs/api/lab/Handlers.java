@@ -61,8 +61,8 @@ public class Handlers {
         // Because for simplicity reasons we only answer to requests with id 1
         // id is only for representation purposes in case this was a real system
         // we would have multiple id's...
-
-        if(req.getId() != 1)
+        int id = Integer.parseInt(customProtocol.decryptWithSecretKey(req.getId()));
+        if(id != 1)
             return ResponseEntity.status(404).build();
 
         if(customProtocol.dataCheck(testreq.getMac()) && customProtocol.verifyNonce(req.getNonce())) {

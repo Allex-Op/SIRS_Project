@@ -103,7 +103,7 @@ public class Handlers {
     @JsonIgnoreProperties
     @GetMapping("/gettestresults/{id}")
     @ResourceId(resourceId = "getTestsResult")
-    public ResponseEntity<TestResponse> sendTestToLab(@PathVariable int id) {
+    public ResponseEntity<String> sendTestToLab(@PathVariable int id) {
         try {
 
             // Getting the certificate
@@ -133,7 +133,7 @@ public class Handlers {
             customProtocol.generateSharedSecret(labPubKey);
 
             if(customProtocol.dataCheck(cp2Response.getMac()) && customProtocol.verifyNonce(hsResponse.getNonce())) {
-                TestRequest testRequest = new TestRequest(id, customProtocol.createNonce());
+                TestRequest testRequest = new TestRequest(customProtocol.encryptWithSecretKey(String.valueOf(id)), customProtocol.createNonce());
 
                 // Using mapper to transform testResponse into string
                 // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
@@ -165,7 +165,7 @@ public class Handlers {
                         String decryptedResults = customProtocol.decryptWithSecretKey(testResponse.getResults());
                         System.out.println(decryptedResults);
 
-                        return ResponseEntity.ok(testResponse);
+                        return ResponseEntity.ok(decryptedResults);
                     }
                 }
             }
