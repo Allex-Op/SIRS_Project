@@ -101,9 +101,9 @@ In order to validate the certificates received by each API during the TLS Handsh
 The custom protocol to develop, will enable secure communications between the Hospital API and partner lab, providing almost all of the same properties as TLS.
 This protocol will work on top of the HTTP protocol and not under it like TLS, this means that the handshakes, message exchanges will all happen with HTTP requests.
 
-In our case we will only support one cipher suite, the protocols to be used will be Diffie-Hellman for key exchanging, AES-256 for block cipher and hmac-sha256 for message authentication.
+In our case we will only support one cipher suite, the protocols to be used will be Diffie-Hellman\cite{diffiehellman} for key exchanging, AES-256 for block cipher and hmac-sha256 for message authentication.
 
-When a doctor makes a test data request, the Hospital API will be in charge of starting the handshake with the Lab API, by making a request to a special endpoint with its certificate and its DiffieHellman parameters (which is the public key of its Diffie Helman KeyPair Java Object) , before exchanging any data.  After the lab receives the certificate, it will verify it by checking its hostname (to see if it is actually a valid person in the hospital side making the request), expiration date and validity with the CA. If it's all ok, the client will use the hospital's DH public key to generate its own DH KeyPair, and to generate the secret following the rest of the Diffie-Hellman protocol. It will then send its own DiffieHellman parameters to the hospital and add a TAG (for integrity) using the same secret key. The hospital will now finish its part of the DiffieHellman's protocol, by generating the secret key and confirm the integrity of the received data.
+When a doctor makes a test data request, the Hospital API will be in charge of starting the handshake with the Lab API, by making a request to a special endpoint with its certificate and its Diffie-Hellman parameters (which is the public key of its Diffie-Hellman KeyPair Java Object) , before exchanging any data.  After the lab receives the certificate, it will verify it by checking its hostname (to see if it is actually a valid person in the hospital side making the request), expiration date and validity with the CA. If it's all ok, the client will use the hospital's DH public key to generate its own DH KeyPair, and to generate the secret following the rest of the Diffie-Hellman protocol. It will then send its own Diffie-Hellman parameters to the hospital and add a TAG (for integrity) using the same secret key. The hospital will now finish its part of the DiffieHellman's protocol, by generating the secret key and confirm the integrity of the received data.
 
 Finished this handshake, the hospital will now make a request to the lab API encrypting the request with the secret key and adding a TAG (for integrity) using the same secret key, for more security the key shouldn't be the same, but the group didn't have time to complete that step. The Lab will then answer with the test results data encrypted and protected using the same generated secret key. Finally, all the messages will also have an NONCE combined with a TIMESTAMP to protect from message replay attacks. \\
 
@@ -164,6 +164,10 @@ FasterXML
 \bibitem{authz} 
 Authzforce
 \\\texttt{https://github.com/authzforce/java-xacml-sdk}
+
+\bibitem{diffiehellman}
+Diffie-Hellman Java Implementation
+\\\textt{https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html#DH2Ex}
 
 
 
