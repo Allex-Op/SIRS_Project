@@ -1,39 +1,86 @@
 package sirs.api.hospital;
 
-import sirs.api.hospital.messages.HandshakeResponse;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.cert.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
 
 public class CustomProtocol {
     private SecretKey secretKey;
+    private KeyAgreement hospitalKeyAgree;
     private String nonce;
-    private final ArrayList<String> receivedNonces  = new ArrayList<String>();
+    private final ArrayList<String> receivedNonces  = new ArrayList<>();
 
-    public byte[] decryptData(byte[] cipheredData, PrivateKey privKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-        // Decrypt the data, verify integrity and freshness
-        Cipher decrypt=Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
-        decrypt.init(Cipher.DECRYPT_MODE, privKey);
-        return decrypt.doFinal(cipheredData);
+    /**
+     * *************************************
+     * Start of Diffie Hellman's Functions  *
+     * *************************************
+     * */
+
+    public String diffieHospitalPublicKey() throws NoSuchAlgorithmException, InvalidKeyException {
+        // Hospital creates her own DH key pair with 2048-bit key size
+        KeyPairGenerator hospitalKpairGen = KeyPairGenerator.getInstance("DH");
+        hospitalKpairGen.initialize(2048);
+        KeyPair hospitalKpair = hospitalKpairGen.generateKeyPair();
+
+        // Hospital creates and initializes her DH KeyAgreement object
+        hospitalKeyAgree = KeyAgreement.getInstance("DH");
+        hospitalKeyAgree.init(hospitalKpair.getPrivate());
+
+        // Hospital encodes her public key, and sends it over to lab.
+        byte[] hospitalPubKeyEnc = hospitalKpair.getPublic().getEncoded();
+
+        return Base64.getEncoder().encodeToString(hospitalPubKeyEnc);
     }
 
-    public PrivateKey extractPrivKey(File keyStoreFile) throws IOException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException, CertificateException {
-        KeyStore keystore = KeyStore.getInstance("JKS");
-        String password = "hospital";
-        FileInputStream is = new FileInputStream(keyStoreFile);
-        String alias = "hospital";
+    public void firstPhaseHospital(String labpubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+        /*
+         * Hospital uses lab's public key for the first (and only) phase
+         * of her version of the DH
+         * protocol.
+         * Before she can do so, she has to instantiate a DH public key
+         * from lab's encoded key material.
+         */
+        byte [] labPubKeyEnc= Base64.getDecoder().decode(labpubkey);
 
-        keystore.load(is, password.toCharArray());
-        return (PrivateKey) keystore.getKey(alias, password.toCharArray());
+        KeyFactory hospitalKeyFac = KeyFactory.getInstance("DH");
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(labPubKeyEnc);
+        PublicKey labPubKey = hospitalKeyFac.generatePublic(x509KeySpec);
+        hospitalKeyAgree.doPhase(labPubKey, true);
     }
+
+    /*
+     * At this stage, both hospital and lab have completed the DH key
+     * agreement protocol.
+     * Both generate the (same) shared secret.
+     */
+    public void generateSharedSecret(String labpubkey) throws Exception {
+        /*
+         * Lab uses hospital's public key for the first (and only) phase
+         * of his version of the DH protocol.
+         */
+        firstPhaseHospital(labpubkey);
+        byte[] hospitalSharedSecret = hospitalKeyAgree.generateSecret();
+
+        // Creating a SecretKey object using the shared secret and use it for encryption.
+        SecretKeySpec hospitalAesKey = new SecretKeySpec(hospitalSharedSecret, 0, 16, "AES");
+        secretKey = hospitalAesKey;
+    }
+
+
+    /**
+     * ***********************************
+     * End of Diffie Hellman's Functions  *
+     * ***********************************
+     * */
+
 
     public String decryptWithSecretKey(String stringToDecrypt) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
         cipher.init(Cipher.DECRYPT_MODE, this.secretKey);
         return new String(cipher.doFinal(Base64.getDecoder().decode(stringToDecrypt)));
     }
@@ -73,23 +120,6 @@ public class CustomProtocol {
         return false;
     }
 
-
-
-    public void generateSecretKey(HandshakeResponse message, String path) throws UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException, IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchPaddingException {
-        // Getting the encrypted random string from CustomProtocolResponse
-        String encryptedString64 = message.getRandomString();
-        byte[] encryptedStringBytes = Base64.getDecoder().decode(encryptedString64);
-
-        // Extract private key from hospitalKeyStore
-        File keyStoreFile = new File(path);
-        PrivateKey privKey = extractPrivKey(keyStoreFile);
-
-        // Decrypt random string received
-        byte[] decryptedStringBytes = decryptData(encryptedStringBytes, privKey);
-
-        this.secretKey = new SecretKeySpec(decryptedStringBytes, 0, decryptedStringBytes.length, "AES");
-    }
-
     public String createNonce() {
         byte[] randomString = new byte[32];
         new Random().nextBytes(randomString);
@@ -97,7 +127,6 @@ public class CustomProtocol {
         return  Base64.getEncoder().encodeToString(nonce.getBytes());
 
     }
-
 
     public boolean verifyNonce(String nonce) {
         String decnonce = Base64.getDecoder().decode(nonce).toString();
@@ -108,9 +137,14 @@ public class CustomProtocol {
             return true;
         }else
             return false;
+    }
+    public String encryptWithSecretKey(String stringToEncrypt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        Cipher cipher = null;
+        cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+        return Base64.getEncoder().encodeToString(cipher.doFinal(stringToEncrypt.getBytes(StandardCharsets.UTF_8)));
 
     }
-
 
 }
 

@@ -5,53 +5,114 @@ import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
 
 import javax.crypto.*;
+import javax.crypto.interfaces.DHPublicKey;
+import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
 public class CustomProtocol {
-   private  SecretKey secretKey;
+   private SecretKey secretKey;
+   private KeyAgreement labKeyAgree;
    private String nonce;
-   private final ArrayList<String> receivedNonces  = new ArrayList<String>();
+   private final ArrayList<String> receivedNonces  = new ArrayList<>();
 
-    public String createRandomString(String certificate) throws NoSuchPaddingException, NoSuchAlgorithmException, CertificateException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
-        // Generating random string
-        byte[] randomString = new byte[32];
-        new Random().nextBytes(randomString);
+    /**
+     * *************************************
+     * Start of Diffie Hellman's Functions  *
+     * *************************************
+     * */
 
-        // Generating secretKey from randomString
-        secretKey = new SecretKeySpec(randomString, 0, randomString.length, "AES");
 
-        // Encrypt random string with pub key
-        return encryptRandomString(certificate, randomString);
+    public String diffieLabPublicKey(String hospitalpubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
+        /*
+        * Let's turn over to lab. Lab has received hospital's public key
+        * in encoded format.
+        * He instantiates a DH public key from the encoded key material.
+        *
+        */
+        byte [] hospitalPubKeyEnc= Base64.getDecoder().decode( hospitalpubkey);
+        KeyFactory labKeyFac = KeyFactory.getInstance("DH");
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(hospitalPubKeyEnc);
+        PublicKey hospitalPubKey = labKeyFac.generatePublic(x509KeySpec);
+
+        /*
+         * Lab gets the DH parameters associated with hospital's public key.
+         * He must use the same parameters when he generates his own key
+         * pair.
+         */
+        DHParameterSpec dhParamFromhospitalPubKey = ((DHPublicKey) hospitalPubKey).getParams();
+
+        // Lab creates his own DH key pair
+        KeyPairGenerator labKpairGen = KeyPairGenerator.getInstance("DH");
+        labKpairGen.initialize(dhParamFromhospitalPubKey);
+        KeyPair labKpair = labKpairGen.generateKeyPair();
+
+        // Lab creates and initializes his DH KeyAgreement object
+        labKeyAgree = KeyAgreement.getInstance("DH");
+        labKeyAgree.init(labKpair.getPrivate());
+
+        // Lab encodes his public key, and sends it over to hospital.
+        byte[] labPubKeyEnc = labKpair.getPublic().getEncoded();
+        return Base64.getEncoder().encodeToString(labPubKeyEnc);
     }
 
-    public PublicKey extractPubKey(String certificate) throws CertificateException {
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        InputStream cert = new ByteArrayInputStream(certificate.getBytes());
-        Certificate final_certificate = cf.generateCertificate(cert);
 
-        return final_certificate.getPublicKey();
+    public void firstPhaseLab(String hospitalpubkey) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
+        /*
+         * Lab uses hospital's public key for the first (and only) phase
+         * of his version of the DH protocol.
+         */
+        byte [] hospitalPubKeyEnc= Base64.getDecoder().decode(hospitalpubkey);
+
+        KeyFactory labKeyFac = KeyFactory.getInstance("DH");
+        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(hospitalPubKeyEnc);
+        PublicKey hospitalPubKey = labKeyFac.generatePublic(x509KeySpec);
+
+        labKeyAgree.doPhase(hospitalPubKey, true);
     }
 
-    public byte[] encryptData(byte[] randomString, PublicKey pubKey) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
-        // Encrypt the data adding Confidentiality, Integrity & Freshness
-        Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA1AndMGF1Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, pubKey);
+    /*
+     * At this stage, both hospital and lab have completed the DH key
+     * agreement protocol.
+     * Both generate the (same) shared secret.
+     */
+    public void generateSharedSecret(String hospitalpubkey) throws Exception {
+        firstPhaseLab(hospitalpubkey);
+        byte[] labSharedSecret = labKeyAgree.generateSecret();
 
-        return cipher.doFinal(randomString);
+        /*
+         * Now let's create a SecretKey object using the shared secret
+         * and use it for encryption.
+         */
+        secretKey = new SecretKeySpec(labSharedSecret, 0, 16, "AES");
     }
 
-    public String encryptWithSecretKey(String stringToEncrypt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException, BadPaddingException, IllegalBlockSizeException {
+
+    /**
+     * ***********************************
+     * End of Diffie Hellman's Functions  *
+     * ***********************************
+     * */
+
+    public String encryptWithSecretKey(String stringToEncrypt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = null;
-            cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             return Base64.getEncoder().encodeToString(cipher.doFinal(stringToEncrypt.getBytes(StandardCharsets.UTF_8)));
 
+    }
+
+    public String decryptWithSecretKey(String stringToDecrypt) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+        cipher.init(Cipher.DECRYPT_MODE, this.secretKey);
+        return new String(cipher.doFinal(Base64.getDecoder().decode(stringToDecrypt)));
     }
 
     public boolean verifyCertificate(String certificateToCheck, String trustedAnchor, String expectedCN) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
@@ -103,20 +164,12 @@ public class CustomProtocol {
         return Base64.getEncoder().encodeToString(message);
     }
 
-    public String encryptRandomString(String certificate, byte[] randomString) throws NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, CertificateException {
-        // Encrypt random string with pub key
-        PublicKey pubKey = extractPubKey(certificate);
-        byte[] encrypted_data = encryptData(randomString, pubKey);
-        return java.util.Base64.getEncoder().encodeToString(encrypted_data);
-    }
-
     public String createNonce() {
         byte[] randomString = new byte[32];
         new Random().nextBytes(randomString);
         nonce = new String(randomString )+ Long.toString(System.currentTimeMillis());
 
         return  Base64.getEncoder().encodeToString(nonce.getBytes());
-
     }
 
     public boolean dataCheck(String data) throws NoSuchAlgorithmException, InvalidKeyException {
@@ -145,7 +198,5 @@ public class CustomProtocol {
            return true;
        }else
            return false;
-
     }
-
 }

@@ -1,6 +1,5 @@
 package sirs.api.lab;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,28 +11,29 @@ import javax.crypto.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.spec.InvalidKeySpecException;
 
 @RestController
 public class Handlers {
     CustomProtocol customProtocol = new CustomProtocol();
 
-    // Return nonce, randomString, mac (nonce + secret key)
     @PostMapping("/beginhandshake")
-    public ResponseEntity<CustomProtocolResponse> handshake(@RequestBody HandshakeRequest handshakeRequest) throws CertificateException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException, JsonProcessingException {
+    public ResponseEntity<CustomProtocolResponse> handshake(@RequestBody HandshakeRequest handshakeRequest) throws Exception {
 
         String certificate = handshakeRequest.getCertificate();
 
         try {
             boolean valid = customProtocol.verifyCertificate(certificate, "src/main/resources/myCA.crt", "hospital");
             System.out.println("Certificate is " + valid);
+            String hospitalPubKey = handshakeRequest.getHospitalPubKey();
+
+            String diffieLabKey = customProtocol.diffieLabPublicKey(hospitalPubKey);
+            customProtocol.generateSharedSecret(hospitalPubKey);
+
 
             //encrypted random string
-            String randomString = customProtocol.createRandomString(certificate);
+//            String randomString = customProtocol.createRandomString(certificate);
             String nonce = customProtocol.createNonce();
-
-            HandshakeResponse handshakeResponse = new HandshakeResponse(randomString, nonce);
+            HandshakeResponse handshakeResponse = new HandshakeResponse(diffieLabKey, nonce);
 
             // Using mapper to transform testResponse into string
             // Doing mac of the resulting string, generating the data string meant to put in customProtocolResponse
@@ -61,8 +61,8 @@ public class Handlers {
         // Because for simplicity reasons we only answer to requests with id 1
         // id is only for representation purposes in case this was a real system
         // we would have multiple id's...
-
-        if(req.getId() != 1)
+        int id = Integer.parseInt(customProtocol.decryptWithSecretKey(req.getId()));
+        if(id != 1)
             return ResponseEntity.status(404).build();
 
         if(customProtocol.dataCheck(testreq.getMac()) && customProtocol.verifyNonce(req.getNonce())) {
