@@ -80,7 +80,7 @@ public class CustomProtocol {
 
 
     public String decryptWithSecretKey(String stringToDecrypt) throws InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
         cipher.init(Cipher.DECRYPT_MODE, this.secretKey);
         return new String(cipher.doFinal(Base64.getDecoder().decode(stringToDecrypt)));
     }
@@ -138,7 +138,7 @@ public class CustomProtocol {
     }
     public String encryptWithSecretKey(String stringToEncrypt) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = null;
-        cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
         return Base64.getEncoder().encodeToString(cipher.doFinal(stringToEncrypt.getBytes(StandardCharsets.UTF_8)));
 
