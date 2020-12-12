@@ -18,6 +18,10 @@ Project developed in the context of the curricular unit of SIRS (Segurança Info
 Before starting:
 This process was only tested on Linux Ubuntu 20.04, we can't guarantee it will work on other operating systems but, it should.
 
+For convenience we included the JAR's to be used in the deploy process in the folder "../vagrant/examples/snapshots", in case it's desired to do this process
+manually, you must go to each folder in "../apis/" (hospital, pdp, lab) and run "mvn clean package". Notice, you must be using JAVA 11 Version ("export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"). Then copy the snapshot generated in the folder "target" of each of this directories and place it in "...project_path/vagrant/examples/snapshots".
+Or, run the script "compile.sh" from the main folder of the cloned/downloaded repo.
+
 To deploy and create the necessary infrastructure you require Vagrant (https://www.vagrantup.com/) installed on your computer. 
 After installing vagrant navigate to the "vagrant" folder and issue the command "vagrant up".
 
@@ -46,12 +50,7 @@ LAB_URL=http://localhost:8002
 PDP_URL=http://localhost:8001
 PROJECT_PATH=...project_path/vagrant/examples/
 
-
-For convenience we included the JAR's to be used in the deploy process in the folder "../vagrant/examples/snapshots", in case it's desired to do even this process
-manually, go to each folder in "../apis/" (hospital, pdp, lab) and run "mvn clean package". Notice, you must be using JAVA 11 Version ("export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"). Then copy the snapshot generated in the folder "target" of each of this directories and place it in "...project_path/vagrant/examples/snapshots".
-
-Or, run the script "compile.sh" from the main folder of the cloned/downloaded repo:
-
+Compile.sh:
 ```
 currDir=$(echo $PWD)
 hospitalDir="$currDir/apis/hospital"
