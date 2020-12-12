@@ -75,6 +75,11 @@ cp $labSnapshot $destDir
 
 ```
 
+And finally having in the hosts file:
+127.0.0.1   hospital
+127.0.0.1   pdp
+127.0.0.1   lab1
+
 ## Secrets & PKI
 
 In the "/vagrant/examples/certificates" it can be found all the cryptographic material to enable the HTTPS communications.

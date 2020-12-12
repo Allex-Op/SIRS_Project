@@ -1,27 +1,4 @@
-Local tests:
-
-curl -d '{"username":"mrdoctor","password":"doctor"}' -H "Content-Type:application/json" -w "\n" http://localhost:8080/login
-
-curl -H "Authorization:gCojQrOifOx-1uaVGKZcmki4KNbL2_uC4J0bdJQAvJYOVHMTmR-3H51rxpn0fH7CgXMawPcFCAXDXrO2v57F0g" -w "\n" http://localhost:8080/patient/1/name
-
-curl -H "Authorization:gCojQrOifOx-1uaVGKZcmki4KNbL2_uC4J0bdJQAvJYOVHMTmR-3H51rxpn0fH7CgXMawPcFCAXDXrO2v57F0g" -w "\n" http://localhost:8080/patient/1/treatment
-
-curl -H "Authorization:gCojQrOifOx-1uaVGKZcmki4KNbL2_uC4J0bdJQAvJYOVHMTmR-3H51rxpn0fH7CgXMawPcFCAXDXrO2v57F0g" -w "\n" http://localhost:8080/checkauthenticity/1
-
-curl -H "Authorization:gCojQrOifOx-1uaVGKZcmki4KNbL2_uC4J0bdJQAvJYOVHMTmR-3H51rxpn0fH7CgXMawPcFCAXDXrO2v57F0g" -w "\n" http://localhost:8080/gettestresults/1
-
-curl -H "Authorization:gCojQrOifOx-1uaVGKZcmki4KNbL2_uC4J0bdJQAvJYOVHMTmR-3H51rxpn0fH7CgXMawPcFCAXDXrO2v57F0g" -w "\n" http://localhost:8080/checkauthenticity/2
-
-
-curl -d '{"username":"mrjanitor","password":"janitor"}' -H "Content-Type:application/json" -w "\n" http://localhost:8080/login
-
-curl -H "Authorization:0kpHoRXNjrwi9Yqp3OjTlNf9o39jN9TNyPP2kKxmhjPeJcgWYlWG8nbNt3V39bkMLTfunskWptlP5zF8ReQnNQ" -w "\n" http://localhost:8080/patient/1/name
-
-curl -H "Authorization:0kpHoRXNjrwi9Yqp3OjTlNf9o39jN9TNyPP2kKxmhjPeJcgWYlWG8nbNt3V39bkMLTfunskWptlP5zF8ReQnNQ" -w "\n" http://localhost:8080/patient/1/treatment
-
-
-
-Remote tests:
+tests:
 
 curl -d '{"username":"mrdoctor","password":"doctor"}' -H "Content-Type:application/json" -w "\n" https://hospital:8443/login
 
